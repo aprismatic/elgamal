@@ -11,53 +11,10 @@ public class Test
 
     public static void Main()
     {
-        multiply();
+        TestTextEncryption();
+        TestMultiplication();
         return;
-
-        // define the byte array that we will use
-        // as plaintext
-        byte[] plaintext
-            = Encoding.Default.GetBytes("Programming .NET Security");
-
-        // Create an instance of the algorithm and generate some keys
-        ElGamal algorithm = new ElGamalManaged();
-        // set the key size - keep it small to speed up the tests
-        algorithm.KeySize = 384;
-        // extract and print the xml string (this will cause
-        // a new key pair to be generated)
-        string parametersXML = algorithm.ToXmlString(true);
-        Console.WriteLine("\n{0}\n", PrettifyXML(parametersXML));
-
-        // Test the basic encryption support
-        ElGamal encryptAlgorithm = new ElGamalManaged();
-        // set the keys - note that we export without the
-        // private parameters since we are encrypting data
-        encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
-        byte[] ciphertext = encryptAlgorithm.EncryptData(plaintext);
-
-        // create a new instance of the algorithm to decrypt
-        ElGamal decryptAlgorithm = new ElGamalManaged();
-        // set the keys - note that we export with the
-        // private parameters since we are decrypting data
-        decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
-        // restore the plaintext
-        byte[] candidatePlaintext = decryptAlgorithm.DecryptData(ciphertext);
-
-        Console.WriteLine("BASIC ENCRYPTION: {0}",
-            CompareArrays(plaintext, candidatePlaintext));
-    }
-
-    private static bool CompareArrays(byte[] p_arr1, byte[] p_arr2)
-    {
-        for (int i = 0; i < p_arr1.Length; i++)
-        {
-            if (p_arr1[i] != p_arr2[i])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
+    }    
 
     public static String PrettifyXML(String XML)
     {
@@ -101,31 +58,69 @@ public class Test
         return Result;
     }
 
-    public static void multiply()
+    public static void TestTextEncryption(string message = "Programming .NET Security", int keySize = 384, ElGamalPaddingMode padding = ElGamalPaddingMode.Zeros)
     {
-        var a = new BigInteger(20);
-        var b = new BigInteger(2);
+        Console.WriteLine();
+        Console.WriteLine("-- Testing string encryption ---");
+
+        byte[] plaintext = Encoding.Default.GetBytes(message);
+
+        ElGamal algorithm = new ElGamalManaged();
+
+        algorithm.KeySize = keySize;
+        algorithm.Padding = padding;
+
+        string parametersXML = algorithm.ToXmlString(true);
+        Console.WriteLine("\n{0}\n", PrettifyXML(parametersXML));
+
+        ElGamal encryptAlgorithm = new ElGamalManaged();
+        encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+
+        byte[] ciphertext = encryptAlgorithm.EncryptData(plaintext);
+
+        ElGamal decryptAlgorithm = new ElGamalManaged();
+        decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+
+        byte[] candidatePlaintext = decryptAlgorithm.DecryptData(ciphertext);
+
+        Console.WriteLine("Original string:  '{0}'", message);
+        Console.WriteLine("Decrypted string: '{0}'", Encoding.Default.GetString(candidatePlaintext));
+        Console.WriteLine("Byte arrays equal: {0}", plaintext.SequenceEqual(candidatePlaintext));
+        Console.WriteLine();
+    }
+
+    public static void TestMultiplication()
+    {
+        Console.WriteLine();
+        Console.WriteLine("-- Testing multiplication ------");
+
+        var rnd = new Random();
+
+        var a = new BigInteger(rnd.Next());
+        var b = new BigInteger(rnd.Next());
 
         ElGamal algorithm = new ElGamalManaged();
         algorithm.KeySize = 384;
         algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
         string parametersXML = algorithm.ToXmlString(true);
         Console.WriteLine("\n{0}\n", PrettifyXML(parametersXML));
-                
-        ElGamal encryptAlgorithm = new ElGamalManaged();        
+
+        ElGamal encryptAlgorithm = new ElGamalManaged();
         encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
-        
-        var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());        
+
+        var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
         var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
 
         var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
-                
+
         ElGamal decryptAlgorithm = new ElGamalManaged();
         decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
-        var c = new BigInteger(decryptAlgorithm.DecryptData(c_bytes));
-            a = new BigInteger(decryptAlgorithm.DecryptData(a_bytes));
-            b = new BigInteger(decryptAlgorithm.DecryptData(b_bytes)); 
-                
-        Console.WriteLine("{0} * {1} = {2}", a.ToString(), b.ToString(), c.ToString());
+        var dec_c = new BigInteger(decryptAlgorithm.DecryptData(c_bytes));
+        var dec_a = new BigInteger(decryptAlgorithm.DecryptData(a_bytes));
+        var dec_b = new BigInteger(decryptAlgorithm.DecryptData(b_bytes));
+
+        Console.WriteLine("Encrypted: {0} * {1} = {2}", dec_a.ToString(), dec_b.ToString(), dec_c.ToString());
+        Console.WriteLine("Plaintext: {0} * {1} = {2}", a.ToString(), b.ToString(), (a * b).ToString());
+        Console.WriteLine();
     }
 }
