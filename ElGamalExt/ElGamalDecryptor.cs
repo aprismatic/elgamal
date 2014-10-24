@@ -81,7 +81,7 @@ namespace ElGamalExt
 
             switch (o_key_struct.Padding)
             {
-                // removing all the trailing zeros
+                // removing all the leading zeros
                 case ElGamalPaddingMode.LeadingZeros:
                     int i = 0;
                     for (; i < o_plaintext_blocksize; i++)
