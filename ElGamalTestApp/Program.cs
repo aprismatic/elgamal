@@ -5,6 +5,7 @@ using System.Text;
 using System.Security.Cryptography;
 using ElGamalExt;
 using System.Linq;
+using System.Diagnostics;
 
 public class Test
 {
@@ -12,7 +13,8 @@ public class Test
     public static void Main()
     {
         TestTextEncryption();
-        TestMultiplication();
+        TestMultiplication_Batch();
+        //PerformanceTest();
         return;
     }    
 
@@ -89,38 +91,124 @@ public class Test
         Console.WriteLine();
     }
 
-    public static void TestMultiplication()
+    //public static void TestMultiplication()
+    //{
+    //    Console.WriteLine();
+    //    Console.WriteLine("-- Testing multiplication ------");
+
+    //    var rnd = new Random();
+
+    //    var a = new BigInteger(rnd.Next());
+    //    var b = new BigInteger(rnd.Next());
+
+    //    ElGamal algorithm = new ElGamalManaged();
+    //    algorithm.KeySize = 384;
+    //    algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
+    //    string parametersXML = algorithm.ToXmlString(true);
+    //    Console.WriteLine("\n{0}\n", PrettifyXML(parametersXML));
+
+    //    ElGamal encryptAlgorithm = new ElGamalManaged();
+    //    encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+
+    //    var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
+    //    var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
+
+    //    var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
+
+    //    ElGamal decryptAlgorithm = new ElGamalManaged();
+    //    decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+    //    var dec_c = new BigInteger(decryptAlgorithm.DecryptData(c_bytes));
+    //    var dec_a = new BigInteger(decryptAlgorithm.DecryptData(a_bytes));
+    //    var dec_b = new BigInteger(decryptAlgorithm.DecryptData(b_bytes));
+
+    //    Console.WriteLine("Encrypted: {0} * {1} = {2}", dec_a.ToString(), dec_b.ToString(), dec_c.ToString());
+    //    Console.WriteLine("Plaintext: {0} * {1} = {2}", a.ToString(), b.ToString(), (a * b).ToString());
+    //    Console.WriteLine();
+    //}
+
+    public static void TestMultiplication_Batch()
     {
         Console.WriteLine();
-        Console.WriteLine("-- Testing multiplication ------");
+        Console.WriteLine("-- Testing multiplication in batch ------");
 
         var rnd = new Random();
 
-        var a = new BigInteger(rnd.Next());
-        var b = new BigInteger(rnd.Next());
+        for (int i = 0; i < 3; i++)
+            // testing for 3 sets of key
+        {
+            Console.WriteLine("- Testing for key No.{0} -", i);
+            ElGamal algorithm = new ElGamalManaged();
+            algorithm.KeySize = 384;
+            algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
+            string parametersXML = algorithm.ToXmlString(true);
 
-        ElGamal algorithm = new ElGamalManaged();
-        algorithm.KeySize = 384;
-        algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
-        string parametersXML = algorithm.ToXmlString(true);
-        Console.WriteLine("\n{0}\n", PrettifyXML(parametersXML));
+            ElGamal encryptAlgorithm = new ElGamalManaged();
+            encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
 
-        ElGamal encryptAlgorithm = new ElGamalManaged();
-        encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+            ElGamal decryptAlgorithm = new ElGamalManaged();
+            decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
 
-        var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
-        var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
+            int error_counter = 0;
+            for (int j = 0; j < 50; j++)
+                // testing for 50 pairs of random numbers
+            {
+                var a = new BigInteger(rnd.Next());
+                var b = new BigInteger(rnd.Next());
 
-        var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
+                var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
+                var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
 
-        ElGamal decryptAlgorithm = new ElGamalManaged();
-        decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
-        var dec_c = new BigInteger(decryptAlgorithm.DecryptData(c_bytes));
-        var dec_a = new BigInteger(decryptAlgorithm.DecryptData(a_bytes));
-        var dec_b = new BigInteger(decryptAlgorithm.DecryptData(b_bytes));
+                var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
 
-        Console.WriteLine("Encrypted: {0} * {1} = {2}", dec_a.ToString(), dec_b.ToString(), dec_c.ToString());
-        Console.WriteLine("Plaintext: {0} * {1} = {2}", a.ToString(), b.ToString(), (a * b).ToString());
-        Console.WriteLine();
+                var dec_c = new BigInteger(decryptAlgorithm.DecryptData(c_bytes));
+                var dec_a = new BigInteger(decryptAlgorithm.DecryptData(a_bytes));
+                var dec_b = new BigInteger(decryptAlgorithm.DecryptData(b_bytes));
+
+                var ab_result = a * b;
+                if (dec_c != ab_result)
+                {
+                    error_counter++;
+                    Console.WriteLine("Failure #{0}", error_counter);
+                    Console.WriteLine("Key = {0}", PrettifyXML(parametersXML)); 
+                    Console.WriteLine("Encrypted: {0} * {1} = {2}", dec_a.ToString(), dec_b.ToString(), dec_c.ToString());
+                    Console.WriteLine("Plaintext: {0} * {1} = {2}", a.ToString(), b.ToString(), ab_result.ToString());
+                    Console.WriteLine();
+                }
+            }
+            Console.WriteLine("There are {0}/50 cases that do not pass the test", error_counter);
+            Console.WriteLine();
+        }
     }
+
+    //public static void PerformanceTest()
+    //{
+    //    // Timing for plaintext multiplication
+    //    Console.WriteLine();
+    //    Console.WriteLine("-- Performance Test --");
+
+    //    Stopwatch timer = new Stopwatch();
+    //    timer.Start();
+
+    //    var rnd = new Random();
+    //    var a = new BigInteger(rnd.Next());
+    //    var b = new BigInteger(rnd.Next());
+    //    var ab_result = a * b;
+
+    //    timer.Stop();
+    //    var time1 = timer.Elapsed;
+    //    Console.WriteLine(time1);
+
+    //    timer.Reset();
+    //    timer.Start();
+
+    //    var a2 = new BigInteger(rnd.Next());
+    //    var b2 = new BigInteger(rnd.Next());
+    //    var ab2_result = a2 * b2;
+
+    //    timer.Stop();
+    //    var time2 = timer.Elapsed;
+    //    Console.WriteLine(time2);
+
+    //    Console.WriteLine((time1 + time2)/2);
+    //}
 }
