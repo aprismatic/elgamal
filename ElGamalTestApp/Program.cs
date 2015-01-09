@@ -14,7 +14,7 @@ public class Test
     {
         TestTextEncryption();
         TestMultiplication_Batch();
-        //PerformanceTest();
+        PerformanceTest();
         return;
     }    
 
@@ -180,35 +180,55 @@ public class Test
         }
     }
 
-    //public static void PerformanceTest()
-    //{
-    //    // Timing for plaintext multiplication
-    //    Console.WriteLine();
-    //    Console.WriteLine("-- Performance Test --");
+    public static void PerformanceTest()
+    {
+        Console.WriteLine();
+        Console.WriteLine("-- Performance Test --");
 
-    //    Stopwatch timer = new Stopwatch();
-    //    timer.Start();
+        Stopwatch timer = new Stopwatch();
+        var rnd = new Random();
+        
+        TimeSpan time1 = TimeSpan.Zero;
+        TimeSpan time2 = TimeSpan.Zero;
+        for (int j = 30; j <= 70; j += 20)
+        {
+            Console.WriteLine("-- Calculating timing for case of dataset={0} --", j);
+            for (int i = 0; i < j; i++)
+            {
+                //--- start timer for timing plaintext multiplication ---
+                timer.Start();
+                var a = new BigInteger(rnd.Next());
+                var b = new BigInteger(rnd.Next());
+                var ab_result = a * b;
+                timer.Stop();
 
-    //    var rnd = new Random();
-    //    var a = new BigInteger(rnd.Next());
-    //    var b = new BigInteger(rnd.Next());
-    //    var ab_result = a * b;
+                time1 += timer.Elapsed;
+                //Console.WriteLine("Time1 = {0}", time1);
 
-    //    timer.Stop();
-    //    var time1 = timer.Elapsed;
-    //    Console.WriteLine(time1);
+                timer.Reset();
 
-    //    timer.Reset();
-    //    timer.Start();
+                // --- start timer for timing of ciphertext multiplication ---
+                timer.Start();
+                ElGamal algorithm = new ElGamalManaged();
+                algorithm.KeySize = 384;
+                algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
+                string parametersXML = algorithm.ToXmlString(true);
 
-    //    var a2 = new BigInteger(rnd.Next());
-    //    var b2 = new BigInteger(rnd.Next());
-    //    var ab2_result = a2 * b2;
+                ElGamal encryptAlgorithm = new ElGamalManaged();
+                encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
 
-    //    timer.Stop();
-    //    var time2 = timer.Elapsed;
-    //    Console.WriteLine(time2);
+                var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
+                var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
+                var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
+                timer.Stop();
+                time2 += timer.Elapsed;
+                //Console.WriteLine("Time 2 = {0}", time2);
 
-    //    Console.WriteLine((time1 + time2)/2);
-    //}
+                timer.Reset();
+            }
+            Console.WriteLine("Avg time for plaintext multiplication = {0} ticks", time1.Ticks / j);
+            Console.WriteLine("Avg time for ciphertext multiplication = {0} ticks", time2.Ticks / j);
+            Console.WriteLine();
+        }
+    }
 }
