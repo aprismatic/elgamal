@@ -3,7 +3,7 @@ ElGamalExt
 
 Extension for the .NET Framework cryptography subsystem, which introduces the ElGamal public key cryptosystem with support for homomorphic multiplication.
 
-This code is based on the code from [1]. This code is provided as-is and is covered by the WTFPL 2.0 [2] (except for the parts that belong by O'Reilly - they are covered by [3]).
+This code is based on the code from [1]. This code is provided as-is and is covered by the WTFPL 2.0 [2] except for the parts that belong by O'Reilly - they are covered by [3].
 
 NOTE: It is not yet production ready!
 
