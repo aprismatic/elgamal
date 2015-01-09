@@ -1,27 +1,21 @@
-﻿using System;
+﻿using ElGamalExt;
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Collections.Generic;
 using System.Text;
 using System.Xml;
-using ElGamalExt;
 
 public class Test
 {
-    public static ElGamal encryptAlgorithm, decryptAlgorithm;
-    public static int a, b, c;
-    public static byte[] _a, _b, _c;
-
-
     public static void Main()
     {
         //TestTextEncryption();
-        TestMultiplication();
-        Console.ReadLine();
+        //TestMultiplication_Batch();
+        PerformanceTest();
         return;
-    }    
+    }
 
     public static String PrettifyXML(String XML)
     {
@@ -96,52 +90,94 @@ public class Test
         Console.WriteLine();
     }
 
-    public static void TestMultiplication()
+    public static void TestMultiplication_Batch()
     {
         Console.WriteLine();
-        Console.WriteLine("-- Testing multiplication ------");
+        Console.WriteLine("-- Testing multiplication in batch ------");
 
         var rnd = new Random();
 
-        a = rnd.Next(32768);
-        b = rnd.Next(32768);
+        for (int i = 0; i < 3; i++)
+        // testing for 3 sets of key
+        {
+            Console.WriteLine("- Testing for key No.{0} -", i);
+            ElGamal algorithm = new ElGamalManaged();
+            algorithm.KeySize = 384;
+            algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
+            string parametersXML = algorithm.ToXmlString(true);
 
-        ElGamal algorithm = new ElGamalManaged();
-        algorithm.KeySize = 1024;
-        algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
-        string parametersXML = algorithm.ToXmlString(true);
-        Console.WriteLine("\n{0}\n", PrettifyXML(parametersXML));
+            ElGamal encryptAlgorithm = new ElGamalManaged();
+            encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
 
-        encryptAlgorithm = new ElGamalManaged();
-        encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+            ElGamal decryptAlgorithm = new ElGamalManaged();
+            decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
 
-        decryptAlgorithm = new ElGamalManaged();
-        decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+            int error_counter = 0;
+            for (int j = 0; j < 50; j++)
+            // testing for 50 pairs of random numbers
+            {
+                var a = new BigInteger(rnd.Next());
+                var b = new BigInteger(rnd.Next());
 
-        _a = encryptAlgorithm.EncryptData((new BigInteger(a)).getBytes());
-        _b = encryptAlgorithm.EncryptData((new BigInteger(b)).getBytes());
+                var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
+                var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
 
-        ProfileEncMul(25000);
-        ProfilePlainMul(25000);
-        
-        var dec_a = new BigInteger(decryptAlgorithm.DecryptData(_a));
-        var dec_b = new BigInteger(decryptAlgorithm.DecryptData(_b));
-        var dec_c = new BigInteger(decryptAlgorithm.DecryptData(_c));
+                var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
 
-        Console.WriteLine("Encrypted: {0} * {1} = {2}", dec_a.ToString(), dec_b.ToString(), dec_c.ToString());
-        Console.WriteLine("Plaintext: {0} * {1} = {2}", a.ToString(), b.ToString(), c.ToString());
+                var dec_c = new BigInteger(decryptAlgorithm.DecryptData(c_bytes));
+                var dec_a = new BigInteger(decryptAlgorithm.DecryptData(a_bytes));
+                var dec_b = new BigInteger(decryptAlgorithm.DecryptData(b_bytes));
+
+                var ab_result = a * b;
+                if (dec_c != ab_result)
+                {
+                    error_counter++;
+                    Console.WriteLine("Failure #{0}", error_counter);
+                    Console.WriteLine("Key = {0}", PrettifyXML(parametersXML));
+                    Console.WriteLine("Encrypted: {0} * {1} = {2}", dec_a.ToString(), dec_b.ToString(), dec_c.ToString());
+                    Console.WriteLine("Plaintext: {0} * {1} = {2}", a.ToString(), b.ToString(), ab_result.ToString());
+                    Console.WriteLine();
+                }
+            }
+            Console.WriteLine("There are {0}/50 cases that do not pass the test", error_counter);
+            Console.WriteLine();
+        }
+    }
+
+    public static void PerformanceTest()
+    {
+        Console.WriteLine();
+        Console.WriteLine("-- Performance Test --");
+
+        long total_time_plaintext = 0;
+        long total_time_encrypted = 0;
+
+        for (int i = 0; i < 10; i++)
+        {
+            Console.WriteLine("-- Performance test iteration {0} --", i);
+
+            total_time_plaintext += ProfilePlaintextMUL(250000);
+            total_time_encrypted += ProfileEncryptedMUL(250000);
+        }
+
+        Console.WriteLine("Total time for plaintext multiplication  = {0} ticks", total_time_plaintext);
+        Console.WriteLine("Total time for ciphertext multiplication = {0} ticks", total_time_encrypted);
         Console.WriteLine();
     }
 
-    public static void ProfilePlainMul(int iterations)
+    private static long ProfilePlaintextMUL(int iterations)
     {
         // clean up
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
 
-        // warm up 
-        c = a * b;
+        var rnd = new Random();
+
+        // prepare and warm up 
+        var a = rnd.Next(32768);
+        var b = rnd.Next(32768);
+        var c = a * b;
 
         var watch = Stopwatch.StartNew();
         for (int i = 0; i < iterations; i++)
@@ -150,28 +186,42 @@ public class Test
         }
         watch.Stop();
 
-        Console.Write("Plaintext multiplication");
-        Console.WriteLine(" Time Elapsed {0} ms", watch.Elapsed.TotalMilliseconds);
-    } 
+        return watch.Elapsed.Ticks;
+    }
 
-    public static void ProfileEncMul(int iterations)
+    private static long ProfileEncryptedMUL(int iterations)
     {
         // clean up
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
 
-        // warm up 
-        _c = encryptAlgorithm.Multiply(_a, _b);
+        var rnd = new Random();
+
+        // prepare and warm up 
+        ElGamal algorithm = new ElGamalManaged();
+        algorithm.KeySize = 384;
+        algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
+        string parametersXML = algorithm.ToXmlString(true);
+
+        ElGamal encryptAlgorithm = new ElGamalManaged();
+        encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+
+        var a = new BigInteger(rnd.Next(32768));
+        var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
+
+        var b = new BigInteger(rnd.Next(32768));
+        var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
+
+        var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
 
         var watch = Stopwatch.StartNew();
         for (int i = 0; i < iterations; i++)
         {
-            _c = encryptAlgorithm.Multiply(_a, _b);
+            c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
         }
         watch.Stop();
 
-        Console.Write("ElGamal homomorphic multiplication");
-        Console.WriteLine(" Time Elapsed {0} ms", watch.Elapsed.TotalMilliseconds);
+        return watch.Elapsed.Ticks;
     }
 }
