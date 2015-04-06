@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BigInteger">
+      <HintPath>..\packages\BigInteger.1.0.4\lib\BigInteger.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -39,7 +42,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BigInteger.cs" />
     <Compile Include="ElGamal.cs" />
     <Compile Include="ElGamalAbstractCipher.cs" />
     <Compile Include="ElGamalDecryptor.cs" />
@@ -48,6 +50,9 @@
     <Compile Include="ElGamalManaged.cs" />
     <Compile Include="ElGamalParameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

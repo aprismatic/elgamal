@@ -11,8 +11,8 @@ public class Test
 {
     public static void Main()
     {
-        //TestTextEncryption();
-        //TestMultiplication_Batch();
+        TestTextEncryption();
+        TestMultiplication_Batch();
         PerformanceTest();
         return;
     }
