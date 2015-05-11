@@ -35,10 +35,6 @@
     <Reference Include="BigInteger">
       <HintPath>..\packages\BigInteger.1.0.4\lib\BigInteger.dll</HintPath>
     </Reference>
-    <Reference Include="ElGamalExt, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\ElGamalExt\bin\Debug\ElGamalExt.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -54,6 +50,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ElGamalExt\ElGamalExt.csproj">
+      <Project>{c905f97c-bd3a-434e-a155-b0da78dc7eb9}</Project>
+      <Name>ElGamalExt</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

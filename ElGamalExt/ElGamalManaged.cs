@@ -79,6 +79,8 @@ namespace ElGamalExt
 
             // compute Y
             o_key_struct.Y = o_key_struct.G.modPow(o_key_struct.X, o_key_struct.P);
+
+            o_key_struct.Padding = this.Padding;
         }
 
         private bool NeedToGenerateKey()
