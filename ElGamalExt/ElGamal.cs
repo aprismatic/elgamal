@@ -54,7 +54,7 @@ namespace ElGamalExt
             x_sb.Append("<P>" + Convert.ToBase64String(x_params.P) + "</P>");
             x_sb.Append("<G>" + Convert.ToBase64String(x_params.G) + "</G>");
             x_sb.Append("<Y>" + Convert.ToBase64String(x_params.Y) + "</Y>");
-            x_sb.Append("<Padding>" + Padding.ToString() + "</Padding>");
+            x_sb.Append("<Padding>" + x_params.Padding.ToString() + "</Padding>");
             if (p_include_private)
             {
                 // we need to include X, which is the part of private key
