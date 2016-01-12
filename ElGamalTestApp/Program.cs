@@ -11,9 +11,9 @@ public class Test
 {
     public static void Main()
     {
-        TestTextEncryption();
-        //TestMultiplication_Batch();
-        //PerformanceTest();
+        //TestTextEncryption();
+        TestMultiplication_Batch();
+        PerformanceTest();
         return;
     }
 
@@ -92,15 +92,15 @@ public class Test
 
     public static void TestMultiplication_Batch()
     {
-        Console.WriteLine();
-        Console.WriteLine("-- Testing multiplication in batch ------");
+        //Console.WriteLine();
+        //Console.WriteLine("-- Testing multiplication in batch ------");
 
         var rnd = new Random();
 
         for (int i = 0; i < 3; i++)
         // testing for 3 sets of key
         {
-            Console.WriteLine("- Testing for key No.{0} -", i);
+            //Console.WriteLine("- Testing for key No.{0} -", i);
             ElGamal algorithm = new ElGamalManaged();
             algorithm.KeySize = 384;
             algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
@@ -139,30 +139,36 @@ public class Test
                     Console.WriteLine();
                 }
             }
-            Console.WriteLine("There are {0}/50 cases that do not pass the test", error_counter);
-            Console.WriteLine();
+            //Console.WriteLine("There are {0}/50 cases that do not pass the test", error_counter);
+            //Console.WriteLine();
         }
     }
 
     public static void PerformanceTest()
     {
         Console.WriteLine();
-        Console.WriteLine("-- Performance Test --");
 
-        long total_time_plaintext = 0;
-        long total_time_encrypted = 0;
+        int[] bits = { 384, 512, 640, 768, 896, 1024 };
 
-        for (int i = 0; i < 10; i++)
+        foreach (var keyl in bits)
         {
-            Console.WriteLine("-- Performance test iteration {0} --", i);
+            Console.WriteLine("-- Performance Test -- {0} bits --", keyl);
 
-            total_time_plaintext += ProfilePlaintextMUL(250000);
-            total_time_encrypted += ProfileEncryptedMUL(250000);
+            long total_time_plaintext = 0;
+            long total_time_encrypted = 0;
+
+            for (int i = 0; i < 12; i++)
+            {
+                //Console.WriteLine("-- Performance test iteration {0} --", i);
+
+                total_time_plaintext += ProfilePlaintextMUL(250000);
+                total_time_encrypted += ProfileEncryptedMUL(250000, keyl);
+            }
+
+            Console.WriteLine("Total time for plaintext multiplication  = {0} ticks", total_time_plaintext);
+            Console.WriteLine("Total time for ciphertext multiplication = {0} ticks", total_time_encrypted);
+            Console.WriteLine();
         }
-
-        Console.WriteLine("Total time for plaintext multiplication  = {0} ticks", total_time_plaintext);
-        Console.WriteLine("Total time for ciphertext multiplication = {0} ticks", total_time_encrypted);
-        Console.WriteLine();
     }
 
     private static long ProfilePlaintextMUL(int iterations)
@@ -175,8 +181,8 @@ public class Test
         var rnd = new Random();
 
         // prepare and warm up 
-        var a = rnd.Next(32768);
-        var b = rnd.Next(32768);
+        var a = (Int64)rnd.Next(65536);
+        var b = (Int64)rnd.Next(65536);
         var c = a * b;
 
         var watch = Stopwatch.StartNew();
@@ -189,7 +195,7 @@ public class Test
         return watch.Elapsed.Ticks;
     }
 
-    private static long ProfileEncryptedMUL(int iterations)
+    private static long ProfileEncryptedMUL(int iterations, int keyl)
     {
         // clean up
         GC.Collect();
@@ -200,17 +206,17 @@ public class Test
 
         // prepare and warm up 
         ElGamal algorithm = new ElGamalManaged();
-        algorithm.KeySize = 384;
+        algorithm.KeySize = keyl;
         algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
         string parametersXML = algorithm.ToXmlString(true);
 
         ElGamal encryptAlgorithm = new ElGamalManaged();
         encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
 
-        var a = new BigInteger(rnd.Next(32768));
+        var a = new BigInteger(rnd.Next(65536));
         var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
 
-        var b = new BigInteger(rnd.Next(32768));
+        var b = new BigInteger(rnd.Next(65536));
         var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
 
         var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
