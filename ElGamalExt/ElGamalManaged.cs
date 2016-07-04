@@ -23,7 +23,7 @@ namespace ElGamalExt
         private ElGamalKeyStruct o_key_struct;
 
         public ElGamalManaged()
-        {            
+        {
             // create the key struct
             o_key_struct = new ElGamalKeyStruct();
 
@@ -62,7 +62,7 @@ namespace ElGamalExt
         private void CreateKeyPair(int p_key_strength)
         {
             // create the random number generator
-            Random x_random_generator = new Random();
+            var x_random_generator = new Random(); // TODO: switch to cryptographic RNG
 
             // create the large prime number, P
             o_key_struct.P = BigInteger.genPseudoPrime(p_key_strength,
@@ -127,7 +127,7 @@ namespace ElGamalExt
             }
 
             // create the parameter set
-            ElGamalParameters x_params = new ElGamalParameters();
+            var x_params = new ElGamalParameters();
 
             // set the public values of the parameters
             x_params.P = o_key_struct.P.getBytes();
@@ -145,7 +145,7 @@ namespace ElGamalExt
                 // ensure that we zero the value
                 x_params.X = new byte[1];
             }
-                        
+
             return x_params;
         }
 
@@ -157,9 +157,8 @@ namespace ElGamalExt
                 CreateKeyPair(KeySizeValue);
             }
 
-            // encrypt the data
-            ElGamalEncryptor x_enc = new ElGamalEncryptor(o_key_struct);
-            
+            var x_enc = new ElGamalEncryptor(o_key_struct);
+
             return x_enc.ProcessData(p_data);
         }
 
@@ -171,9 +170,8 @@ namespace ElGamalExt
                 CreateKeyPair(KeySizeValue);
             }
 
-            // encrypt the data
-            ElGamalDecryptor x_enc = new ElGamalDecryptor(o_key_struct);
-            
+            var x_enc = new ElGamalDecryptor(o_key_struct);
+
             return x_enc.ProcessData(p_data);
         }
 
@@ -198,40 +196,14 @@ namespace ElGamalExt
 
             if (p_first.Length != blocksize)
             {
-                throw new System.ArgumentException("p_first", "Ciphertext to multiply should be exactly one block long.");
+                throw new ArgumentException("p_first", "Ciphertext to multiply should be exactly one block long.");
             }
             if (p_second.Length != blocksize)
             {
-                throw new System.ArgumentException("p_second", "Ciphertext to multiply should be exactly one block long.");
+                throw new ArgumentException("p_second", "Ciphertext to multiply should be exactly one block long.");
             }
 
-            Func<byte[], Tuple<BigInteger, BigInteger>> toBigIntegerPair = delegate(byte[] block)
-            {
-                // extract the byte arrays that represent A and B
-                byte[] A_bytes = new byte[blocksize / 2];
-                Array.Copy(block, 0, A_bytes, 0, A_bytes.Length);
-                byte[] B_bytes = new byte[blocksize / 2];
-                Array.Copy(block, A_bytes.Length, B_bytes, 0, B_bytes.Length);
-
-                // create big integers from the byte arrays and return them
-                return new Tuple<BigInteger, BigInteger>(new BigInteger(A_bytes), new BigInteger(B_bytes));
-            };
-
-            var a = toBigIntegerPair(p_first);
-            var b = toBigIntegerPair(p_second);
-
-            var c = new byte[blocksize];
-
-            var cA = (a.Item1 * b.Item1) % o_key_struct.P;
-            var cB = (a.Item2 * b.Item2) % o_key_struct.P;
-
-            var cAbytes = cA.getBytes();
-            var cBbytes = cB.getBytes();
-
-            Array.Copy(cAbytes, 0, c, blocksize / 2 - cAbytes.Length, cAbytes.Length);
-            Array.Copy(cBbytes, 0, c, blocksize - cBbytes.Length, cBbytes.Length);
-
-            return c;
+            return Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.getBytes());
         }
     }
 }

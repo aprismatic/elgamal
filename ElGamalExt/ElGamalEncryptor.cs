@@ -80,8 +80,7 @@ namespace ElGamalExt
                         break;
 
                     case ElGamalPaddingMode.ANSIX923:
-                        throw new System.NotImplementedException();
-                        break;
+                        throw new NotImplementedException();
                 }
 
                 return x_padded;

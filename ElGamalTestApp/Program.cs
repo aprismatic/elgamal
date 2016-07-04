@@ -11,52 +11,55 @@ public class Test
 {
     public static void Main()
     {
-        //TestTextEncryption();
+        TestTextEncryption();
         TestMultiplication_Batch();
-        PerformanceTest();
+        //PerformanceTest();
         return;
     }
 
-    public static String PrettifyXML(String XML)
+    public static string PrettifyXML(string XML)
     {
-        String Result = "";
+        var res = "";
 
-        MemoryStream mStream = new MemoryStream();
-        XmlTextWriter writer = new XmlTextWriter(mStream, Encoding.Unicode);
-        XmlDocument document = new XmlDocument();
-
-        try
+        using (var mStream = new MemoryStream())
         {
-            // Load the XmlDocument with the XML.
-            document.LoadXml(XML);
+            using (var writer = new XmlTextWriter(mStream, Encoding.Unicode))
+            {
+                var document = new XmlDocument();
 
-            writer.Formatting = Formatting.Indented;
+                try
+                {
+                    document.LoadXml(XML);
 
-            // Write the XML into a formatting XmlTextWriter
-            document.WriteContentTo(writer);
-            writer.Flush();
-            mStream.Flush();
+                    writer.Formatting = Formatting.Indented;
 
-            // Have to rewind the MemoryStream in order to read
-            // its contents.
-            mStream.Position = 0;
+                    // Write the XML into a formatting XmlTextWriter
+                    document.WriteContentTo(writer);
+                    writer.Flush();
+                    mStream.Flush();
 
-            // Read MemoryStream contents into a StreamReader.
-            StreamReader sReader = new StreamReader(mStream);
+                    // Have to rewind the MemoryStream in order to read its contents.
+                    mStream.Position = 0;
 
-            // Extract the text from the StreamReader.
-            String FormattedXML = sReader.ReadToEnd();
+                    // Read MemoryStream contents into a StreamReader.
+                    using (var sReader = new StreamReader(mStream))
+                    {
+                        // Extract the text from the StreamReader.
+                        var FormattedXML = sReader.ReadToEnd();
 
-            Result = FormattedXML;
+                        res = FormattedXML;
+                    }
+                }
+                catch (XmlException)
+                {
+                }
+
+                mStream.Close();
+                writer.Close();
+            }
         }
-        catch (XmlException)
-        {
-        }
 
-        mStream.Close();
-        writer.Close();
-
-        return Result;
+        return res;
     }
 
     public static void TestTextEncryption(string message = "Programming .NET Security", int keySize = 384, ElGamalPaddingMode padding = ElGamalPaddingMode.Zeros)
@@ -64,7 +67,7 @@ public class Test
         Console.WriteLine();
         Console.WriteLine("-- Testing string encryption ---");
 
-        byte[] plaintext = Encoding.Default.GetBytes(message);
+        var plaintext = Encoding.Default.GetBytes(message);
 
         ElGamal algorithm = new ElGamalManaged();
 
@@ -92,15 +95,15 @@ public class Test
 
     public static void TestMultiplication_Batch()
     {
-        //Console.WriteLine();
-        //Console.WriteLine("-- Testing multiplication in batch ------");
+        Console.WriteLine();
+        Console.WriteLine("-- Testing multiplication in batch ------");
 
         var rnd = new Random();
 
         for (int i = 0; i < 3; i++)
-        // testing for 3 sets of key
+        // testing for 3 sets of keys
         {
-            //Console.WriteLine("- Testing for key No.{0} -", i);
+            Console.WriteLine("- Testing for key No.{0} -", i + 1);
             ElGamal algorithm = new ElGamalManaged();
             algorithm.KeySize = 384;
             algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
@@ -139,8 +142,9 @@ public class Test
                     Console.WriteLine();
                 }
             }
-            //Console.WriteLine("There are {0}/50 cases that do not pass the test", error_counter);
-            //Console.WriteLine();
+
+            Console.WriteLine("There are {0}/50 cases that do not pass the test", error_counter);
+            Console.WriteLine();
         }
     }
 

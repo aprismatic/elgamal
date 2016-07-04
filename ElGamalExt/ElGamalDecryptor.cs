@@ -66,7 +66,7 @@ namespace ElGamalExt
                 return new byte[0];
             }
 
-            return UnpadPlaintextBlock(ProcessDataBlock(p_final_block));            
+            return UnpadPlaintextBlock(ProcessDataBlock(p_final_block));
         }
 
         protected byte[] UnpadPlaintextBlock(byte[] p_block)
@@ -93,13 +93,11 @@ namespace ElGamalExt
                     break;
 
                 case ElGamalPaddingMode.ANSIX923:
-                    throw new System.NotImplementedException();
-                    break;
+                    throw new NotImplementedException();
 
                 // unlikely to happen
                 default:
-                    throw new System.ArgumentOutOfRangeException();
-                    break;
+                    throw new ArgumentOutOfRangeException();
             }
 
             return x_res;

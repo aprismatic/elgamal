@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElGamalExt", "ElGamalExt\ElGamalExt.csproj", "{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}"
 EndProject
@@ -9,25 +9,36 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElGamalTestApp", "ElGamalTe
 		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9} = {C905F97C-BD3A-434E-A155-B0DA78DC7EB9}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElGamalExt.Homomorphism", "ElGamalExt.Homomorphism\ElGamalExt.Homomorphism.csproj", "{11B0BD5B-16D7-4395-A968-4C225509588F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release and Deploy|Any CPU = Release and Deploy|Any CPU
+		Deploy EGExt.Hom|Any CPU = Deploy EGExt.Hom|Any CPU
+		Deploy EGExt|Any CPU = Deploy EGExt|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Release and Deploy|Any CPU.ActiveCfg = Release and Deploy|Any CPU
-		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Release and Deploy|Any CPU.Build.0 = Release and Deploy|Any CPU
+		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Deploy EGExt.Hom|Any CPU.ActiveCfg = Release|Any CPU
+		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Deploy EGExt|Any CPU.ActiveCfg = Deploy EGExt|Any CPU
+		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Deploy EGExt|Any CPU.Build.0 = Deploy EGExt|Any CPU
 		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}.Release and Deploy|Any CPU.ActiveCfg = Release and Deploy|Any CPU
-		{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}.Release and Deploy|Any CPU.Build.0 = Release and Deploy|Any CPU
+		{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}.Deploy EGExt.Hom|Any CPU.ActiveCfg = Debug|Any CPU
+		{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}.Deploy EGExt|Any CPU.ActiveCfg = Release|Any CPU
 		{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11B0BD5B-16D7-4395-A968-4C225509588F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11B0BD5B-16D7-4395-A968-4C225509588F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11B0BD5B-16D7-4395-A968-4C225509588F}.Deploy EGExt.Hom|Any CPU.ActiveCfg = Deploy EGExt.Hom|Any CPU
+		{11B0BD5B-16D7-4395-A968-4C225509588F}.Deploy EGExt.Hom|Any CPU.Build.0 = Deploy EGExt.Hom|Any CPU
+		{11B0BD5B-16D7-4395-A968-4C225509588F}.Deploy EGExt|Any CPU.ActiveCfg = Deploy EGExt.Hom|Any CPU
+		{11B0BD5B-16D7-4395-A968-4C225509588F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11B0BD5B-16D7-4395-A968-4C225509588F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

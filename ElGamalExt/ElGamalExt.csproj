@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -30,8 +30,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release and Deploy|AnyCPU'">
-    <OutputPath>bin\Release and Deploy\</OutputPath>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Deploy EGExt|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -40,8 +40,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BigInteger, Version=1.0.4.36383, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\BigInteger.1.0.4.36383\lib\net20\BigInteger.dll</HintPath>
+    <Reference Include="BigInteger, Version=1.0.6.32395, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BigInteger.1.0.6.32395\lib\net20\BigInteger.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ElGamalExt.Homomorphism, Version=0.9.2.32643, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ElGamalExt.Homomorphism.0.9.2.32643\lib\net40\ElGamalExt.Homomorphism.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -71,8 +75,8 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>-->
-  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release and Deploy'">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\.deploy\deployLocalNuGet.ps1&quot;">
+  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Deploy EGExt'">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\.deploy\EGExt-deployLocalNuGet.ps1&quot;">
     </Exec>
   </Target>
 </Project>
