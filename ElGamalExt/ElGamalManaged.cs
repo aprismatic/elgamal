@@ -62,7 +62,7 @@ namespace ElGamalExt
         private void CreateKeyPair(int p_key_strength)
         {
             // create the random number generator
-            var x_random_generator = new Random(); // TODO: switch to cryptographic RNG
+            var x_random_generator = new RNGCryptoServiceProvider(); // TODO: switch to cryptographic RNG
 
             // create the large prime number, P
             o_key_struct.P = BigInteger.genPseudoPrime(p_key_strength,

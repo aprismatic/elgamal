@@ -14,17 +14,18 @@
  ************************************************************************************/
 
 using System;
+using System.Security.Cryptography;
 
 namespace ElGamalExt
 {
     public class ElGamalEncryptor : ElGamalAbstractCipher
     {
-        Random o_random;
+        RNGCryptoServiceProvider o_random;
 
         public ElGamalEncryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
-            o_random = new Random();
+            o_random = new RNGCryptoServiceProvider();
         }
 
         protected override byte[] ProcessDataBlock(byte[] p_block)
