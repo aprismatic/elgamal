@@ -1,8 +1,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElGamalExt", "ElGamalExt\ElGamalExt.csproj", "{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{11B0BD5B-16D7-4395-A968-4C225509588F} = {11B0BD5B-16D7-4395-A968-4C225509588F}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElGamalTestApp", "ElGamalTestApp\ElGamalTestApp.csproj", "{17BA3782-81DB-4E3B-8C5E-2E8AB2CCA683}"
 	ProjectSection(ProjectDependencies) = postProject
