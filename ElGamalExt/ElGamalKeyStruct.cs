@@ -13,7 +13,6 @@
      2001, (http://www.oreillynet.com/pub/a/oreilly/ask_tim/2001/codepolicy.html)
  ************************************************************************************/
 
-
 namespace ElGamalExt
 {
     public struct ElGamalKeyStruct
