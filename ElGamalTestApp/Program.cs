@@ -62,7 +62,7 @@ public class Test
         return res;
     }
 
-    public static void TestTextEncryption(string message = "Programming .NET Security", int keySize = 384, ElGamalPaddingMode padding = ElGamalPaddingMode.Zeros)
+    public static void TestTextEncryption(string message = "Programming .NET Security", int keySize = 1024, ElGamalPaddingMode padding = ElGamalPaddingMode.Zeros)
     {
         Console.WriteLine();
         Console.WriteLine("-- Testing string encryption ---");
