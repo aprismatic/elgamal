@@ -18,7 +18,7 @@ using System.Security.Cryptography;
 
 namespace ElGamalExt
 {
-    public class ElGamalEncryptor : ElGamalAbstractCipher
+    public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
         RNGCryptoServiceProvider o_random;
 
@@ -88,6 +88,11 @@ namespace ElGamalExt
             }
 
             return p_block;
+        }
+
+        public void Dispose()
+        {
+            o_random.Dispose();
         }
     }
 }

@@ -40,12 +40,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BigInteger, Version=1.0.6.32395, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\BigInteger.1.0.6.32395\lib\net20\BigInteger.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ElGamalExt.Homomorphism, Version=0.9.2.32643, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ElGamalExt.Homomorphism.0.9.2.32643\lib\net40\ElGamalExt.Homomorphism.dll</HintPath>
+    <Reference Include="BigInteger, Version=1.0.6.32405, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BigInteger.1.0.6.32405\lib\net20\BigInteger.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -69,6 +65,12 @@
   <ItemGroup>
     <None Include="ElGamalExt.nuspec" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ElGamalExt.Homomorphism\ElGamalExt.Homomorphism.csproj">
+      <Project>{11b0bd5b-16d7-4395-a968-4c225509588f}</Project>
+      <Name>ElGamalExt.Homomorphism</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

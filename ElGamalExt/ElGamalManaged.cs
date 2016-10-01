@@ -157,9 +157,10 @@ namespace ElGamalExt
                 CreateKeyPair(KeySizeValue);
             }
 
-            var x_enc = new ElGamalEncryptor(o_key_struct);
-
-            return x_enc.ProcessData(p_data);
+            using (var x_enc = new ElGamalEncryptor(o_key_struct))
+            {
+                return x_enc.ProcessData(p_data);
+            }
         }
 
         public override byte[] DecryptData(byte[] p_data)
