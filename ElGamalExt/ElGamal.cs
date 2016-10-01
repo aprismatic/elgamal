@@ -42,9 +42,9 @@ namespace ElGamalExt
 
         public override string ToXmlString(bool p_include_private)
         {
-            ElGamalParameters x_params = ExportParameters(p_include_private);
+            var x_params = ExportParameters(p_include_private);
             // create a new string builder
-            StringBuilder x_sb = new StringBuilder();
+            var x_sb = new StringBuilder();
             // add the header
             x_sb.Append("<ElGamalKeyValue>");
             // add the public elements from the parameters
@@ -62,13 +62,12 @@ namespace ElGamalExt
             return x_sb.ToString();
         }
 
-        public override void FromXmlString(String p_string)
+        public override void FromXmlString(string p_string)
         {
             // create the params that we will use as the result
-            ElGamalParameters x_params = new ElGamalParameters();
+            var x_params = new ElGamalParameters();
             // create a text reader using a string reader
-            XmlTextReader x_reader =
-                new XmlTextReader(new System.IO.StringReader(p_string));
+            var x_reader = new XmlTextReader(new System.IO.StringReader(p_string));
 
             // run through the elements in the xml string
             while (x_reader.Read())

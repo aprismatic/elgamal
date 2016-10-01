@@ -1,7 +1,5 @@
 ﻿using System;
 
-
-
 namespace ElGamalExt.Homomorphism
 {
     public static class ElGamalHomomorphism

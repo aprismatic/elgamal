@@ -24,14 +24,14 @@ namespace ElGamalExt
 
         public ElGamalManaged()
         {
-            // create the key struct
-            o_key_struct = new ElGamalKeyStruct();
-
-            // set all of the big integers to zero
-            o_key_struct.P = new BigInteger(0);
-            o_key_struct.G = new BigInteger(0);
-            o_key_struct.Y = new BigInteger(0);
-            o_key_struct.X = new BigInteger(0);
+            // create the key struct and set all of the big integers to zero
+            o_key_struct = new ElGamalKeyStruct
+            {
+                P = new BigInteger(0),
+                G = new BigInteger(0),
+                Y = new BigInteger(0),
+                X = new BigInteger(0)
+            };
 
             // set the default key size value
             KeySizeValue = 1024;
@@ -40,49 +40,37 @@ namespace ElGamalExt
             Padding = ElGamalPaddingMode.Zeros;
 
             // set the range of legal keys
-            LegalKeySizesValue = new KeySizes[] { new KeySizes(384, 1088, 8) };
+            LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
         }
 
-        public override string SignatureAlgorithm
-        {
-            get
-            {
-                return "ElGamal";
-            }
-        }
+        public override string SignatureAlgorithm => "ElGamal";
 
-        public override string KeyExchangeAlgorithm
-        {
-            get
-            {
-                return "ElGamal";
-            }
-        }
+        public override string KeyExchangeAlgorithm => "ElGamal";
 
         private void CreateKeyPair(int p_key_strength)
         {
-            // create the random number generator
-            var x_random_generator = new RNGCryptoServiceProvider(); // TODO: switch to cryptographic RNG
+            using (var x_random_generator = new RNGCryptoServiceProvider())
+            {
+                // create the large prime number, P
+                o_key_struct.P = BigInteger.genPseudoPrime(p_key_strength,
+                    16, x_random_generator);
 
-            // create the large prime number, P
-            o_key_struct.P = BigInteger.genPseudoPrime(p_key_strength,
-                16, x_random_generator);
+                // create the two random numbers, which are smaller than P
+                o_key_struct.X = new BigInteger();
+                o_key_struct.X.genRandomBits(p_key_strength - 1, x_random_generator);
+                o_key_struct.G = new BigInteger();
+                o_key_struct.G.genRandomBits(p_key_strength - 1, x_random_generator);
 
-            // create the two random numbers, which are smaller than P
-            o_key_struct.X = new BigInteger();
-            o_key_struct.X.genRandomBits(p_key_strength - 1, x_random_generator);
-            o_key_struct.G = new BigInteger();
-            o_key_struct.G.genRandomBits(p_key_strength - 1, x_random_generator);
+                // compute Y
+                o_key_struct.Y = o_key_struct.G.modPow(o_key_struct.X, o_key_struct.P);
 
-            // compute Y
-            o_key_struct.Y = o_key_struct.G.modPow(o_key_struct.X, o_key_struct.P);
-
-            o_key_struct.Padding = this.Padding;
+                o_key_struct.Padding = Padding;
+            }
         }
 
         private bool NeedToGenerateKey()
         {
-            return o_key_struct.P == 0 && o_key_struct.G == 0 && o_key_struct.Y == 0;
+            return (o_key_struct.P == 0) && (o_key_struct.G == 0) && (o_key_struct.Y == 0);
         }
 
         public ElGamalKeyStruct KeyStruct
@@ -126,14 +114,14 @@ namespace ElGamalExt
                 CreateKeyPair(KeySizeValue);
             }
 
-            // create the parameter set
-            var x_params = new ElGamalParameters();
-
-            // set the public values of the parameters
-            x_params.P = o_key_struct.P.getBytes();
-            x_params.G = o_key_struct.G.getBytes();
-            x_params.Y = o_key_struct.Y.getBytes();
-            x_params.Padding = o_key_struct.Padding;
+            // create the parameter set and set the public values of the parameters
+            var x_params = new ElGamalParameters
+            {
+                P = o_key_struct.P.getBytes(),
+                G = o_key_struct.G.getBytes(),
+                Y = o_key_struct.Y.getBytes(),
+                Padding = o_key_struct.Padding
+            };
 
             // if required, include the private value, X
             if (p_include_private_params)
@@ -153,7 +141,6 @@ namespace ElGamalExt
         {
             if (NeedToGenerateKey())
             {
-                // we need to create a new key before we can export 
                 CreateKeyPair(KeySizeValue);
             }
 
@@ -167,7 +154,6 @@ namespace ElGamalExt
         {
             if (NeedToGenerateKey())
             {
-                // we need to create a new key before we can export 
                 CreateKeyPair(KeySizeValue);
             }
 
@@ -197,11 +183,11 @@ namespace ElGamalExt
 
             if (p_first.Length != blocksize)
             {
-                throw new ArgumentException("p_first", "Ciphertext to multiply should be exactly one block long.");
+                throw new ArgumentException("Ciphertext to multiply should be exactly one block long.", nameof(p_first));
             }
             if (p_second.Length != blocksize)
             {
-                throw new ArgumentException("p_second", "Ciphertext to multiply should be exactly one block long.");
+                throw new ArgumentException("Ciphertext to multiply should be exactly one block long.", nameof(p_second));
             }
 
             return Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.getBytes());
