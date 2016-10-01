@@ -41,16 +41,16 @@ namespace ElGamalExt
         public byte[] ProcessData(byte[] p_data)
         {
             // create a stream backed by a memory array
-            MemoryStream x_stream = new MemoryStream();
+            var x_stream = new MemoryStream();
 
             // determine how many complete blocks there are
-            int x_complete_blocks = p_data.Length / o_block_size;
+            var x_complete_blocks = p_data.Length / o_block_size;
 
             // create an array which will hold a block
-            byte[] x_block = new Byte[o_block_size];
+            var x_block = new byte[o_block_size];
 
             // run through and process the complete blocks
-            int i = 0;
+            var i = 0;
             for (; i < x_complete_blocks; i++)
             {
                 // copy the block and create the big integer
@@ -62,13 +62,13 @@ namespace ElGamalExt
             }
 
             // process the final block
-            byte[] x_final_block = new Byte[p_data.Length -
+            var x_final_block = new byte[p_data.Length -
                 (x_complete_blocks * o_block_size)];
             Array.Copy(p_data, i * o_block_size, x_final_block, 0,
                 x_final_block.Length);
 
             // process the final block
-            byte[] x_final_result = ProcessFinalDataBlock(x_final_block);
+            var x_final_result = ProcessFinalDataBlock(x_final_block);
 
             // write the final data bytes into the stream
             x_stream.Write(x_final_result, 0, x_final_result.Length);

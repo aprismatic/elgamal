@@ -18,9 +18,9 @@ using System.Security.Cryptography;
 
 namespace ElGamalExt
 {
-    public class ElGamalEncryptor : ElGamalAbstractCipher
+    public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
-        RNGCryptoServiceProvider o_random;
+        private RNGCryptoServiceProvider o_random;
 
         public ElGamalEncryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
@@ -31,7 +31,7 @@ namespace ElGamalExt
         protected override byte[] ProcessDataBlock(byte[] p_block)
         {
             // set random K
-            BigInteger K;            
+            BigInteger K;
             do
             {
                 K = new BigInteger();
@@ -39,16 +39,16 @@ namespace ElGamalExt
             } while (K.gcd(o_key_struct.P - 1) != 1);
 
             // compute the values A and B
-            BigInteger A =  o_key_struct.G.modPow(K, o_key_struct.P);
-            BigInteger B = (o_key_struct.Y.modPow(K, o_key_struct.P) * new BigInteger(p_block)) % (o_key_struct.P);
+            var A = o_key_struct.G.modPow(K, o_key_struct.P);
+            var B = o_key_struct.Y.modPow(K, o_key_struct.P) * new BigInteger(p_block) % o_key_struct.P;
 
             // create an array to contain the ciphertext
-            byte[] x_result = new byte[o_ciphertext_blocksize];
+            var x_result = new byte[o_ciphertext_blocksize];
             // copy the bytes from A and B into the result array
-            byte[] x_a_bytes = A.getBytes();
+            var x_a_bytes = A.getBytes();
             Array.Copy(x_a_bytes, 0, x_result, o_ciphertext_blocksize / 2
                 - x_a_bytes.Length, x_a_bytes.Length);
-            byte[] x_b_bytes = B.getBytes();
+            var x_b_bytes = B.getBytes();
             Array.Copy(x_b_bytes, 0, x_result, o_ciphertext_blocksize
                 - x_b_bytes.Length, x_b_bytes.Length);
             // return the result array
@@ -67,11 +67,11 @@ namespace ElGamalExt
         {
             if (p_block.Length < o_block_size)
             {
-                byte[] x_padded = new byte[o_block_size];
+                var x_padded = new byte[o_block_size];
 
                 switch (o_key_struct.Padding)
                 {
-                        // trailing zeros
+                    // trailing zeros
                     case ElGamalPaddingMode.Zeros:
                         Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
                         break;
@@ -88,6 +88,11 @@ namespace ElGamalExt
             }
 
             return p_block;
+        }
+
+        public void Dispose()
+        {
+            o_random.Dispose();
         }
     }
 }
