@@ -12,15 +12,14 @@ namespace ElGamalTests
         [TestMethod]
         public void TestZero()
         {
-            ElGamal algorithm = new ElGamalManaged();
             ElGamalPaddingMode[] paddingModes = { ElGamalPaddingMode.LeadingZeros, ElGamalPaddingMode.Zeros };
 
             foreach (var paddingMode in paddingModes)
             {
-                algorithm.Padding = paddingMode;
-
                 for (var keySize = 384; keySize <= 1088; keySize += 8)
                 {
+                    ElGamal algorithm = new ElGamalManaged();
+                    algorithm.Padding = paddingMode;
                     algorithm.KeySize = keySize;
 
                     ElGamal encryptAlgorithm = new ElGamalManaged();
@@ -43,15 +42,16 @@ namespace ElGamalTests
         }
 
         [TestMethod]
-        public void TestRandomBI()
+        public void TestRandomBigInteger()
         {
-            // Failed test because of zeroes
+            var rnd = new Random();
 
-            ElGamal algorithm = new ElGamalManaged();
-            algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
-
-            for (algorithm.KeySize = 384; algorithm.KeySize <= 1088; algorithm.KeySize += 8)
+            for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
+                ElGamal algorithm = new ElGamalManaged();
+                algorithm.Padding = ElGamalPaddingMode.LeadingZeros;
+                algorithm.KeySize = keySize;
+
                 ElGamal encryptAlgorithm = new ElGamalManaged();
                 encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
 
@@ -59,16 +59,19 @@ namespace ElGamalTests
                 decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
 
                 var z = new BigInteger();
-                z.genRandomBits(new Random().Next(1, 2241), new RNGCryptoServiceProvider());
+                // Plaintext that is bigger than one block needs different padding and the encryption loses homomorphic properties
+                z.genRandomBits(rnd.Next(1, (algorithm as ElGamalManaged).KeyStruct.getPlaintextBlocksize() * 8), new Random());
 
-                var z_enc = encryptAlgorithm.EncryptData(z.getBytes());
-                var z_dec = decryptAlgorithm.DecryptData(z_enc);
+                var z_enc_bytes = encryptAlgorithm.EncryptData(z.getBytes());
+                var z_dec_bytes = decryptAlgorithm.DecryptData(z_enc_bytes);
 
-                CollectionAssert.AreEqual(z.getBytes(), z_dec);
+                var z_dec = new BigInteger(z_dec_bytes);
+
+                Assert.AreEqual(z, z_dec);
             }
         }
 
-        //[TestMethod] TODO: Fix text encryption and re-enable the test
+        //[TestMethod] TODO: Fix text encryption and re-enable the test (implement ANSIX923 or PKCS97 padding)
         public void TestTextEncryption()
         {
             int keySize;
@@ -101,11 +104,12 @@ namespace ElGamalTests
         [TestMethod]
         public void TestMultiplication_Batch()
         {
+            var iterations = 3;
             var rnd = new Random();
+
             for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
-                for (var i = 0; i < 3; i++)
-                // testing for 3 sets of keys
+                for (var i = 0; i < iterations; i++)
                 {
                     ElGamal algorithm = new ElGamalManaged();
                     algorithm.KeySize = keySize;
