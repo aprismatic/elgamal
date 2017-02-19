@@ -25,7 +25,6 @@ namespace ElGamalExt
         public byte[] Y;
         public ElGamalPaddingMode Padding;
 
-        [NonSerialized]
         public byte[] X;
     }
 }
