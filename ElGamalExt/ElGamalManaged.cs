@@ -15,6 +15,8 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Numerics;
+using ElGamalExt.BigInt;
 
 namespace ElGamalExt
 {
@@ -52,14 +54,14 @@ namespace ElGamalExt
             using (var x_random_generator = new RNGCryptoServiceProvider())
             {
                 // create the large prime number, P
-                o_key_struct.P = BigInteger.genPseudoPrime(p_key_strength,
+                o_key_struct.P = o_key_struct.P.genPseudoPrime(p_key_strength,
                     16, x_random_generator);
 
                 // create the two random numbers, which are smaller than P
                 o_key_struct.X = new BigInteger();
-                o_key_struct.X.genRandomBits(p_key_strength - 1, x_random_generator);
+                o_key_struct.X = o_key_struct.X.genRandomBits(p_key_strength - 1, x_random_generator);
                 o_key_struct.G = new BigInteger();
-                o_key_struct.G.genRandomBits(p_key_strength - 1, x_random_generator);
+                o_key_struct.G = o_key_struct.G.genRandomBits(p_key_strength - 1, x_random_generator);
 
                 // compute Y
                 o_key_struct.Y = o_key_struct.G.modPow(o_key_struct.X, o_key_struct.P);

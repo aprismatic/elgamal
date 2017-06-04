@@ -15,6 +15,8 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Numerics;
+using ElGamalExt.BigInt;
 
 namespace ElGamalExt
 {
@@ -35,7 +37,7 @@ namespace ElGamalExt
             do
             {
                 K = new BigInteger();
-                K.genRandomBits(o_key_struct.P.bitCount() - 1, o_random);
+                K = K.genRandomBits(o_key_struct.P.bitCount() - 1, o_random);
             } while (K.gcd(o_key_struct.P - 1) != 1);
 
             // compute the values A and B

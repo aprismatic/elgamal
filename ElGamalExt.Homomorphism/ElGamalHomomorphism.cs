@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Numerics;
+using ElGamalExt.BigInt;
 
 namespace ElGamalExt.Homomorphism
 {
@@ -10,11 +12,16 @@ namespace ElGamalExt.Homomorphism
 
             var res = new byte[blocksize];
 
+            byte[] temp = new byte[blocksize / 2];
             var P = new BigInteger(p_P);
-            var A_left = new BigInteger(p_first, blocksize / 2);
-            var A_right = new BigInteger(p_first, blocksize / 2, blocksize / 2);
-            var B_left = new BigInteger(p_second, blocksize / 2);
-            var B_right = new BigInteger(p_second, blocksize / 2, blocksize / 2);
+            Array.Copy(p_first, temp, blocksize / 2);
+            var A_left = new BigInteger(p_first);
+            Array.Copy(p_first, 0, temp, blocksize / 2, blocksize / 2);
+            var A_right = new BigInteger(p_first);
+            Array.Copy(p_second, temp, blocksize / 2);
+            var B_left = new BigInteger(p_second);
+            Array.Copy(p_second, 0, temp, blocksize / 2, blocksize / 2);
+            var B_right = new BigInteger(p_second);
             
             var res_left = (A_left * B_left) % P;
             var res_right = (A_right * B_right) % P;

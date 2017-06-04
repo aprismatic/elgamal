@@ -15,6 +15,8 @@
 
 using System;
 using System.Linq;
+using System.Numerics;
+using ElGamalExt.BigInt;
 
 namespace ElGamalExt
 {
@@ -39,6 +41,7 @@ namespace ElGamalExt
             // create big integers from the byte arrays
             var A = new BigInteger(x_a_bytes);
             var B = new BigInteger(x_b_bytes);
+                
 
             // calculate the value M
             var M = B * A.modPow(o_key_struct.X, o_key_struct.P).modInverse(o_key_struct.P) % o_key_struct.P;
