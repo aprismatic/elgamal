@@ -62,6 +62,8 @@ namespace ElGamalExt.BigInt
         /// <returns>Modulo inverse of this</returns>
         public static BigInteger modInverse(this BigInteger T,  BigInteger mod)
         {
+            if(BigInteger.GreatestCommonDivisor(T,mod).IsZero)
+                throw (new ArithmeticException("No inverse!"));
             return BigInteger.ModPow(T, mod-2, mod);
         }
 
@@ -86,16 +88,7 @@ namespace ElGamalExt.BigInt
         /// <returns>Byte array containing value of the BigInteger</returns>
         public static byte[] getBytes(this BigInteger T)
         {
-            byte[] source = T.ToByteArray();
-            byte[] result = new byte[source.Length-1];
-
-            if (source[source.Length - 1] == 0)
-            {
-                Array.Copy(source, result, source.Length - 1);
-                return result;
-            }
-
-            return source;
+            return T.ToByteArray();
         }
 
 
@@ -112,14 +105,23 @@ namespace ElGamalExt.BigInt
         /// <returns></returns>
         public static int bitCount(this BigInteger T)
         {
-            int bitLength = 0;
-            while (T / 2 != 0)
+            byte[] data = T.getBytes();
+
+            byte value = data[data.Length - 1];
+            int count = 0;
+
+            if (value == 0)
+                return (data.Length - 1) * 8;
+            else
             {
-                T /= 2;
-                bitLength++;
+                while (value != 0)
+                {
+                    value >>= 1;
+                    count++;
+                }
             }
-            bitLength += 1;
-            return bitLength;
+
+            return (data.Length - 1) * 8 + count;
         }
 
 

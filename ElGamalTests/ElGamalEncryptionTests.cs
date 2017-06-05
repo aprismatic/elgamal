@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ElGamalExt;
 using System.Text;
+using ElGamalExt.BigInt;
+using System.Numerics;
 using System.Security.Cryptography;
 
 namespace ElGamalTests
@@ -9,6 +11,7 @@ namespace ElGamalTests
     [TestClass]
     public class ElGamalEncryptionTests
     {
+
         [TestMethod]
         public void TestZero()
         {
@@ -60,7 +63,7 @@ namespace ElGamalTests
 
                 var z = new BigInteger();
                 // Plaintext that is bigger than one block needs different padding and the encryption loses homomorphic properties
-                z.genRandomBits(rnd.Next(1, (algorithm as ElGamalManaged).KeyStruct.getPlaintextBlocksize() * 8), new Random());
+                z = z.genRandomBits(rnd.Next(1, (algorithm as ElGamalManaged).KeyStruct.getPlaintextBlocksize() * 8), new RNGCryptoServiceProvider());
 
                 var z_enc_bytes = encryptAlgorithm.EncryptData(z.getBytes());
                 var z_dec_bytes = decryptAlgorithm.DecryptData(z_enc_bytes);
@@ -121,8 +124,8 @@ namespace ElGamalTests
                     ElGamal decryptAlgorithm = new ElGamalManaged();
                     decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
 
-                    var a = new BigInteger(rnd.Next(32768));
-                    var b = new BigInteger(rnd.Next(32768));
+                    var a = new BigInteger(0);
+                    var b = new BigInteger(0);
 
                     var a_bytes = encryptAlgorithm.EncryptData(a.getBytes());
                     var b_bytes = encryptAlgorithm.EncryptData(b.getBytes());
