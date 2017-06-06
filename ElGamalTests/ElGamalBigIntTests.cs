@@ -166,7 +166,7 @@ namespace ElGamalTests
             }
 
             // Test on random number of bits
-            for (int i = 0; i < 999999; i++)
+            for (int i = 0; i < 9999; i++)
             {
                 var bi = new BigInteger();
                 var rng = new RNGCryptoServiceProvider();
@@ -174,7 +174,7 @@ namespace ElGamalTests
                 var bits = rand.Next(1, 70 * 32 + 1);
                 bi = bi.genRandomBits(bits, rng);
                 Assert.IsTrue(bits>= bi.bitCount());
-                Assert.IsTrue(bi.Sign == 1);
+                Assert.IsTrue(bi.Sign == 1|| bi.Sign == 0);
             }
 
             { // Test lower boudary value
