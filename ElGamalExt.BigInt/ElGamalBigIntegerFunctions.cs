@@ -114,15 +114,15 @@ namespace ElGamalExt.BigInt
         {
             byte[] data = T.ToByteArray();
             uint value = data[data.Length - 1];
-            uint mask = 0x80000000;
-            int bits = 32;
+            uint mask = 0x80;
+            int bits = 8;
 
             while (bits > 0 && (value & mask) == 0)
             {
                 bits--;
                 mask >>= 1;
             }
-            bits += ((data.Length - 1) << 3)+1;
+            bits += ((data.Length - 1) << 3);
 
             return bits == 0 ? 1 : bits;
         }
@@ -145,32 +145,39 @@ namespace ElGamalExt.BigInt
         /// <param name="rng"></param>
         public static BigInteger genRandomBits(this BigInteger T, int bits, RNGCryptoServiceProvider rng)
         {
-            byte[] randBytes = new byte[(bits / 8) + 1];
-            BigInteger R;
-            double remainderSum = 0;
+            int bytes = bits >> 3;
+            int remBits = bits % 8;
 
-            rng.GetBytes(randBytes);
+            if (remBits != 0)
+                bytes++;
 
-            if (bits % 8 != 0)
+            byte[] data = new byte[bytes];
+
+            if (bits <= 0)
+                throw (new ArithmeticException("Number of required bits is not valid."));
+
+            rng.GetBytes(data);
+
+            if (remBits != 0)
             {
-                randBytes[randBytes.Length - 1] &= (byte)0x7F; //force sign bit to positive  
-                for (int i = 0; i < bits % 8; i++)
-                {
-                    remainderSum += Math.Pow(2, i);
-                }
-                randBytes[randBytes.Length - 1] &= (byte)Convert.ToUInt16(remainderSum);
-                randBytes[randBytes.Length - 1] |= (byte)Convert.ToUInt16(Math.Pow(2, (bits % 8 - 1)));
+                byte mask;
 
+                if (bits != 1)
+                {
+                    mask = (byte)(0x01 << (remBits - 1));
+                    data[bytes - 1] |= mask;
+                }
+
+                mask = (byte)(0xFF >> (8 - remBits));
+                data[bytes - 1] &= mask;
             }
             else
-            {
-                randBytes[randBytes.Length - 1] &= (byte)0x7F; //force sign bit to positive
-            }
+                data[bytes - 1] |= 0x80;
 
+            data[bytes - 1] &= 0x7F;
 
-            R = new BigInteger(randBytes);
+            return new BigInteger(data);
 
-            return R;
 
         }
 

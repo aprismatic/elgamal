@@ -47,11 +47,6 @@ namespace ElGamalExt
             // copy the bytes from A and B into the result array
             var x_a_bytes = A.getBytes();
 
-            if (x_a_bytes.Length * 2 != o_ciphertext_blocksize)
-            {
-                o_ciphertext_blocksize = x_a_bytes.Length * 2;
-            }
-
             // create an array to contain the ciphertext
             var x_result = new byte[o_ciphertext_blocksize];
 
