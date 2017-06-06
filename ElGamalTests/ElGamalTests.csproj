@@ -35,11 +35,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BigInteger, Version=1.0.6.32409, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\BigInteger.1.0.6.32409\lib\net20\BigInteger.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Numerics" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -54,10 +51,15 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ElGamalBigIntTests.cs" />
     <Compile Include="ElGamalEncryptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ElGamalExt.BigInt\ElGamalExt.BigInt.csproj">
+      <Project>{85cc3622-562e-4671-9e21-ac88d86c561b}</Project>
+      <Name>ElGamalExt.BigInt</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ElGamalExt\ElGamalExt.csproj">
       <Project>{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}</Project>
       <Name>ElGamalExt</Name>

@@ -15,6 +15,8 @@
 
 using System;
 using System.Linq;
+using System.Numerics;
+using ElGamalExt.BigInt;
 
 namespace ElGamalExt
 {
@@ -34,14 +36,16 @@ namespace ElGamalExt
             var x_a_bytes = new byte[o_ciphertext_blocksize / 2];
             Array.Copy(p_block, 0, x_a_bytes, 0, x_a_bytes.Length);
             var x_b_bytes = new byte[o_ciphertext_blocksize / 2];
-            Array.Copy(p_block, x_a_bytes.Length, x_b_bytes, 0, x_b_bytes.Length);
+            Array.Copy(p_block, p_block.Length - x_b_bytes.Length, x_b_bytes, 0, x_b_bytes.Length);
 
             // create big integers from the byte arrays
             var A = new BigInteger(x_a_bytes);
             var B = new BigInteger(x_b_bytes);
 
             // calculate the value M
-            var M = B * A.modPow(o_key_struct.X, o_key_struct.P).modInverse(o_key_struct.P) % o_key_struct.P;
+            A = A.modPow(o_key_struct.X, o_key_struct.P);
+            A = A.modInverse(o_key_struct.P);
+            var M = B * A % o_key_struct.P;
 
             // return the result - take care to ensure that we create
             // a result which is the correct length
