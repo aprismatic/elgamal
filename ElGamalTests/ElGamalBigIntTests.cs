@@ -30,37 +30,6 @@ namespace ElGamalTests
             }
         }
 
-        [TestMethod]
-        public void TestBitCount()
-        {
-            { // Randomized tests
-                var r = new Random();
-
-                for (int j = 0; j < 4096; j++)
-                {
-                    var length = r.Next(210 * sizeof(uint) * 8 - 2); // TODO: 70 - current maxLength, remove hardcoded value
-                    if (length < 3)
-                        length = 3;
-
-                    var bi = new BigInteger();
-                    bi = bi.genRandomBits(length, new RNGCryptoServiceProvider());
-                      
-                    var bitsCounted = bi.bitCount();
-
-                    Assert.AreEqual(length, bitsCounted);
-                }
-            }
-
-            { // Special cases - zero, one
-                var z = new BigInteger(0);
-                var bitsCounted = z.bitCount();
-                Assert.AreEqual(bitsCounted, 0);
-
-                var o = new BigInteger(1);
-                bitsCounted = o.bitCount();
-                Assert.AreEqual(bitsCounted, 1);
-            }
-        }
 
         [TestMethod]
         public void TestGetBytes()
@@ -190,7 +159,6 @@ namespace ElGamalTests
                 bi = bi.genRandomBits(rand.Next(1, 33), rng);
 
                 var bytes = bi.getBytes();
-                Array.Reverse(bytes);
                 var new_bytes = new byte[4];
                 Array.Copy(bytes, new_bytes, bytes.Length);
 
@@ -206,6 +174,7 @@ namespace ElGamalTests
                 var bits = rand.Next(1, 70 * 32 + 1);
                 bi = bi.genRandomBits(bits, rng);
                 Assert.AreEqual(bits, bi.bitCount());
+                Assert.IsTrue(bi.Sign == 1);
             }
 
             { // Test lower boudary value

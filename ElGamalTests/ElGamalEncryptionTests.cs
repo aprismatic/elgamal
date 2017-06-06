@@ -63,7 +63,7 @@ namespace ElGamalTests
 
                 var z = new BigInteger();
                 // Plaintext that is bigger than one block needs different padding and the encryption loses homomorphic properties
-                z = z.genRandomBits(rnd.Next(1, (algorithm as ElGamalManaged).KeyStruct.getPlaintextBlocksize() * 8), new RNGCryptoServiceProvider());
+                z = z.genRandomBits(rnd.Next(1, (algorithm as ElGamalManaged).KeyStruct.getPlaintextBlocksize()), new RNGCryptoServiceProvider());
 
                 var z_enc_bytes = encryptAlgorithm.EncryptData(z.getBytes());
                 var z_dec_bytes = decryptAlgorithm.DecryptData(z_enc_bytes);

@@ -44,10 +44,17 @@ namespace ElGamalExt
             var A = o_key_struct.G.modPow(K, o_key_struct.P);
             var B = o_key_struct.Y.modPow(K, o_key_struct.P) * new BigInteger(p_block) % o_key_struct.P;
 
-            // create an array to contain the ciphertext
-            var x_result = new byte[o_ciphertext_blocksize];
             // copy the bytes from A and B into the result array
             var x_a_bytes = A.getBytes();
+
+            if (x_a_bytes.Length * 2 != o_ciphertext_blocksize)
+            {
+                o_ciphertext_blocksize = x_a_bytes.Length * 2;
+            }
+
+            // create an array to contain the ciphertext
+            var x_result = new byte[o_ciphertext_blocksize];
+
             Array.Copy(x_a_bytes, 0, x_result, o_ciphertext_blocksize / 2
                 - x_a_bytes.Length, x_a_bytes.Length);
             var x_b_bytes = B.getBytes();

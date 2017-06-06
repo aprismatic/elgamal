@@ -36,7 +36,7 @@ namespace ElGamalExt
             var x_a_bytes = new byte[o_ciphertext_blocksize / 2];
             Array.Copy(p_block, 0, x_a_bytes, 0, x_a_bytes.Length);
             var x_b_bytes = new byte[o_ciphertext_blocksize / 2];
-            Array.Copy(p_block, x_a_bytes.Length, x_b_bytes, 0, x_b_bytes.Length);
+            Array.Copy(p_block, p_block.Length - x_b_bytes.Length, x_b_bytes, 0, x_b_bytes.Length);
 
             // create big integers from the byte arrays
             var A = new BigInteger(x_a_bytes);

@@ -55,16 +55,23 @@ namespace ElGamalExt.BigInt
         /// <summary>
         /// Returns the modulo inverse of this
         /// </summary>
-        /// <remarks>
-        /// Throws ArithmeticException if the inverse does not exist.  (i.e. gcd(this, modulus) != 1)
-        /// </remarks>
         /// <param name="modulus"></param>
         /// <returns>Modulo inverse of this</returns>
         public static BigInteger modInverse(this BigInteger T,  BigInteger mod)
         {
-            if(BigInteger.GreatestCommonDivisor(T,mod).IsZero)
-                throw (new ArithmeticException("No inverse!"));
-            return BigInteger.ModPow(T, mod-2, mod);
+            BigInteger i = mod, v = 0, d = 1;
+            while (T > 0)
+            {
+                BigInteger t = i / T, x = T;
+                T = i % x;
+                i = x;
+                x = d;
+                d = v - t * x;
+                v = x;
+            }
+            v %=mod;
+            if (v < 0) v = (v + mod) % mod;
+            return v;
         }
 
 
@@ -105,23 +112,19 @@ namespace ElGamalExt.BigInt
         /// <returns></returns>
         public static int bitCount(this BigInteger T)
         {
-            byte[] data = T.getBytes();
+            byte[] data = T.ToByteArray();
+            uint value = data[data.Length - 1];
+            uint mask = 0x80000000;
+            int bits = 32;
 
-            byte value = data[data.Length - 1];
-            int count = 0;
-
-            if (value == 0)
-                return (data.Length - 1) * 8;
-            else
+            while (bits > 0 && (value & mask) == 0)
             {
-                while (value != 0)
-                {
-                    value >>= 1;
-                    count++;
-                }
+                bits--;
+                mask >>= 1;
             }
+            bits += ((data.Length - 1) << 3)+1;
 
-            return (data.Length - 1) * 8 + count;
+            return bits == 0 ? 1 : bits;
         }
 
 
@@ -142,7 +145,6 @@ namespace ElGamalExt.BigInt
         /// <param name="rng"></param>
         public static BigInteger genRandomBits(this BigInteger T, int bits, RNGCryptoServiceProvider rng)
         {
-
             byte[] randBytes = new byte[(bits / 8) + 1];
             BigInteger R;
             double remainderSum = 0;
@@ -162,13 +164,11 @@ namespace ElGamalExt.BigInt
             }
             else
             {
-                randBytes[randBytes.Length - 1] &= (byte)0x00; //force sign bit to positive
-                randBytes[randBytes.Length - 2] |= (byte)0x80;
+                randBytes[randBytes.Length - 1] &= (byte)0x7F; //force sign bit to positive
             }
 
 
             R = new BigInteger(randBytes);
-            int a = R.bitCount();
 
             return R;
 
