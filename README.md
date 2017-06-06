@@ -1,4 +1,4 @@
-#ElGamalExt
+#ElGamalExt with .Net Framework BigInteger Implementation
 Extension for the .NET Framework cryptography subsystem, which introduces the ElGamal public key cryptosystem with support for homomorphic multiplication.
 
 This code is based on the code from [1] and is partially covered by O'Reilly Code Policy [2].
