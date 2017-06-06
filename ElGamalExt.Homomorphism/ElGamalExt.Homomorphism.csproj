@@ -39,12 +39,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BigInteger, Version=1.0.6.32409, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\BigInteger.1.0.6.32409\lib\net20\BigInteger.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ElGamalHomomorphism.cs" />
@@ -52,6 +49,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ElGamalExt.BigInt\ElGamalExt.BigInt.csproj">
+      <Project>{85cc3622-562e-4671-9e21-ac88d86c561b}</Project>
+      <Name>ElGamalExt.BigInt</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
