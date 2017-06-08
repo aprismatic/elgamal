@@ -1,14 +1,14 @@
 ﻿/************************************************************************************
  This implementation of the ElGamal encryption scheme is based on the code from [1].
- 
+
  This library is provided as-is and is covered by the MIT License [2] (except for the
  parts that belong to O'Reilly - they are covered by [3]).
-  
+
  [1] Adam Freeman & Allen Jones, Programming .NET Security: O'Reilly Media, 2003,
      ISBN 9780596552275 (http://books.google.com.sg/books?id=ykXCNVOIEuQC)
- 
+
  [2] The MIT License (MIT), website, (http://opensource.org/licenses/MIT)
- 
+
  [3] Tim O'Reilly, O'Reilly Policy on Re-Use of Code Examples from Books: website,
      2001, (http://www.oreillynet.com/pub/a/oreilly/ask_tim/2001/codepolicy.html)
  ************************************************************************************/
@@ -26,7 +26,7 @@ namespace ElGamalExt
         LeadingZeros,
         TrailingZeros,
         BigIntegerPadding
-    };
+    }
 
     public abstract class ElGamal : AsymmetricAlgorithm
     {
@@ -44,11 +44,11 @@ namespace ElGamalExt
         public override string ToXmlString(bool p_include_private)
         {
             var x_params = ExportParameters(p_include_private);
-            
+
             var x_sb = new StringBuilder();
 
             x_sb.Append("<ElGamalKeyValue>");
-            
+
             x_sb.Append("<P>" + Convert.ToBase64String(x_params.P) + "</P>");
             x_sb.Append("<G>" + Convert.ToBase64String(x_params.G) + "</G>");
             x_sb.Append("<Y>" + Convert.ToBase64String(x_params.Y) + "</Y>");
@@ -67,9 +67,8 @@ namespace ElGamalExt
 
         public override void FromXmlString(string p_string)
         {
-            // create the params that we will use as the result
             var x_params = new ElGamalParameters();
-            // create a text reader using a string reader
+
             var x_reader = new XmlTextReader(new System.IO.StringReader(p_string));
 
             // run through the elements in the xml string

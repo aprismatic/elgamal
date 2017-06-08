@@ -1,10 +1,10 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ElGamalExt;
-using System.Text;
+﻿using ElGamalExt;
 using ElGamalExt.BigInt;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Numerics;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace ElGamalTests
 {
@@ -20,7 +20,7 @@ namespace ElGamalTests
             {
                 for (var keySize = 384; keySize <= 1088; keySize += 8)
                 {
-                    ElGamal algorithm = new ElGamalManaged()
+                    ElGamal algorithm = new ElGamalManaged
                     {
                         Padding = paddingMode,
                         KeySize = keySize
@@ -53,7 +53,7 @@ namespace ElGamalTests
 
             for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
-                ElGamal algorithm = new ElGamalManaged()
+                ElGamal algorithm = new ElGamalManaged
                 {
                     Padding = ElGamalPaddingMode.BigIntegerPadding,
                     KeySize = keySize
@@ -65,8 +65,9 @@ namespace ElGamalTests
                 ElGamal decryptAlgorithm = new ElGamalManaged();
                 decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
 
-                var z = new BigInteger(); // Plaintext that is bigger than one block needs different padding and the encryption loses homomorphic properties
-                z = z.genRandomBits(rnd.Next(1, (algorithm as ElGamalManaged).KeyStruct.getPlaintextBlocksize()), rng);
+                var z = new BigInteger(); // Plaintext that is bigger than one block needs different padding,
+                                          // and the encryption loses homomorphic properties
+                z = z.GenRandomBits(rnd.Next(1, ((ElGamalManaged) algorithm).KeyStruct.getPlaintextBlocksize()), rng);
 
                 var z_enc_bytes = encryptAlgorithm.EncryptData(z.ToByteArray());
                 var z_dec_bytes = decryptAlgorithm.DecryptData(z_enc_bytes);
@@ -108,7 +109,7 @@ namespace ElGamalTests
             }
 
             {
-                ElGamal algorithm = new ElGamalManaged()
+                ElGamal algorithm = new ElGamalManaged
                 {
                     KeySize = 384,
                     Padding = ElGamalPaddingMode.TrailingZeros
@@ -198,7 +199,7 @@ namespace ElGamalTests
             {
                 for (var i = 0; i < iterations; i++)
                 {
-                    ElGamal algorithm = new ElGamalManaged()
+                    ElGamal algorithm = new ElGamalManaged
                     {
                         KeySize = keySize,
                         Padding = ElGamalPaddingMode.BigIntegerPadding

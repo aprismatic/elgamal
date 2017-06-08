@@ -1,14 +1,14 @@
 ﻿/************************************************************************************
  This implementation of the ElGamal encryption scheme is based on the code from [1].
- 
+
  This library is provided as-is and is covered by the MIT License [2] (except for the
  parts that belong to O'Reilly - they are covered by [3]).
-  
+
  [1] Adam Freeman & Allen Jones, Programming .NET Security: O'Reilly Media, 2003,
      ISBN 9780596552275 (http://books.google.com.sg/books?id=ykXCNVOIEuQC)
- 
+
  [2] The MIT License (MIT), website, (http://opensource.org/licenses/MIT)
- 
+
  [3] Tim O'Reilly, O'Reilly Policy on Re-Use of Code Examples from Books: website,
      2001, (http://www.oreillynet.com/pub/a/oreilly/ask_tim/2001/codepolicy.html)
  ************************************************************************************/
@@ -22,7 +22,7 @@ namespace ElGamalExt.BigInt
     public static class ElGamalBigIntegerFunctions
     {
         // primes smaller than 2000 to test the generated prime number
-        public static readonly int[] primesBelow2000 = {
+        public static readonly int[] PrimesBelow2000 = {
            2,    3,    5,    7,   11,   13,   17,   19,   23,   29,   31,   37,   41,   43,   47,   53,   59,   61,   67,   71,
           73,   79,   83,   89,   97,  101,  103,  107,  109,  113,  127,  131,  137,  139,  149,  151,  157,  163,  167,  173,
          179,  181,  191,  193,  197,  199,  211,  223,  227,  229,  233,  239,  241,  251,  257,  263,  269,  271,  277,  281,
@@ -46,7 +46,7 @@ namespace ElGamalExt.BigInt
         /// </summary>
         /// <param name="mod">Modulo</param>
         /// <returns>Modulo inverse of this</returns>
-        public static BigInteger modInverse(this BigInteger T, BigInteger mod)
+        public static BigInteger ModInverse(this BigInteger T, BigInteger mod)
         {
             BigInteger i = mod, v = 0, d = 1;
 
@@ -79,7 +79,7 @@ namespace ElGamalExt.BigInt
         /// 5) The result is 5, if the value of BigInteger is 0...0001 0011
         /// </example>
         /// <returns></returns>
-        public static int bitCount(this BigInteger T)
+        public static int BitCount(this BigInteger T)
         {
             var data = T.ToByteArray();
             uint value = data[data.Length - 1];
@@ -103,7 +103,7 @@ namespace ElGamalExt.BigInt
         /// </summary>
         /// <param name="bits"></param>
         /// <param name="rng"></param>
-        public static BigInteger genRandomBits(this BigInteger T, int bits, RNGCryptoServiceProvider rng)
+        public static BigInteger GenRandomBits(this BigInteger T, int bits, RNGCryptoServiceProvider rng)
         {
             if (bits <= 0)
                 throw new ArithmeticException("Number of required bits is not valid.");
@@ -147,18 +147,18 @@ namespace ElGamalExt.BigInt
         /// <param name="confidence">Number of chosen bases</param>
         /// <param name="rand">RNGCryptoServiceProvider object</param>
         /// <returns>A probably prime number</returns>
-        public static BigInteger genPseudoPrime(this BigInteger T, int bits, int confidence, RNGCryptoServiceProvider rand)
+        public static BigInteger GenPseudoPrime(this BigInteger T, int bits, int confidence, RNGCryptoServiceProvider rand)
         {
             var result = new BigInteger();
             var done = false;
 
             while (!done)
             {
-                result = result.genRandomBits(bits, rand);
+                result = result.GenRandomBits(bits, rand);
                 result |= 1;  // make it odd
 
                 // prime test
-                done = result.isProbablePrime(confidence);
+                done = result.IsProbablePrime(confidence);
             }
 
             return result;
@@ -173,7 +173,7 @@ namespace ElGamalExt.BigInt
         /// </remarks>
         /// <param name="confidence">Number of chosen bases</param>
         /// <returns>True if this is probably prime</returns>
-        public static bool isProbablePrime(this BigInteger T, int confidence)
+        public static bool IsProbablePrime(this BigInteger T, int confidence)
         {
             var thisVal = BigInteger.Abs(T);
             if (thisVal.IsZero || thisVal.IsOne) return false;
@@ -181,9 +181,9 @@ namespace ElGamalExt.BigInt
             var val = (Int32) BigInteger.Min(Int32.MaxValue, thisVal);
 
             // test for divisibility by primes < 2000
-            for (var i = 0; i < primesBelow2000.Length; i++)
+            for (var i = 0; i < PrimesBelow2000.Length; i++)
             {
-                var divisor = primesBelow2000[i];
+                var divisor = PrimesBelow2000[i];
 
                 if (divisor >= val)
                     return true;
@@ -228,14 +228,14 @@ namespace ElGamalExt.BigInt
             // Instead, random BigIntegers are constructed from randomly generated
             // byte arrays of the same length as the w.
             var rng = new RNGCryptoServiceProvider();
-            var wlen = w.bitCount();
+            var wlen = w.BitCount();
             var b = BigInteger.Zero;
 
             for (var i = 0; i < confidence; i++)
             {
                 do
                 {
-                    b = b.genRandomBits(wlen, rng);
+                    b = b.GenRandomBits(wlen, rng);
                 }
                 while (b < 2 || b >= w - 1);
 

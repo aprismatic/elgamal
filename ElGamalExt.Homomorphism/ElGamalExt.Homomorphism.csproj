@@ -48,9 +48,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\ElGamalExt.BigInt\ElGamalExt.BigInt.csproj">
       <Project>{85cc3622-562e-4671-9e21-ac88d86c561b}</Project>
       <Name>ElGamalExt.BigInt</Name>

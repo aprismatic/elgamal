@@ -1,14 +1,14 @@
 ﻿/************************************************************************************
  This implementation of the ElGamal encryption scheme is based on the code from [1].
- 
+
  This library is provided as-is and is covered by the MIT License [2] (except for the
  parts that belong to O'Reilly - they are covered by [3]).
-  
+
  [1] Adam Freeman & Allen Jones, Programming .NET Security: O'Reilly Media, 2003,
      ISBN 9780596552275 (http://books.google.com.sg/books?id=ykXCNVOIEuQC)
- 
+
  [2] The MIT License (MIT), website, (http://opensource.org/licenses/MIT)
- 
+
  [3] Tim O'Reilly, O'Reilly Policy on Re-Use of Code Examples from Books: website,
      2001, (http://www.oreillynet.com/pub/a/oreilly/ask_tim/2001/codepolicy.html)
  ************************************************************************************/
@@ -29,17 +29,17 @@ namespace ElGamalExt
             // create the key struct and set all of the big integers to zero
             o_key_struct = new ElGamalKeyStruct
             {
-                P = new BigInteger(0),
-                G = new BigInteger(0),
-                Y = new BigInteger(0),
-                X = new BigInteger(0)
+                P = BigInteger.Zero,
+                G = BigInteger.Zero,
+                Y = BigInteger.Zero,
+                X = BigInteger.Zero
             };
 
             // set the default key size value
-            KeySizeValue = 1024;
+            KeySizeValue = 384;
 
             // set the default padding mode
-            Padding = ElGamalPaddingMode.TrailingZeros;
+            Padding = ElGamalPaddingMode.BigIntegerPadding;
 
             // set the range of legal keys
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
@@ -54,13 +54,13 @@ namespace ElGamalExt
             using (var x_random_generator = new RNGCryptoServiceProvider())
             {
                 // create the large prime number, P
-                o_key_struct.P = o_key_struct.P.genPseudoPrime(p_key_strength, 16, x_random_generator);
+                o_key_struct.P = o_key_struct.P.GenPseudoPrime(p_key_strength, 16, x_random_generator);
 
                 // create the two random numbers, which are smaller than P
                 o_key_struct.X = new BigInteger();
-                o_key_struct.X = o_key_struct.X.genRandomBits(p_key_strength - 1, x_random_generator);
+                o_key_struct.X = o_key_struct.X.GenRandomBits(p_key_strength - 1, x_random_generator);
                 o_key_struct.G = new BigInteger();
-                o_key_struct.G = o_key_struct.G.genRandomBits(p_key_strength - 1, x_random_generator);
+                o_key_struct.G = o_key_struct.G.GenRandomBits(p_key_strength - 1, x_random_generator);
 
                 // compute Y
                 o_key_struct.Y = BigInteger.ModPow(o_key_struct.G, o_key_struct.X, o_key_struct.P);
@@ -104,7 +104,7 @@ namespace ElGamalExt
             }
 
             // set the length of the key based on the import
-            KeySizeValue = o_key_struct.P.bitCount();
+            KeySizeValue = o_key_struct.P.BitCount();
             Padding = o_key_struct.Padding;
         }
 
@@ -112,7 +112,6 @@ namespace ElGamalExt
         {
             if (NeedToGenerateKey())
             {
-                // we need to create a new key before we can export 
                 CreateKeyPair(KeySizeValue);
             }
 
@@ -181,7 +180,7 @@ namespace ElGamalExt
 
         public override byte[] Multiply(byte[] p_first, byte[] p_second)
         {
-            var blocksize = o_key_struct.getCiphertextBlocksize() + 2;
+            var blocksize = o_key_struct.getCiphertextBlocksize();
 
             if (p_first.Length != blocksize)
             {

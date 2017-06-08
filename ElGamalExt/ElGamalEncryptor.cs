@@ -1,14 +1,14 @@
 ﻿/************************************************************************************
  This implementation of the ElGamal encryption scheme is based on the code from [1].
- 
+
  This library is provided as-is and is covered by the MIT License [2] (except for the
  parts that belong to O'Reilly - they are covered by [3]).
-  
+
  [1] Adam Freeman & Allen Jones, Programming .NET Security: O'Reilly Media, 2003,
      ISBN 9780596552275 (http://books.google.com.sg/books?id=ykXCNVOIEuQC)
- 
+
  [2] The MIT License (MIT), website, (http://opensource.org/licenses/MIT)
- 
+
  [3] Tim O'Reilly, O'Reilly Policy on Re-Use of Code Examples from Books: website,
      2001, (http://www.oreillynet.com/pub/a/oreilly/ask_tim/2001/codepolicy.html)
  ************************************************************************************/
@@ -37,7 +37,7 @@ namespace ElGamalExt
             do
             {
                 K = new BigInteger();
-                K = K.genRandomBits(o_key_struct.P.bitCount() - 1, o_random);
+                K = K.GenRandomBits(o_key_struct.P.BitCount() - 1, o_random);
             } while (BigInteger.GreatestCommonDivisor(K, o_key_struct.P - 1) != 1);
 
             var A = BigInteger.ModPow(o_key_struct.G, K, o_key_struct.P);
@@ -47,7 +47,7 @@ namespace ElGamalExt
             var x_b_bytes = B.ToByteArray();
 
             // create an array to contain the ciphertext
-            var x_result = new byte[o_ciphertext_blocksize + 2];
+            var x_result = new byte[o_ciphertext_blocksize];
 
             Array.Copy(x_a_bytes, 0, x_result, 0, x_a_bytes.Length);
             Array.Copy(x_b_bytes, 0, x_result, x_result.Length / 2, x_b_bytes.Length);

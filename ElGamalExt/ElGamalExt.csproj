@@ -57,7 +57,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ElGamalExt.nuspec" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ElGamalExt.BigInt\ElGamalExt.BigInt.csproj">
