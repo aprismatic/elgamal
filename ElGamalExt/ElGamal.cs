@@ -24,7 +24,8 @@ namespace ElGamalExt
     {
         ANSIX923,
         LeadingZeros,
-        Zeros
+        TrailingZeros,
+        BigIntegerPadding
     };
 
     public abstract class ElGamal : AsymmetricAlgorithm
@@ -43,22 +44,24 @@ namespace ElGamalExt
         public override string ToXmlString(bool p_include_private)
         {
             var x_params = ExportParameters(p_include_private);
-            // create a new string builder
+            
             var x_sb = new StringBuilder();
-            // add the header
+
             x_sb.Append("<ElGamalKeyValue>");
-            // add the public elements from the parameters
+            
             x_sb.Append("<P>" + Convert.ToBase64String(x_params.P) + "</P>");
             x_sb.Append("<G>" + Convert.ToBase64String(x_params.G) + "</G>");
             x_sb.Append("<Y>" + Convert.ToBase64String(x_params.Y) + "</Y>");
             x_sb.Append("<Padding>" + x_params.Padding.ToString() + "</Padding>");
+
             if (p_include_private)
             {
                 // we need to include X, which is the part of private key
                 x_sb.Append("<X>" + Convert.ToBase64String(x_params.X) + "</X>");
             }
-            // add the final element
+
             x_sb.Append("</ElGamalKeyValue>");
+
             return x_sb.ToString();
         }
 
@@ -77,21 +80,17 @@ namespace ElGamalExt
                 {
                     switch (x_reader.Name)
                     {
-                        case "P":
-                            // set the value for P
+                        case "P": // set the value for P
                             x_params.P = Convert.FromBase64String(x_reader.ReadString());
                             break;
-                        case "G":
-                            // set the value for G
+                        case "G": // set the value for G
                             x_params.G = Convert.FromBase64String(x_reader.ReadString());
                             break;
-                        case "Y":
-                            // set the value for Y
+                        case "Y": // set the value for Y
                             x_params.Y = Convert.FromBase64String(x_reader.ReadString());
                             break;
-                        case "Padding":
-                            // set the padding mode
-                            x_params.Padding = (ElGamalPaddingMode)Enum.Parse(typeof(ElGamalPaddingMode), x_reader.ReadString());
+                        case "Padding": // set the padding mode
+                            x_params.Padding = (ElGamalPaddingMode) Enum.Parse(typeof(ElGamalPaddingMode), x_reader.ReadString());
                             break;
                         case "X":
                             // set the value for X (this would not be found in a 
@@ -102,7 +101,7 @@ namespace ElGamalExt
                     }
                 }
             }
-            // Import the result
+
             ImportParameters(x_params);
         }
     }

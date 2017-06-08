@@ -38,33 +38,26 @@ namespace ElGamalExt
             {
                 K = new BigInteger();
                 K = K.genRandomBits(o_key_struct.P.bitCount() - 1, o_random);
-            } while (K.gcd(o_key_struct.P - 1) != 1);
+            } while (BigInteger.GreatestCommonDivisor(K, o_key_struct.P - 1) != 1);
 
-            // compute the values A and B
-            var A = o_key_struct.G.modPow(K, o_key_struct.P);
-            var B = o_key_struct.Y.modPow(K, o_key_struct.P) * new BigInteger(p_block) % o_key_struct.P;
+            var A = BigInteger.ModPow(o_key_struct.G, K, o_key_struct.P);
+            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * new BigInteger(p_block) % o_key_struct.P;
 
-            // copy the bytes from A and B into the result array
-            var x_a_bytes = A.getBytes();
+            var x_a_bytes = A.ToByteArray();
+            var x_b_bytes = B.ToByteArray();
 
             // create an array to contain the ciphertext
-            var x_result = new byte[o_ciphertext_blocksize];
+            var x_result = new byte[o_ciphertext_blocksize + 2];
 
-            Array.Copy(x_a_bytes, 0, x_result, o_ciphertext_blocksize / 2
-                - x_a_bytes.Length, x_a_bytes.Length);
-            var x_b_bytes = B.getBytes();
-            Array.Copy(x_b_bytes, 0, x_result, o_ciphertext_blocksize
-                - x_b_bytes.Length, x_b_bytes.Length);
-            // return the result array
+            Array.Copy(x_a_bytes, 0, x_result, 0, x_a_bytes.Length);
+            Array.Copy(x_b_bytes, 0, x_result, x_result.Length / 2, x_b_bytes.Length);
+
             return x_result;
         }
 
         protected override byte[] ProcessFinalDataBlock(byte[] p_final_block)
         {
-            if (!(p_final_block.Length > 0))
-                return new byte[0];
-
-            return ProcessDataBlock(PadPlaintextBlock(p_final_block));
+            return p_final_block.Length > 0 ? ProcessDataBlock(PadPlaintextBlock(p_final_block)) : new byte[0];
         }
 
         protected byte[] PadPlaintextBlock(byte[] p_block)
@@ -76,7 +69,7 @@ namespace ElGamalExt
                 switch (o_key_struct.Padding)
                 {
                     // trailing zeros
-                    case ElGamalPaddingMode.Zeros:
+                    case ElGamalPaddingMode.TrailingZeros:
                         Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
                         break;
 
@@ -86,6 +79,22 @@ namespace ElGamalExt
 
                     case ElGamalPaddingMode.ANSIX923:
                         throw new NotImplementedException();
+                        break;
+
+                    case ElGamalPaddingMode.BigIntegerPadding:
+                        Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
+                        if ((p_block[p_block.Length - 1] & 0b1000_0000) == 1)
+                        {
+                            for (var i = p_block.Length; i < x_padded.Length; i++)
+                            {
+                                x_padded[i] = 0xFF;
+                            }
+                        }
+                        break;
+
+                    // unlikely to happen
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 return x_padded;

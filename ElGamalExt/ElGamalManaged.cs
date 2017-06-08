@@ -39,7 +39,7 @@ namespace ElGamalExt
             KeySizeValue = 1024;
 
             // set the default padding mode
-            Padding = ElGamalPaddingMode.Zeros;
+            Padding = ElGamalPaddingMode.TrailingZeros;
 
             // set the range of legal keys
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
@@ -54,17 +54,16 @@ namespace ElGamalExt
             using (var x_random_generator = new RNGCryptoServiceProvider())
             {
                 // create the large prime number, P
-                o_key_struct.P = o_key_struct.P.genPseudoPrime(p_key_strength -1,
-                    16, x_random_generator);
+                o_key_struct.P = o_key_struct.P.genPseudoPrime(p_key_strength, 16, x_random_generator);
 
                 // create the two random numbers, which are smaller than P
                 o_key_struct.X = new BigInteger();
-                o_key_struct.X = o_key_struct.X.genRandomBits(p_key_strength - 2, x_random_generator);
+                o_key_struct.X = o_key_struct.X.genRandomBits(p_key_strength - 1, x_random_generator);
                 o_key_struct.G = new BigInteger();
-                o_key_struct.G = o_key_struct.G.genRandomBits(p_key_strength - 2, x_random_generator);
+                o_key_struct.G = o_key_struct.G.genRandomBits(p_key_strength - 1, x_random_generator);
 
                 // compute Y
-                o_key_struct.Y = o_key_struct.G.modPow(o_key_struct.X, o_key_struct.P);
+                o_key_struct.Y = BigInteger.ModPow(o_key_struct.G, o_key_struct.X, o_key_struct.P);
 
                 o_key_struct.Padding = Padding;
             }
@@ -106,6 +105,7 @@ namespace ElGamalExt
 
             // set the length of the key based on the import
             KeySizeValue = o_key_struct.P.bitCount();
+            Padding = o_key_struct.Padding;
         }
 
         public override ElGamalParameters ExportParameters(bool p_include_private_params)
@@ -119,16 +119,16 @@ namespace ElGamalExt
             // create the parameter set and set the public values of the parameters
             var x_params = new ElGamalParameters
             {
-                P = o_key_struct.P.getBytes(),
-                G = o_key_struct.G.getBytes(),
-                Y = o_key_struct.Y.getBytes(),
+                P = o_key_struct.P.ToByteArray(),
+                G = o_key_struct.G.ToByteArray(),
+                Y = o_key_struct.Y.ToByteArray(),
                 Padding = o_key_struct.Padding
             };
 
             // if required, include the private value, X
             if (p_include_private_params)
             {
-                x_params.X = o_key_struct.X.getBytes();
+                x_params.X = o_key_struct.X.ToByteArray();
             }
             else
             {
@@ -181,7 +181,7 @@ namespace ElGamalExt
 
         public override byte[] Multiply(byte[] p_first, byte[] p_second)
         {
-            var blocksize = o_key_struct.getCiphertextBlocksize();
+            var blocksize = o_key_struct.getCiphertextBlocksize() + 2;
 
             if (p_first.Length != blocksize)
             {
@@ -192,7 +192,7 @@ namespace ElGamalExt
                 throw new ArgumentException("Ciphertext to multiply should be exactly one block long.", nameof(p_second));
             }
 
-            return Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.getBytes());
+            return Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.ToByteArray());
         }
     }
 }

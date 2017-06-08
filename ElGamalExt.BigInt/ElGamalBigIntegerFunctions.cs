@@ -40,26 +40,16 @@ namespace ElGamalExt.BigInt
         1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889, 1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987,
         1993, 1997, 1999 };
 
-        /// <summary>
-        /// Modulo Exponentiation
-        /// </summary>
-        /// <param name="exp">Exponential</param>
-        /// <param name="n">Modulo</param>
-        /// <returns>BigInteger result of raising this to the power of exp and then modulo n </returns>
-        public static BigInteger modPow(this BigInteger T, BigInteger exp, BigInteger mod)
-        {
-            return BigInteger.ModPow(T, exp, mod);
-        }
-
 
         /// <summary>
         /// Returns the modulo inverse of this
         /// </summary>
-        /// <param name="modulus"></param>
+        /// <param name="mod">Modulo</param>
         /// <returns>Modulo inverse of this</returns>
-        public static BigInteger modInverse(this BigInteger T,  BigInteger mod)
+        public static BigInteger modInverse(this BigInteger T, BigInteger mod)
         {
             BigInteger i = mod, v = 0, d = 1;
+
             while (T > 0)
             {
                 BigInteger t = i / T, x = T;
@@ -69,33 +59,12 @@ namespace ElGamalExt.BigInt
                 d = v - t * x;
                 v = x;
             }
-            v %=mod;
-            if (v < 0) v = (v + mod) % mod;
+
+            v %= mod;
+            if (v < 0)
+                v = (v + mod) % mod;
+
             return v;
-        }
-
-
-        /// <summary>
-        /// Returns gcd(this, bi)
-        /// </summary>
-        /// <param name="bi"></param>
-        /// <returns>Greatest Common Divisor of this and bi</returns>
-        public static BigInteger gcd(this BigInteger T, BigInteger bi)
-        {
-            return BigInteger.GreatestCommonDivisor(T, bi);
-        }
-
-
-        /// <summary>
-        /// Returns the value of the BigInteger as a byte array
-        /// </summary>
-        /// <remarks>
-        /// The lowest index contains the MSB
-        /// </remarks>
-        /// <returns>Byte array containing value of the BigInteger</returns>
-        public static byte[] getBytes(this BigInteger T)
-        {
-            return T.ToByteArray();
         }
 
 
@@ -112,7 +81,7 @@ namespace ElGamalExt.BigInt
         /// <returns></returns>
         public static int bitCount(this BigInteger T)
         {
-            byte[] data = T.ToByteArray();
+            var data = T.ToByteArray();
             uint value = data[data.Length - 1];
             uint mask = 0x80;
             int bits = 8;
@@ -122,19 +91,10 @@ namespace ElGamalExt.BigInt
                 bits--;
                 mask >>= 1;
             }
+
             bits += ((data.Length - 1) << 3);
 
             return bits == 0 ? 1 : bits;
-        }
-
-
-        /// <summary>
-        /// Returns length in bytes
-        /// </summary>
-        /// <returns>Length in bytes</returns>
-        public static int dataLength(this BigInteger T)
-        {
-            return T.getBytes().Length;
         }
 
 
@@ -145,16 +105,16 @@ namespace ElGamalExt.BigInt
         /// <param name="rng"></param>
         public static BigInteger genRandomBits(this BigInteger T, int bits, RNGCryptoServiceProvider rng)
         {
-            int bytes = bits >> 3;
-            int remBits = bits % 8;
+            if (bits <= 0)
+                throw new ArithmeticException("Number of required bits is not valid.");
+
+            var bytes = bits >> 3;
+            var remBits = bits % 8;
 
             if (remBits != 0)
                 bytes++;
 
-            byte[] data = new byte[bytes];
-
-            if (bits <= 0)
-                throw (new ArithmeticException("Number of required bits is not valid."));
+            var data = new byte[bytes];
 
             rng.GetBytes(data);
 
@@ -164,11 +124,11 @@ namespace ElGamalExt.BigInt
 
                 if (bits != 1)
                 {
-                    mask = (byte)(0x01 << (remBits - 1));
+                    mask = (byte) (0x01 << (remBits - 1));
                     data[bytes - 1] |= mask;
                 }
 
-                mask = (byte)(0xFF >> (8 - remBits));
+                mask = (byte) (0xFF >> (8 - remBits));
                 data[bytes - 1] &= mask;
             }
             else
@@ -177,8 +137,6 @@ namespace ElGamalExt.BigInt
             data[bytes - 1] &= 0x7F;
 
             return new BigInteger(data);
-
-
         }
 
 
@@ -191,20 +149,19 @@ namespace ElGamalExt.BigInt
         /// <returns>A probably prime number</returns>
         public static BigInteger genPseudoPrime(this BigInteger T, int bits, int confidence, RNGCryptoServiceProvider rand)
         {
-            BigInteger result = new BigInteger();
-            bool done = false;
+            var result = new BigInteger();
+            var done = false;
 
             while (!done)
             {
                 result = result.genRandomBits(bits, rand);
-                result = result.IsEven ? result += 1 : result;
+                result |= 1;  // make it odd
 
                 // prime test
                 done = result.isProbablePrime(confidence);
             }
 
             return result;
-
         }
 
 
@@ -218,35 +175,32 @@ namespace ElGamalExt.BigInt
         /// <returns>True if this is probably prime</returns>
         public static bool isProbablePrime(this BigInteger T, int confidence)
         {
-            byte[] data = T.ToByteArray();
-            BigInteger thisVal;
-            if ((data[data.Length-1] & 0x8) != 0)        // negative
-                thisVal = -1* T;
-            else
-                thisVal = T;
+            var thisVal = BigInteger.Abs(T);
+            if (thisVal.IsZero || thisVal.IsOne) return false;
+
+            var val = (Int32) BigInteger.Min(Int32.MaxValue, thisVal);
 
             // test for divisibility by primes < 2000
-            for (int p = 0; p < primesBelow2000.Length; p++)
+            for (var i = 0; i < primesBelow2000.Length; i++)
             {
-                BigInteger divisor = primesBelow2000[p];
+                var divisor = primesBelow2000[i];
 
-                if (divisor >= thisVal)
-                    break;
+                if (divisor >= val)
+                    return true;
 
-                BigInteger resultNum = BigInteger.Remainder(thisVal, divisor);
+                var resultNum = BigInteger.Remainder(thisVal, divisor);
                 if (resultNum == BigInteger.Zero)
                     return false;
             }
 
-            if (thisVal.RabinMillerTest(confidence))
-                return true;
-            else
-                return false;
+            return thisVal.RabinMillerTest(confidence);
         }
 
 
         /// <summary>
-        /// Probabilistic prime test based on Rabin-Miller's
+        /// Probabilistic prime test based on Miller-Rabin's alogorithm.
+        /// Algorithm based on http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf (p. 72)
+        /// This method REQUIRES that the BigInteger is positive
         /// </summary>
         /// <remarks>
         /// for any p &gt; 0 with p - 1 = 2^s * t
@@ -259,52 +213,46 @@ namespace ElGamalExt.BigInt
         /// </remarks>
         /// <param name="confidence">Number of chosen bases</param>
         /// <returns>True if this is a strong pseudoprime to randomly chosen bases</returns>
-        public static bool RabinMillerTest(this BigInteger T, int confidence)
+        public static bool RabinMillerTest(this BigInteger w, int confidence)
         {
-            if (T == 2 || T == 3)
-                return true;
-            if (T < 2 || T % 2 == 0)
-                return false;
+            var m = w - 1;
+            var a = 0;
 
-            BigInteger d = T - 1;
-            int s = 0;
-
-            while (d % 2 == 0)
+            while (m % 2 == 0)
             {
-                d /= 2;
-                s += 1;
+                m /= 2;
+                a += 1;
             }
 
             // There is no built-in method for generating random BigInteger values.
             // Instead, random BigIntegers are constructed from randomly generated
-            // byte arrays of the same length as the T.
-            RandomNumberGenerator rng = RandomNumberGenerator.Create();
-            byte[] bytes = new byte[T.ToByteArray().LongLength];
-            BigInteger a;
+            // byte arrays of the same length as the w.
+            var rng = new RNGCryptoServiceProvider();
+            var wlen = w.bitCount();
+            var b = BigInteger.Zero;
 
-            for (int i = 0; i < confidence; i++)
+            for (var i = 0; i < confidence; i++)
             {
                 do
                 {
-                    rng.GetBytes(bytes);
-                    a = new BigInteger(bytes);
+                    b = b.genRandomBits(wlen, rng);
                 }
-                while (a < 2 || a >= T - 2);
+                while (b < 2 || b >= w - 1);
 
-                BigInteger x = BigInteger.ModPow(a, d, T);
-                if (x == 1 || x == T - 1)
+                var z = BigInteger.ModPow(b, m, w);
+                if (z == 1 || z == w - 1)
                     continue;
 
-                for (int r = 1; r < s; r++)
+                for (var j = 1; j < a; j++)
                 {
-                    x = BigInteger.ModPow(x, 2, T);
-                    if (x == 1)
+                    z = BigInteger.ModPow(z, 2, w);
+                    if (z == 1)
                         return false;
-                    if (x == T - 1)
+                    if (z == w - 1)
                         break;
                 }
 
-                if (x != T - 1)
+                if (z != w - 1)
                     return false;
             }
 

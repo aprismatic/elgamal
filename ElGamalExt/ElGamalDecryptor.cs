@@ -27,15 +27,16 @@ namespace ElGamalExt
             : base(p_struct)
         {
             // set the default block size to be ciphertext
-            o_block_size = o_ciphertext_blocksize;
+            o_block_size = o_ciphertext_blocksize + 2;
         }
 
         protected override byte[] ProcessDataBlock(byte[] p_block)
         {
             // extract the byte arrays that represent A and B
-            var x_a_bytes = new byte[o_ciphertext_blocksize / 2];
+            var byteLength = (o_ciphertext_blocksize + 2) / 2;
+            var x_a_bytes = new byte[byteLength];
             Array.Copy(p_block, 0, x_a_bytes, 0, x_a_bytes.Length);
-            var x_b_bytes = new byte[o_ciphertext_blocksize / 2];
+            var x_b_bytes = new byte[byteLength];
             Array.Copy(p_block, p_block.Length - x_b_bytes.Length, x_b_bytes, 0, x_b_bytes.Length);
 
             // create big integers from the byte arrays
@@ -43,21 +44,18 @@ namespace ElGamalExt
             var B = new BigInteger(x_b_bytes);
 
             // calculate the value M
-            A = A.modPow(o_key_struct.X, o_key_struct.P);
+            A = BigInteger.ModPow(A, o_key_struct.X, o_key_struct.P);
             A = A.modInverse(o_key_struct.P);
             var M = B * A % o_key_struct.P;
 
-            // return the result - take care to ensure that we create
-            // a result which is the correct length
-            var x_m_bytes = M.getBytes();
+            var x_m_bytes = M.ToByteArray();
 
-            // we may end up with results which are short some leading
-            // bytes - add these are required
+            // we may end up with results which are short some trailing zero bytes
+            // due to BigInteger implementation
             if (x_m_bytes.Length < o_plaintext_blocksize)
             {
                 var x_full_result = new byte[o_plaintext_blocksize];
-                Array.Copy(x_m_bytes, 0, x_full_result,
-                    o_plaintext_blocksize - x_m_bytes.Length, x_m_bytes.Length);
+                Array.Copy(x_m_bytes, 0, x_full_result, 0, x_m_bytes.Length);
                 x_m_bytes = x_full_result;
             }
             return x_m_bytes;
@@ -65,12 +63,7 @@ namespace ElGamalExt
 
         protected override byte[] ProcessFinalDataBlock(byte[] p_final_block)
         {
-            if (!(p_final_block.Length > 0))
-            {
-                return new byte[0];
-            }
-
-            return UnpadPlaintextBlock(ProcessDataBlock(p_final_block));
+            return p_final_block.Length > 0 ? UnpadPlaintextBlock(ProcessDataBlock(p_final_block)) : new byte[0];
         }
 
         protected byte[] UnpadPlaintextBlock(byte[] p_block)
@@ -82,7 +75,7 @@ namespace ElGamalExt
                 // removing all the leading zeros
                 case ElGamalPaddingMode.LeadingZeros:
                     var i = 0;
-                    for (; i < o_plaintext_blocksize; i++)
+                    for (; i < p_block.Length; i++)
                     {
                         if (p_block[i] != 0)
                             break;
@@ -90,14 +83,56 @@ namespace ElGamalExt
                     x_res = p_block.Skip(i).ToArray();
                     break;
 
-                // we can't determine which bytes are padding and which are meaningful
-                // thus we return the block as is
-                case ElGamalPaddingMode.Zeros:
-                    x_res = p_block;
+                // removing all the trailing zeros
+                case ElGamalPaddingMode.TrailingZeros:
+                    var j = p_block.Length - 1;
+                    for (; j >= 0; j--)
+                    {
+                        if (p_block[j] != 0)
+                            break;
+                    }
+                    x_res = p_block.Take(j + 1).ToArray();
                     break;
 
                 case ElGamalPaddingMode.ANSIX923:
                     throw new NotImplementedException();
+                    break;
+
+                case ElGamalPaddingMode.BigIntegerPadding:
+                    var k = p_block.Length - 1;
+
+                    if (p_block[k] == 0xFF)
+                    {
+                        for (; k >= 0; k--)
+                        {
+                            if (p_block[k] != 0xFF)
+                            {
+                                if (k > 0)
+                                {
+                                    if ((p_block[k] & 0b1000_0000) == 0)
+                                        k++;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    else if(p_block[k] == 0)
+                    {
+                        for (; k >= 0; k--)
+                        {
+                            if (p_block[k] != 0)
+                            {
+                                if (k > 0)
+                                {
+                                    if ((p_block[k] & 0b1000_0000) != 0)
+                                        k++;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    x_res = p_block.Take(k + 1).ToArray();
+                    break;
 
                 // unlikely to happen
                 default:

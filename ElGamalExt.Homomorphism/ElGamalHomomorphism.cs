@@ -16,7 +16,7 @@ namespace ElGamalExt.Homomorphism
             var temp = new byte[blocksize / 2];
             Array.Copy(p_first, temp, blocksize / 2);
             var A_left = new BigInteger(temp);
-            Array.Copy(p_first, blocksize / 2 , temp, 0 , blocksize / 2);
+            Array.Copy(p_first, blocksize / 2, temp, 0, blocksize / 2);
             var A_right = new BigInteger(temp);
             Array.Copy(p_second, temp, blocksize / 2);
             var B_left = new BigInteger(temp);
@@ -26,11 +26,11 @@ namespace ElGamalExt.Homomorphism
             var res_left = (A_left * B_left) % P;
             var res_right = (A_right * B_right) % P;
 
-            var cAbytes = res_left.getBytes();
-            var cBbytes = res_right.getBytes();
+            var cAbytes = res_left.ToByteArray();
+            var cBbytes = res_right.ToByteArray();
 
-            Array.Copy(cAbytes, 0, res, blocksize / 2 - cAbytes.Length, cAbytes.Length);
-            Array.Copy(cBbytes, 0, res, blocksize - cBbytes.Length, cBbytes.Length);
+            Array.Copy(cAbytes, 0, res, 0, cAbytes.Length);
+            Array.Copy(cBbytes, 0, res, blocksize / 2, cBbytes.Length);
 
             return res;
         }
