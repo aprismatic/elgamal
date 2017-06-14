@@ -12,8 +12,9 @@
  [3] Tim O'Reilly, O'Reilly Policy on Re-Use of Code Examples from Books: website,
      2001, (http://www.oreillynet.com/pub/a/oreilly/ask_tim/2001/codepolicy.html)
  ************************************************************************************/
+
 using System.Numerics;
-using ElGamalExt.BigInt;
+using BigIntegerExt;
 
 namespace ElGamalExt
 {

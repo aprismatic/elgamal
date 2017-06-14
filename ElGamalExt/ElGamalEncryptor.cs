@@ -16,7 +16,7 @@
 using System;
 using System.Numerics;
 using System.Security.Cryptography;
-using ElGamalExt.BigInt;
+using BigIntegerExt;
 
 namespace ElGamalExt
 {

@@ -16,7 +16,7 @@
 using System;
 using System.Linq;
 using System.Numerics;
-using ElGamalExt.BigInt;
+using BigIntegerExt;
 
 namespace ElGamalExt
 {
@@ -46,8 +46,7 @@ namespace ElGamalExt
 
             var x_m_bytes = M.ToByteArray();
 
-            // we may end up with results which are short some trailing zero bytes
-            // due to BigInteger implementation
+            // we may end up with results which are short some trailing zeros
             if (x_m_bytes.Length < o_plaintext_blocksize)
             {
                 var x_full_result = new byte[o_plaintext_blocksize];

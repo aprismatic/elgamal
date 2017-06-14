@@ -1,5 +1,5 @@
 ﻿using ElGamalExt;
-using ElGamalExt.BigInt;
+using BigIntegerExt;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Numerics;
@@ -155,6 +155,20 @@ namespace ElGamalTests
                 var ab_result = a * b;
 
                 Assert.AreEqual(ab_result, dec_c);
+            }
+
+            {
+                ElGamal algorithm = new ElGamalManaged
+                {
+                    KeySize = 384,
+                    Padding = ElGamalPaddingMode.BigIntegerPadding
+                };
+
+                var a = new BigInteger(2048);
+                var a_bytes = algorithm.EncryptData(a.ToByteArray());
+                var dec_a = new BigInteger(algorithm.DecryptData(a_bytes));
+
+                Assert.AreEqual(a, dec_a);
             }
         }
 

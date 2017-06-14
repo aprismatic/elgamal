@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BigIntegerExt, Version=0.1.0.3, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BigIntegerExt.0.1.0.3\lib\net40\BigIntegerExt.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
@@ -51,19 +54,21 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ElGamalBigIntTests.cs" />
     <Compile Include="ElGamalEncryptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ElGamalExt.BigInt\ElGamalExt.BigInt.csproj">
-      <Project>{85cc3622-562e-4671-9e21-ac88d86c561b}</Project>
-      <Name>ElGamalExt.BigInt</Name>
+    <ProjectReference Include="..\ElGamalExt.Homomorphism\ElGamalExt.Homomorphism.csproj">
+      <Project>{11b0bd5b-16d7-4395-a968-4c225509588f}</Project>
+      <Name>ElGamalExt.Homomorphism</Name>
     </ProjectReference>
     <ProjectReference Include="..\ElGamalExt\ElGamalExt.csproj">
       <Project>{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}</Project>
       <Name>ElGamalExt</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
