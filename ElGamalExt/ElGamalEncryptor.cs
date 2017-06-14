@@ -83,7 +83,7 @@ namespace ElGamalExt
 
                     case ElGamalPaddingMode.BigIntegerPadding:
                         Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
-                        if ((p_block[p_block.Length - 1] & 0b1000_0000) == 1)
+                        if ((p_block[p_block.Length - 1] & 0b1000_0000) != 0)
                         {
                             for (var i = p_block.Length; i < x_padded.Length; i++)
                             {
