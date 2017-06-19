@@ -26,10 +26,10 @@ image: "Visual Studio 2017"
 nuget:
   disable_publish_on_pr: true
 version: "0.10.0.{build}"
-init:
-  - ps: |
-        Invoke-RestMethod -Uri 'https://ci.appveyor.com/api/projects/bazzilic/ElGamalExt/settings/build-number' `
-                    -Headers @{ "Authorization" = "Bearer ${env:AppVeyorAPIToken}" ;  "Content-type" = "application/json" } `
-                    -Method Put `
-                    -Body '{ nextBuildNumber: 1 }'
-        Update-AppVeyorBuild -Version '0.10.0.0'
+# init:
+#   - ps: |
+#         Invoke-RestMethod -Uri 'https://ci.appveyor.com/api/projects/bazzilic/ElGamalExt/settings/build-number' `
+#                     -Headers @{ "Authorization" = "Bearer ${env:AppVeyorAPIToken}" ;  "Content-type" = "application/json" } `
+#                     -Method Put `
+#                     -Body '{ nextBuildNumber: 1 }'
+#         Update-AppVeyorBuild -Version '0.10.0.0'
