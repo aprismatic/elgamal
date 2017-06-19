@@ -1,0 +1,35 @@
+---
+assembly_info:
+  assembly_file_version: "{version}"
+  assembly_informational_version: "{version}"
+  assembly_version: "{version}"
+  file: "**\\AssemblyInfo.*"
+  patch: true
+branches:
+  only:
+    - master
+before_build:
+  - nuget restore
+build:
+  publish_nuget: true
+  publish_nuget_symbols: true
+  verbosity: minimal
+configuration: Release
+environment:
+  AppVeyorAPIToken:
+    secure: GvygCCndEp8eiXvItooIyglWYnyfUvg4YNyaufw3N3A=
+  AppVeyorGlobalAPIToken:
+    secure: XaWtuymf7dtXgjvEdnxXZVuIGVwMYUqOcE3dl3f3JzA=
+  NugetAPIToken:
+    secure: U630adFlFmWqwvorvfwA+YvFtAkfL+vw1EX0vCXbyk+R6qiLkIeqKek9yK+poBjV
+image: "Visual Studio 2017"
+nuget:
+  disable_publish_on_pr: true
+version: "0.10.0.{build}"
+init:
+  - ps: |
+        Invoke-RestMethod -Uri 'https://ci.appveyor.com/api/projects/bazzilic/ElGamalExt/settings/build-number' `
+                    -Headers @{ "Authorization" = "Bearer ${env:AppVeyorAPIToken}" ;  "Content-type" = "application/json" } `
+                    -Method Put `
+                    -Body '{ nextBuildNumber: 1 }'
+        Update-AppVeyorBuild -Version '0.10.0.0'
