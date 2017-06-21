@@ -95,38 +95,27 @@ namespace ElGamalExt
 
                 case ElGamalPaddingMode.BigIntegerPadding:
                     var k = p_block.Length - 1;
-
                     if (p_block[k] == 0xFF)
                     {
                         for (; k >= 0; k--)
                         {
-                            if (p_block[k] != 0xFF)
-                            {
-                                if (k > 0)
-                                {
-                                    if ((p_block[k] & 0b1000_0000) == 0)
-                                        k++;
-                                }
-                                break;
-                            }
+                            if (p_block[k] == 0xFF) continue;
+                            if ((p_block[k] & 0b1000_0000) == 0)
+                                k++;
+                            break;
                         }
                     }
-                    else if(p_block[k] == 0)
+                    else if (p_block[k] == 0)
                     {
                         for (; k >= 0; k--)
                         {
-                            if (p_block[k] != 0)
-                            {
-                                if (k > 0)
-                                {
-                                    if ((p_block[k] & 0b1000_0000) != 0)
-                                        k++;
-                                }
-                                break;
-                            }
+                            if (p_block[k] == 0) continue;
+                            if ((p_block[k] & 0b1000_0000) != 0)
+                                k++;
+                            break;
                         }
                     }
-                    x_res = p_block.Take(k + 1).ToArray();
+                    x_res = p_block.Take(k + 1).ToArray(); // TODO: Consider rewriting without LINQ
                     break;
 
                 // unlikely to happen

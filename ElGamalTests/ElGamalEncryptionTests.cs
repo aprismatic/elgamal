@@ -170,6 +170,20 @@ namespace ElGamalTests
 
                 Assert.AreEqual(a, dec_a);
             }
+
+            {
+                ElGamal algorithm = new ElGamalManaged
+                {
+                    KeySize = 384,
+                    Padding = ElGamalPaddingMode.BigIntegerPadding
+                };
+
+                var a = new BigInteger(138);
+                var a_bytes = algorithm.EncryptData(a.ToByteArray());
+                var dec_a = new BigInteger(algorithm.DecryptData(a_bytes));
+
+                Assert.AreEqual(a, dec_a);
+            }
         }
 
         //[TestMethod] TODO: Fix text encryption and re-enable the test (implement ANSIX923 or PKCS97 padding)
