@@ -1,17 +1,16 @@
 ﻿using ElGamalExt;
 using BigIntegerExt;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
+using Xunit;
 
 namespace ElGamalTests
 {
-    [TestClass]
     public class ElGamalEncryptionTests
     {
-        [TestMethod]
+        [Fact]
         public void TestZero()
         {
             ElGamalPaddingMode[] paddingModes = { ElGamalPaddingMode.LeadingZeros, ElGamalPaddingMode.TrailingZeros };
@@ -40,12 +39,12 @@ namespace ElGamalTests
 
                     var z_dec = new BigInteger(z_dec_bytes);
 
-                    Assert.AreEqual(z, z_dec);
+                    Assert.Equal(z, z_dec);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestRandomBigInteger()
         {
             var rnd = new Random();
@@ -74,17 +73,17 @@ namespace ElGamalTests
 
                 var z_dec = new BigInteger(z_dec_bytes);
 
-                Assert.AreEqual(z, z_dec, $"{Environment.NewLine}{Environment.NewLine}" +
-                                          $"Algorithm parameters (TRUE):{Environment.NewLine}" +
-                                          $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
-                                          $"Algorithm parameters (FALSE):{Environment.NewLine}" +
-                                          $"{algorithm.ToXmlString(false)}{Environment.NewLine}{Environment.NewLine}" +
-                                          $"z: {z}{Environment.NewLine}{Environment.NewLine}" +
-                                          $"z_dec: {z_dec}");
+                Assert.True(z == z_dec, $"{Environment.NewLine}{Environment.NewLine}" +
+                                        $"Algorithm parameters (TRUE):{Environment.NewLine}" +
+                                        $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
+                                        $"Algorithm parameters (FALSE):{Environment.NewLine}" +
+                                        $"{algorithm.ToXmlString(false)}{Environment.NewLine}{Environment.NewLine}" +
+                                        $"z: {z}{Environment.NewLine}{Environment.NewLine}" +
+                                        $"z_dec: {z_dec}");
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestSpecificCases()
         {
             {
@@ -105,7 +104,7 @@ namespace ElGamalTests
 
                 var z_dec = new BigInteger(z_dec_bytes);
 
-                Assert.AreEqual(z, z_dec);
+                Assert.Equal(z, z_dec);
             }
 
             {
@@ -129,7 +128,7 @@ namespace ElGamalTests
 
                 var z_dec = new BigInteger(z_dec_bytes);
 
-                Assert.AreEqual(z, z_dec);
+                Assert.Equal(z, z_dec);
             }
 
             {
@@ -154,7 +153,7 @@ namespace ElGamalTests
 
                 var ab_result = a * b;
 
-                Assert.AreEqual(ab_result, dec_c);
+                Assert.Equal(ab_result, dec_c);
             }
 
             {
@@ -168,7 +167,7 @@ namespace ElGamalTests
                 var a_bytes = algorithm.EncryptData(a.ToByteArray());
                 var dec_a = new BigInteger(algorithm.DecryptData(a_bytes));
 
-                Assert.AreEqual(a, dec_a);
+                Assert.Equal(a, dec_a);
             }
 
             {
@@ -182,11 +181,11 @@ namespace ElGamalTests
                 var a_bytes = algorithm.EncryptData(a.ToByteArray());
                 var dec_a = new BigInteger(algorithm.DecryptData(a_bytes));
 
-                Assert.AreEqual(a, dec_a);
+                Assert.Equal(a, dec_a);
             }
         }
 
-        //[TestMethod] TODO: Fix text encryption and re-enable the test (implement ANSIX923 or PKCS97 padding)
+        //[Fact] TODO: Fix text encryption and re-enable the test (implement ANSIX923 or PKCS97 padding)
         public void TestTextEncryption()
         {
             int keySize;
@@ -213,11 +212,11 @@ namespace ElGamalTests
 
                 var candidatePlaintext = decryptAlgorithm.DecryptData(ciphertext);
 
-                CollectionAssert.AreEqual(plaintext, candidatePlaintext, $"Failed at keysize: {keySize}");
+                Assert.True(plaintext.Equals(candidatePlaintext), $"Failed at keysize: {keySize}");
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestMultiplication_Batch()
         {
             var iterations = 3;
@@ -251,15 +250,15 @@ namespace ElGamalTests
 
                     var ab_result = a * b;
 
-                    Assert.AreEqual(dec_c, ab_result, $"{Environment.NewLine}{Environment.NewLine}" +
-                                                      $"Algorithm parameters (TRUE):{Environment.NewLine}" +
-                                                      $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
-                                                      $"Algorithm parameters (FALSE):{Environment.NewLine}" +
-                                                      $"{algorithm.ToXmlString(false)}{Environment.NewLine}{Environment.NewLine}" +
-                                                      $"a     : {a}{Environment.NewLine}{Environment.NewLine}" +
-                                                      $"b     : {b}{Environment.NewLine}{Environment.NewLine}" +
-                                                      $"a*b   : {ab_result}{Environment.NewLine}{Environment.NewLine}" +
-                                                      $"dec_c : {dec_c}");
+                    Assert.True(dec_c == ab_result, $"{Environment.NewLine}{Environment.NewLine}" +
+                                                    $"Algorithm parameters (TRUE):{Environment.NewLine}" +
+                                                    $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
+                                                    $"Algorithm parameters (FALSE):{Environment.NewLine}" +
+                                                    $"{algorithm.ToXmlString(false)}{Environment.NewLine}{Environment.NewLine}" +
+                                                    $"a     : {a}{Environment.NewLine}{Environment.NewLine}" +
+                                                    $"b     : {b}{Environment.NewLine}{Environment.NewLine}" +
+                                                    $"a*b   : {ab_result}{Environment.NewLine}{Environment.NewLine}" +
+                                                    $"dec_c : {dec_c}");
                 }
             }
         }

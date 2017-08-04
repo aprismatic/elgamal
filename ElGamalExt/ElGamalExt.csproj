@@ -1,77 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C905F97C-BD3A-434E-A155-B0DA78DC7EB9}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ElGamalExt</RootNamespace>
-    <AssemblyName>ElGamalExt</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>net40</TargetFramework>
+    <Description>Extension for the .NET Framework cryptography subsystem, which introduces the ElGamal public key cryptosystem with support for homomorphic multiplication.</Description>
+    <Company>Nanyang Technological Unviersity</Company>
+    <Product>ElGamalExt</Product>
+    <Authors>Vasily Sidorov (bazzilic)</Authors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Deploy EGExt|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="BigIntegerExt, Version=0.1.0.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\BigIntegerExt.0.1.0.3\lib\net40\BigIntegerExt.dll</HintPath>
-    </Reference>
-    <Reference Include="ElGamalExt.Homomorphism, Version=0.10.0.4, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ElGamalExt.Homomorphism.0.10.0.4\lib\net40\ElGamalExt.Homomorphism.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="ElGamal.cs" />
-    <Compile Include="ElGamalAbstractCipher.cs" />
-    <Compile Include="ElGamalDecryptor.cs" />
-    <Compile Include="ElGamalEncryptor.cs" />
-    <Compile Include="ElGamalKeyStruct.cs" />
-    <Compile Include="ElGamalManaged.cs" />
-    <Compile Include="ElGamalParameters.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ElGamalExt.nuspec" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>-->
   <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Deploy EGExt'">
     <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\.deploy\EGExt-deployLocalNuGet.ps1&quot;">
     </Exec>
   </Target>
+  <ItemGroup>
+    <PackageReference Include="BigIntegerExt" Version="0.1.0.3" />
+    <PackageReference Include="ElGamalExt.Homomorphism" Version="0.10.0.4" />
+  </ItemGroup>
 </Project>
