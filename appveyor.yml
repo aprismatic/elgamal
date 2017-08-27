@@ -27,4 +27,4 @@ environment:
     secure: GvygCCndEp8eiXvItooIyglWYnyfUvg4YNyaufw3N3A=
   AppVeyorGlobalAPIToken:
     secure: XaWtuymf7dtXgjvEdnxXZVuIGVwMYUqOcE3dl3f3JzA=
-version: "0.1.{build}"
+version: "0.10.0.{build}"
