@@ -41,7 +41,7 @@ namespace ElGamalExt
 
         public abstract byte[] Multiply(byte[] p_first, byte[] p_second);
 
-        public string ToXmlString(bool p_include_private)
+        public override string ToXmlString(bool p_include_private)
         {
             var x_params = ExportParameters(p_include_private);
 
@@ -65,7 +65,7 @@ namespace ElGamalExt
             return x_sb.ToString();
         }
 
-        public void FromXmlString(string p_string)
+        public override void FromXmlString(string p_string)
         {
             var x_params = new ElGamalParameters();
 
