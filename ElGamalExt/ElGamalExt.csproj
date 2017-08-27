@@ -1,21 +1,15 @@
-﻿<Project>
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net40</TargetFramework>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <PackageVersion>0.10.0.0</PackageVersion>
     <Description>Extension for the .NET Framework cryptography subsystem, which introduces the ElGamal public key cryptosystem with support for homomorphic multiplication.</Description>
     <Company>Nanyang Technological Unviersity</Company>
     <Product>ElGamalExt</Product>
     <Authors>Vasily Sidorov (bazzilic)</Authors>
   </PropertyGroup>
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Deploy EGExt|AnyCPU'">
-  </PropertyGroup>
-  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Deploy EGExt'">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\.deploy\EGExt-deployLocalNuGet.ps1&quot;">
-    </Exec>
-  </Target>
   <ItemGroup>
-    <PackageReference Include="BigIntegerExt" Version="0.1.0.3" />
-    <PackageReference Include="ElGamalExt.Homomorphism" Version="0.10.0.4" />
+    <PackageReference Include="BigIntegerExt" Version="0.1.3.1" />
+    <PackageReference Include="ElGamalExt-Homomorphism" Version="0.10.0.10" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 </Project>

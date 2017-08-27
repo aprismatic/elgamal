@@ -22,12 +22,12 @@ namespace ElGamalExt
 {
     public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
-        private RNGCryptoServiceProvider o_random;
+        private RandomNumberGenerator o_random;
 
         public ElGamalEncryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
-            o_random = new RNGCryptoServiceProvider();
+            o_random = RandomNumberGenerator.Create();
         }
 
         protected override byte[] ProcessDataBlock(byte[] p_block)
