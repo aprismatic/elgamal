@@ -45,13 +45,13 @@ namespace ElGamalExt
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
         }
 
-        public override string SignatureAlgorithm => "ElGamal";
+        public string SignatureAlgorithm => "ElGamal";
 
-        public override string KeyExchangeAlgorithm => "ElGamal";
+        public string KeyExchangeAlgorithm => "ElGamal";
 
         private void CreateKeyPair(int p_key_strength)
         {
-            using (var x_random_generator = new RNGCryptoServiceProvider())
+            using (var x_random_generator = RandomNumberGenerator.Create())
             {
                 // create the large prime number, P
                 o_key_struct.P = o_key_struct.P.GenPseudoPrime(p_key_strength, 16, x_random_generator);

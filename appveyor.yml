@@ -1,35 +1,57 @@
 ---
-assembly_info:
-  assembly_file_version: "{version}"
-  assembly_informational_version: "{version}"
-  assembly_version: "{version}"
-  file: "**\\AssemblyInfo.*"
+dotnet_csproj:
   patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
 branches:
   only:
     - master
-before_build:
-  - nuget restore
 build:
   publish_nuget: true
   publish_nuget_symbols: true
   verbosity: minimal
+before_build:
+  - nuget update -self
+  - nuget restore
+test_script:
+  - dotnet test .\ElGamalTests\ElGamalTests.csproj --no-build
 configuration: Release
+image: "Visual Studio 2017 Preview"
+nuget:
+  disable_publish_on_pr: true
+cache:
+  - packages
+deploy:
+  provider: NuGet
+  server: https://www.nuget.org/api/v2/package
+  api_key:
+    secure: U630adFlFmWqwvorvfwA+YvFtAkfL+vw1EX0vCXbyk+R6qiLkIeqKek9yK+poBjV
+  skip_symbols: false
+  on:
+    APPVEYOR_REPO_TAG_NAME: /^v\d+\.\d+\.\d+$/
+    APPVEYOR_REPO_BRANCH: 'master'
+    APPVEYOR_PULL_REQUEST_NUMBER: ''
 environment:
   AppVeyorAPIToken:
     secure: GvygCCndEp8eiXvItooIyglWYnyfUvg4YNyaufw3N3A=
   AppVeyorGlobalAPIToken:
     secure: XaWtuymf7dtXgjvEdnxXZVuIGVwMYUqOcE3dl3f3JzA=
-  NugetAPIToken:
-    secure: U630adFlFmWqwvorvfwA+YvFtAkfL+vw1EX0vCXbyk+R6qiLkIeqKek9yK+poBjV
-image: "Visual Studio 2017"
-nuget:
-  disable_publish_on_pr: true
 version: "0.10.0.{build}"
-# init:
-#   - ps: |
-#         Invoke-RestMethod -Uri 'https://ci.appveyor.com/api/projects/bazzilic/ElGamalExt/settings/build-number' `
-#                     -Headers @{ "Authorization" = "Bearer ${env:AppVeyorAPIToken}" ;  "Content-type" = "application/json" } `
-#                     -Method Put `
-#                     -Body '{ nextBuildNumber: 1 }'
-#         Update-AppVeyorBuild -Version '0.10.0.0'
+init:
+  - ps: |
+        if ( $env:APPVEYOR_REPO_TAG -And `
+            ($env:APPVEYOR_REPO_TAG_NAME -match '^v\d+\.\d+\.\d+$') -And `
+            ($env:APPVEYOR_REPO_BRANCH -eq 'master') -And `
+            ($env:APPVEYOR_PULL_REQUEST_NUMBER -eq $null) ) # new version release
+        {
+          Invoke-RestMethod -Uri 'https://ci.appveyor.com/project/bazzilic/elgamalext/settings/build-number' `
+                            -Headers @{ "Authorization" = "Bearer ${env:AppVeyorAPIToken}" ; "Content-type" = "application/json" } `
+                            -Method Put `
+                            -Body '{ nextBuildNumber: 1 }'
+          $env:APPVEYOR_REPO_TAG_NAME -match '^v(\d+)\.(\d+)\.(\d+)$'
+          [int]$major = $Matches[1]/1
+          [int]$minor = $Matches[2]/1
+          [int]$patch = $Matches[3]/1
+          Update-AppVeyorBuild -Version "$major.$minor.$patch.0"
+        }
