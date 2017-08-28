@@ -7,6 +7,7 @@ dotnet_csproj:
 branches:
   only:
     - master
+skip_tags: true
 build:
   publish_nuget: true
   publish_nuget_symbols: true
@@ -17,7 +18,7 @@ before_build:
 test_script:
   - dotnet test .\ElGamalTests\ElGamalTests.csproj --no-build
 configuration: Release
-image: "Visual Studio 2017 Preview"
+image: "Visual Studio 2017"
 nuget:
   disable_publish_on_pr: true
 cache:
@@ -29,7 +30,7 @@ deploy:
     secure: U630adFlFmWqwvorvfwA+YvFtAkfL+vw1EX0vCXbyk+R6qiLkIeqKek9yK+poBjV
   skip_symbols: false
   on:
-    APPVEYOR_REPO_TAG_NAME: /^v\d+\.\d+\.\d+$/
+    APPVEYOR_REPO_COMMIT_MESSAGE: /^v\d+\.\d+\.\d+$/
     APPVEYOR_REPO_BRANCH: 'master'
     APPVEYOR_PULL_REQUEST_NUMBER: ''
 environment:
@@ -40,8 +41,7 @@ environment:
 version: "0.10.0.{build}"
 init:
   - ps: |
-        if ( $env:APPVEYOR_REPO_TAG -And `
-            ($env:APPVEYOR_REPO_TAG_NAME -match '^v\d+\.\d+\.\d+$') -And `
+        if (($env:APPVEYOR_REPO_COMMIT_MESSAGE -match '^v\d+\.\d+\.\d+$') -And `
             ($env:APPVEYOR_REPO_BRANCH -eq 'master') -And `
             ($env:APPVEYOR_PULL_REQUEST_NUMBER -eq $null) ) # new version release
         {
