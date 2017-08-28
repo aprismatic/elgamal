@@ -45,9 +45,9 @@ namespace ElGamalExt
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
         }
 
-        public string SignatureAlgorithm => "ElGamal";
+        public override string SignatureAlgorithm => "ElGamal";
 
-        public string KeyExchangeAlgorithm => "ElGamal";
+        public override string KeyExchangeAlgorithm => "ElGamal";
 
         private void CreateKeyPair(int p_key_strength)
         {
