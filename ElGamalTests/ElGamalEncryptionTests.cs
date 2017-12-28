@@ -262,5 +262,31 @@ namespace ElGamalTests
                 }
             }
         }
+
+        [Fact(DisplayName = "From issue #15")]
+        public void Test_FromIssue_15() // based on https://github.com/bazzilic/PaillierExt/issues/15
+        {
+            for (var keySize = 384; keySize <= 1088; keySize += 8)
+            {
+                ElGamal algorithm = new ElGamalManaged
+                {
+                    KeySize = keySize,
+                    Padding = ElGamalPaddingMode.BigIntegerPadding
+                };
+
+                var prod = algorithm.EncryptData(new BigInteger(1).ToByteArray());
+                var three = algorithm.EncryptData(new BigInteger(3).ToByteArray());
+
+                for (var i = 0; i < 30; i++)
+                {
+                    prod = algorithm.Multiply(prod, three);
+                }
+
+                var sum_bytes = algorithm.DecryptData(prod);
+                var sum_dec = new BigInteger(sum_bytes);
+
+                Assert.Equal(new BigInteger(205891132094649), sum_dec);
+            }
+        }
     }
 }

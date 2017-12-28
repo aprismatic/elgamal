@@ -180,17 +180,6 @@ namespace ElGamalExt
 
         public override byte[] Multiply(byte[] p_first, byte[] p_second)
         {
-            var blocksize = o_key_struct.getCiphertextBlocksize();
-
-            if (p_first.Length != blocksize)
-            {
-                throw new ArgumentException("Ciphertext to multiply should be exactly one block long.", nameof(p_first));
-            }
-            if (p_second.Length != blocksize)
-            {
-                throw new ArgumentException("Ciphertext to multiply should be exactly one block long.", nameof(p_second));
-            }
-
             return Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.ToByteArray());
         }
     }
