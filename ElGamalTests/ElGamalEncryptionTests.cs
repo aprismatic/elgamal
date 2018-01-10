@@ -1,5 +1,5 @@
-﻿using ElGamalExt;
-using BigIntegerExt;
+﻿using BigIntegerExt;
+using ElGamalExt;
 using System;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -10,7 +10,7 @@ namespace ElGamalTests
 {
     public class ElGamalEncryptionTests
     {
-        [Fact]
+        [Fact(DisplayName = "Zero")]
         public void TestZero()
         {
             ElGamalPaddingMode[] paddingModes = { ElGamalPaddingMode.LeadingZeros, ElGamalPaddingMode.TrailingZeros };
@@ -44,7 +44,7 @@ namespace ElGamalTests
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "Random BigIntegers")]
         public void TestRandomBigInteger()
         {
             var rnd = new Random();
@@ -83,7 +83,7 @@ namespace ElGamalTests
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "Specific cases")]
         public void TestSpecificCases()
         {
             {
@@ -216,7 +216,7 @@ namespace ElGamalTests
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "Multiplication batch")]
         public void TestMultiplication_Batch()
         {
             var iterations = 3;
