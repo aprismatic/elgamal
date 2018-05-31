@@ -17,6 +17,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
+using System.Numerics;
 
 namespace ElGamalExt
 {
@@ -36,6 +37,8 @@ namespace ElGamalExt
         public abstract ElGamalParameters ExportParameters(bool p_include_private_params);
         public abstract byte[] EncryptData(byte[] p_data);
         public abstract byte[] DecryptData(byte[] p_data);
+        public abstract byte[] EncryptBigInteger(BigInteger p_data);
+        public abstract BigInteger DecryptBigInteger(byte[] p_data);
         public abstract byte[] Sign(byte[] p_hashcode);
         public abstract bool VerifySignature(byte[] p_hashcode, byte[] p_signature);
 

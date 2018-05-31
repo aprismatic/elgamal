@@ -163,6 +163,18 @@ namespace ElGamalExt
             return x_enc.ProcessData(p_data);
         }
 
+        public override byte[] EncryptBigInteger(BigInteger p_data)
+        {
+            var p_data_byte = p_data.ToByteArray();
+            return EncryptData(p_data_byte);
+        }
+
+        public override BigInteger DecryptBigInteger(byte[] p_data)
+        {
+            var decrypt_data = DecryptData(p_data);
+            return new BigInteger(decrypt_data);
+        }
+
         protected override void Dispose(bool p_bool)
         {
             // do nothing - no unmanaged resources to release

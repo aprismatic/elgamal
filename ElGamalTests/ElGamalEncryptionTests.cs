@@ -44,6 +44,38 @@ namespace ElGamalTests
             }
         }
 
+        [Fact(DisplayName = "Zero_1")]
+        public void TestZero_1()
+        {
+            ElGamalPaddingMode[] paddingModes = { ElGamalPaddingMode.LeadingZeros, ElGamalPaddingMode.TrailingZeros };
+
+            foreach (var paddingMode in paddingModes)
+            {
+                for (var keySize = 384; keySize <= 1088; keySize += 8)
+                {
+                    ElGamal algorithm = new ElGamalManaged
+                    {
+                        Padding = paddingMode,
+                        KeySize = keySize
+                    };
+
+                    ElGamal encryptAlgorithm = new ElGamalManaged();
+                    encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+
+                    ElGamal decryptAlgorithm = new ElGamalManaged();
+                    decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+
+                    var z = new BigInteger(0);
+
+                    var z_enc_bytes = encryptAlgorithm.EncryptBigInteger(z);
+
+                    var z_dec = decryptAlgorithm.DecryptBigInteger(z_enc_bytes);
+
+                    Assert.Equal(z, z_dec);
+                }
+            }
+        }
+
         [Fact(DisplayName = "Random BigIntegers")]
         public void TestRandomBigInteger()
         {
