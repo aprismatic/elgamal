@@ -35,8 +35,6 @@ namespace ElGamalExt
 
         public abstract void ImportParameters(ElGamalParameters p_parameters);
         public abstract ElGamalParameters ExportParameters(bool p_include_private_params);
-        public abstract byte[] EncryptData(byte[] p_data);
-        public abstract byte[] DecryptData(byte[] p_data);
         public abstract byte[] EncryptBigInteger(BigInteger p_data);
         public abstract BigInteger DecryptBigInteger(byte[] p_data);
         public abstract byte[] Sign(byte[] p_hashcode);

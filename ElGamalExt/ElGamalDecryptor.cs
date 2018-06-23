@@ -28,7 +28,7 @@ namespace ElGamalExt
             o_block_size = o_ciphertext_blocksize;
         }
 
-        protected override byte[] ProcessDataBlock(byte[] p_block)
+        protected byte[] ProcessBlockByte(byte[] p_block)
         {
             // extract the byte arrays that represent A and B
             var byteLength = o_ciphertext_blocksize / 2;
@@ -56,9 +56,9 @@ namespace ElGamalExt
             return x_m_bytes;
         }
 
-        protected override byte[] ProcessFinalDataBlock(byte[] p_final_block)
+        protected override BigInteger ProcessFinalByte(byte[] p_final_block)
         {
-            return p_final_block.Length > 0 ? UnpadPlaintextBlock(ProcessDataBlock(p_final_block)) : new byte[0];
+            return new BigInteger((ProcessBlockByte(p_final_block)));
         }
 
         protected byte[] UnpadPlaintextBlock(byte[] p_block)
@@ -124,6 +124,10 @@ namespace ElGamalExt
             }
 
             return x_res;
+        }
+        protected override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
+        {
+            throw new NotImplementedException();
         }
     }
 }

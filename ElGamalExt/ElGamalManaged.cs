@@ -138,7 +138,7 @@ namespace ElGamalExt
             return x_params;
         }
 
-        public override byte[] EncryptData(byte[] p_data)
+        public override byte[] EncryptBigInteger(BigInteger p_data)
         {
             if (NeedToGenerateKey())
             {
@@ -147,11 +147,11 @@ namespace ElGamalExt
 
             using (var x_enc = new ElGamalEncryptor(o_key_struct))
             {
-                return x_enc.ProcessData(p_data);
+                return x_enc.ProcessBigInteger(p_data);
             }
         }
 
-        public override byte[] DecryptData(byte[] p_data)
+        public override BigInteger DecryptBigInteger(byte[] p_data)
         {
             if (NeedToGenerateKey())
             {
@@ -160,19 +160,7 @@ namespace ElGamalExt
 
             var x_enc = new ElGamalDecryptor(o_key_struct);
 
-            return x_enc.ProcessData(p_data);
-        }
-
-        public override byte[] EncryptBigInteger(BigInteger p_data)
-        {
-            var p_data_byte = p_data.ToByteArray();
-            return EncryptData(p_data_byte);
-        }
-
-        public override BigInteger DecryptBigInteger(byte[] p_data)
-        {
-            var decrypt_data = DecryptData(p_data);
-            return new BigInteger(decrypt_data);
+            return x_enc.ProcessByte(p_data);
         }
 
         protected override void Dispose(bool p_bool)

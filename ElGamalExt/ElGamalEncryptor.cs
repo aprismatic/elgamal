@@ -30,7 +30,7 @@ namespace ElGamalExt
             o_random = RandomNumberGenerator.Create();
         }
 
-        protected override byte[] ProcessDataBlock(byte[] p_block)
+        protected byte[] ProcessBlockBigInteger(BigInteger p_block)
         {
             // set random K
             BigInteger K;
@@ -41,7 +41,7 @@ namespace ElGamalExt
             } while (BigInteger.GreatestCommonDivisor(K, o_key_struct.P - 1) != 1);
 
             var A = BigInteger.ModPow(o_key_struct.G, K, o_key_struct.P);
-            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * new BigInteger(p_block) % o_key_struct.P;
+            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * p_block % o_key_struct.P;
 
             var x_a_bytes = A.ToByteArray();
             var x_b_bytes = B.ToByteArray();
@@ -55,9 +55,9 @@ namespace ElGamalExt
             return x_result;
         }
 
-        protected override byte[] ProcessFinalDataBlock(byte[] p_final_block)
+        protected override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
         {
-            return p_final_block.Length > 0 ? ProcessDataBlock(PadPlaintextBlock(p_final_block)) : new byte[0];
+            return PadPlaintextBlock(ProcessBlockBigInteger(p_final_block));
         }
 
         protected byte[] PadPlaintextBlock(byte[] p_block)
@@ -101,6 +101,11 @@ namespace ElGamalExt
             }
 
             return p_block;
+        }
+        
+        protected override BigInteger ProcessFinalByte(byte[] p_final_block)
+        {
+            throw new NotImplementedException();
         }
 
         public void Dispose()
