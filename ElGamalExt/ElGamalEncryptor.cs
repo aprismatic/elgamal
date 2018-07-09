@@ -68,19 +68,7 @@ namespace ElGamalExt
 
                 switch (o_key_struct.Padding)
                 {
-                    // trailing zeros
-                    case ElGamalPaddingMode.TrailingZeros:
-                        Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
-                        break;
-
-                    case ElGamalPaddingMode.LeadingZeros:
-                        Array.Copy(p_block, 0, x_padded, o_block_size - p_block.Length, p_block.Length);
-                        break;
-
-                    case ElGamalPaddingMode.ANSIX923:
-                        throw new NotImplementedException();
-                        break;
-
+                    //Only left the BigIntegerPadding Mode
                     case ElGamalPaddingMode.BigIntegerPadding:
                         Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
                         if ((p_block[p_block.Length - 1] & 0b1000_0000) != 0)

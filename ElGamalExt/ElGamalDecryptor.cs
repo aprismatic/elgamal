@@ -58,7 +58,7 @@ namespace ElGamalExt
 
         protected override BigInteger ProcessFinalByte(byte[] p_final_block)
         {
-            return new BigInteger((ProcessBlockByte(p_final_block)));
+            return new BigInteger(UnpadPlaintextBlock(ProcessBlockByte(p_final_block)));
         }
 
         protected byte[] UnpadPlaintextBlock(byte[] p_block)
@@ -67,32 +67,7 @@ namespace ElGamalExt
 
             switch (o_key_struct.Padding)
             {
-                // removing all the leading zeros
-                case ElGamalPaddingMode.LeadingZeros:
-                    var i = 0;
-                    for (; i < p_block.Length; i++)
-                    {
-                        if (p_block[i] != 0)
-                            break;
-                    }
-                    x_res = p_block.Skip(i).ToArray();
-                    break;
-
-                // removing all the trailing zeros
-                case ElGamalPaddingMode.TrailingZeros:
-                    var j = p_block.Length - 1;
-                    for (; j >= 0; j--)
-                    {
-                        if (p_block[j] != 0)
-                            break;
-                    }
-                    x_res = p_block.Take(j + 1).ToArray();
-                    break;
-
-                case ElGamalPaddingMode.ANSIX923:
-                    throw new NotImplementedException();
-                    break;
-
+                //Only left the BigIntegerPadding Mode
                 case ElGamalPaddingMode.BigIntegerPadding:
                     var k = p_block.Length - 1;
                     if (p_block[k] == 0xFF)
