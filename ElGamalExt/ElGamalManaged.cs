@@ -39,7 +39,7 @@ namespace ElGamalExt
             KeySizeValue = 384;
 
             // set the default padding mode
-            Padding = ElGamalPaddingMode.BigIntegerPadding;
+            //Padding = ElGamalPaddingMode.BigIntegerPadding;
 
             // set the range of legal keys
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
@@ -65,7 +65,7 @@ namespace ElGamalExt
                 // compute Y
                 o_key_struct.Y = BigInteger.ModPow(o_key_struct.G, o_key_struct.X, o_key_struct.P);
 
-                o_key_struct.Padding = Padding;
+                //o_key_struct.Padding = Padding;
             }
         }
 
@@ -96,7 +96,7 @@ namespace ElGamalExt
             o_key_struct.P = new BigInteger(p_parameters.P);
             o_key_struct.G = new BigInteger(p_parameters.G);
             o_key_struct.Y = new BigInteger(p_parameters.Y);
-            o_key_struct.Padding = p_parameters.Padding;
+            //o_key_struct.Padding = p_parameters.Padding;
 
             if (p_parameters.X != null && p_parameters.X.Length > 0)
             {
@@ -105,7 +105,7 @@ namespace ElGamalExt
 
             // set the length of the key based on the import
             KeySizeValue = o_key_struct.P.BitCount();
-            Padding = o_key_struct.Padding;
+            //Padding = o_key_struct.Padding;
         }
 
         public override ElGamalParameters ExportParameters(bool p_include_private_params)
@@ -121,7 +121,7 @@ namespace ElGamalExt
                 P = o_key_struct.P.ToByteArray(),
                 G = o_key_struct.G.ToByteArray(),
                 Y = o_key_struct.Y.ToByteArray(),
-                Padding = o_key_struct.Padding
+                //Padding = o_key_struct.Padding
             };
 
             // if required, include the private value, X
@@ -147,7 +147,7 @@ namespace ElGamalExt
 
             using (var x_enc = new ElGamalEncryptor(o_key_struct))
             {
-                return x_enc.ProcessBigInteger(p_data);
+                return x_enc.ProcessFinalBigInteger(p_data);
             }
         }
 
@@ -160,7 +160,7 @@ namespace ElGamalExt
 
             var x_enc = new ElGamalDecryptor(o_key_struct);
 
-            return x_enc.ProcessByte(p_data);
+            return x_enc.ProcessFinalByte(p_data);
         }
 
         protected override void Dispose(bool p_bool)

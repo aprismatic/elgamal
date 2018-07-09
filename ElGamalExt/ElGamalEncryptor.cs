@@ -55,7 +55,7 @@ namespace ElGamalExt
             return x_result;
         }
 
-        protected override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
+        public override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
         {
             return PadPlaintextBlock(ProcessBlockBigInteger(p_final_block));
         }
@@ -65,33 +65,21 @@ namespace ElGamalExt
             if (p_block.Length < o_block_size)
             {
                 var x_padded = new byte[o_block_size];
-
-                switch (o_key_struct.Padding)
+                //Only left the BigIntegerPadding Mode
+                Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
+                if ((p_block[p_block.Length - 1] & 0b1000_0000) != 0)
                 {
-                    //Only left the BigIntegerPadding Mode
-                    case ElGamalPaddingMode.BigIntegerPadding:
-                        Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
-                        if ((p_block[p_block.Length - 1] & 0b1000_0000) != 0)
-                        {
-                            for (var i = p_block.Length; i < x_padded.Length; i++)
-                            {
-                                x_padded[i] = 0xFF;
-                            }
-                        }
-                        break;
-
-                    // unlikely to happen
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    for (var i = p_block.Length; i < x_padded.Length; i++)
+                    {
+                        x_padded[i] = 0xFF;
+                    }
                 }
-
                 return x_padded;
             }
-
             return p_block;
         }
         
-        protected override BigInteger ProcessFinalByte(byte[] p_final_block)
+        public override BigInteger ProcessFinalByte(byte[] p_final_block)
         {
             throw new NotImplementedException();
         }

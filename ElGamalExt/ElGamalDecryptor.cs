@@ -56,7 +56,7 @@ namespace ElGamalExt
             return x_m_bytes;
         }
 
-        protected override BigInteger ProcessFinalByte(byte[] p_final_block)
+        public override BigInteger ProcessFinalByte(byte[] p_final_block)
         {
             return new BigInteger(UnpadPlaintextBlock(ProcessBlockByte(p_final_block)));
         }
@@ -65,42 +65,33 @@ namespace ElGamalExt
         {
             var x_res = new byte[0];
 
-            switch (o_key_struct.Padding)
+            //Only left the BigIntegerPadding Mode
+            var k = p_block.Length - 1;
+            if (p_block[k] == 0xFF)
             {
-                //Only left the BigIntegerPadding Mode
-                case ElGamalPaddingMode.BigIntegerPadding:
-                    var k = p_block.Length - 1;
-                    if (p_block[k] == 0xFF)
-                    {
-                        for (; k >= 0; k--)
-                        {
-                            if (p_block[k] == 0xFF) continue;
-                            if ((p_block[k] & 0b1000_0000) == 0)
-                                k++;
-                            break;
-                        }
-                    }
-                    else if (p_block[k] == 0)
-                    {
-                        for (; k >= 0; k--)
-                        {
-                            if (p_block[k] == 0) continue;
-                            if ((p_block[k] & 0b1000_0000) != 0)
-                                k++;
-                            break;
-                        }
-                    }
-                    x_res = p_block.Take(k + 1).ToArray(); // TODO: Consider rewriting without LINQ
+                for (; k >= 0; k--)
+                {
+                    if (p_block[k] == 0xFF) continue;
+                    if ((p_block[k] & 0b1000_0000) == 0)
+                        k++;
                     break;
-
-                // unlikely to happen
-                default:
-                    throw new ArgumentOutOfRangeException();
+                }
             }
+            else if (p_block[k] == 0)
+            {
+                for (; k >= 0; k--)
+                {
+                    if (p_block[k] == 0) continue;
+                    if ((p_block[k] & 0b1000_0000) != 0)
+                        k++;
+                    break;
+                }
+            }
+            x_res = p_block.Take(k + 1).ToArray(); // TODO: Consider rewriting without LINQ
 
             return x_res;
         }
-        protected override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
+        public override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
         {
             throw new NotImplementedException();
         }

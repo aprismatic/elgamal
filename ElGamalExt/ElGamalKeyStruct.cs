@@ -24,7 +24,7 @@ namespace ElGamalExt
         public BigInteger G;
         public BigInteger Y;
         public BigInteger X;
-        public ElGamalPaddingMode Padding; // this parameter should be considered part of the public key
+        //public ElGamalPaddingMode Padding; // this parameter should be considered part of the public key
 
         public int getPlaintextBlocksize()
         {

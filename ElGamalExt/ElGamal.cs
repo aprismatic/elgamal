@@ -21,17 +21,17 @@ using System.Numerics;
 
 namespace ElGamalExt
 {
-    public enum ElGamalPaddingMode : byte
+    /*public enum ElGamalPaddingMode : byte
     {
         ANSIX923,
         LeadingZeros,
         TrailingZeros,
         BigIntegerPadding
-    }
+    }*/
 
     public abstract class ElGamal : AsymmetricAlgorithm
     {
-        public ElGamalPaddingMode Padding;
+        //public ElGamalPaddingMode Padding;
 
         public abstract void ImportParameters(ElGamalParameters p_parameters);
         public abstract ElGamalParameters ExportParameters(bool p_include_private_params);
@@ -53,7 +53,7 @@ namespace ElGamalExt
             x_sb.Append("<P>" + Convert.ToBase64String(x_params.P) + "</P>");
             x_sb.Append("<G>" + Convert.ToBase64String(x_params.G) + "</G>");
             x_sb.Append("<Y>" + Convert.ToBase64String(x_params.Y) + "</Y>");
-            x_sb.Append("<Padding>" + x_params.Padding.ToString() + "</Padding>");
+            //x_sb.Append("<Padding>" + x_params.Padding.ToString() + "</Padding>");
 
             if (p_include_private)
             {
@@ -75,7 +75,7 @@ namespace ElGamalExt
             x_params.P = Convert.FromBase64String((String)keyValues.Element("P") ?? "");
             x_params.G = Convert.FromBase64String((String)keyValues.Element("G") ?? "");
             x_params.Y = Convert.FromBase64String((String)keyValues.Element("Y") ?? "");
-            x_params.Padding = (ElGamalPaddingMode)Enum.Parse(typeof(ElGamalPaddingMode), (String)keyValues.Element("Padding") ?? "");
+            //x_params.Padding = (ElGamalPaddingMode)Enum.Parse(typeof(ElGamalPaddingMode), (String)keyValues.Element("Padding") ?? "");
             x_params.X = Convert.FromBase64String((String)keyValues.Element("X") ?? "");
 
             ImportParameters(x_params);

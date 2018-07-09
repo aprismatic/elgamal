@@ -21,7 +21,7 @@ namespace ElGamalTests
             {
                 ElGamal algorithm = new ElGamalManaged
                 {
-                    Padding = ElGamalPaddingMode.BigIntegerPadding,
+                    //Padding = ElGamalPaddingMode.BigIntegerPadding,
                     KeySize = keySize
                 };
 
@@ -55,7 +55,7 @@ namespace ElGamalTests
                 ElGamal algorithm = new ElGamalManaged
                 {
                     KeySize = 384,
-                    Padding = ElGamalPaddingMode.BigIntegerPadding
+                    //Padding = ElGamalPaddingMode.BigIntegerPadding
                 };
 
                 var a = new BigInteger(2048);
@@ -69,7 +69,7 @@ namespace ElGamalTests
                 ElGamal algorithm = new ElGamalManaged
                 {
                     KeySize = 384,
-                    Padding = ElGamalPaddingMode.BigIntegerPadding
+                    //Padding = ElGamalPaddingMode.BigIntegerPadding
                 };
 
                 var a = new BigInteger(138);
@@ -94,7 +94,7 @@ namespace ElGamalTests
                     ElGamal algorithm = new ElGamalManaged
                     {
                         KeySize = keySize,
-                        Padding = ElGamalPaddingMode.BigIntegerPadding
+                        //Padding = ElGamalPaddingMode.BigIntegerPadding
                     };
 
                     ElGamal encryptAlgorithm = new ElGamalManaged();
@@ -136,7 +136,7 @@ namespace ElGamalTests
                 ElGamal algorithm = new ElGamalManaged
                 {
                     KeySize = keySize,
-                    Padding = ElGamalPaddingMode.BigIntegerPadding
+                    //Padding = ElGamalPaddingMode.BigIntegerPadding
                 };
 
                 var prod = algorithm.EncryptBigInteger(new BigInteger(1));
