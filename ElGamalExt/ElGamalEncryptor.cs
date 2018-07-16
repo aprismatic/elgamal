@@ -30,7 +30,7 @@ namespace ElGamalExt
             o_random = RandomNumberGenerator.Create();
         }
 
-        protected byte[] ProcessBlockBigInteger(BigInteger p_block)
+        public override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
         {
             // set random K
             BigInteger K;
@@ -41,7 +41,7 @@ namespace ElGamalExt
             } while (BigInteger.GreatestCommonDivisor(K, o_key_struct.P - 1) != 1);
 
             var A = BigInteger.ModPow(o_key_struct.G, K, o_key_struct.P);
-            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * p_block % o_key_struct.P;
+            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * p_final_block % o_key_struct.P;
 
             var x_a_bytes = A.ToByteArray();
             var x_b_bytes = B.ToByteArray();
@@ -53,30 +53,6 @@ namespace ElGamalExt
             Array.Copy(x_b_bytes, 0, x_result, x_result.Length / 2, x_b_bytes.Length);
 
             return x_result;
-        }
-
-        public override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
-        {
-            return PadPlaintextBlock(ProcessBlockBigInteger(p_final_block));
-        }
-
-        protected byte[] PadPlaintextBlock(byte[] p_block)
-        {
-            if (p_block.Length < o_block_size)
-            {
-                var x_padded = new byte[o_block_size];
-                //Only left the BigIntegerPadding Mode
-                Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
-                if ((p_block[p_block.Length - 1] & 0b1000_0000) != 0)
-                {
-                    for (var i = p_block.Length; i < x_padded.Length; i++)
-                    {
-                        x_padded[i] = 0xFF;
-                    }
-                }
-                return x_padded;
-            }
-            return p_block;
         }
         
         public override BigInteger ProcessFinalByte(byte[] p_final_block)
