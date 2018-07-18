@@ -18,16 +18,16 @@ using System.Security.Cryptography;
 using System.Numerics;
 using BigIntegerExt;
 
-namespace ElGamalExt
+namespace ElGamalExtModified
 {
-    public class ElGamalManaged : ElGamal
+    public class ElGamalModifiedManaged : ElGamalModified
     {
-        private ElGamalKeyStruct o_key_struct;
+        private ElGamalModifiedKeyStruct o_key_struct;
 
-        public ElGamalManaged()
+        public ElGamalModifiedManaged()
         {
             // create the key struct and set all of the big integers to zero
-            o_key_struct = new ElGamalKeyStruct
+            o_key_struct = new ElGamalModifiedKeyStruct
             {
                 P = BigInteger.Zero,
                 G = BigInteger.Zero,
@@ -74,7 +74,7 @@ namespace ElGamalExt
             return (o_key_struct.P == 0) && (o_key_struct.G == 0) && (o_key_struct.Y == 0);
         }
 
-        public ElGamalKeyStruct KeyStruct
+        public ElGamalModifiedKeyStruct KeyStruct
         {
             get
             {
@@ -90,7 +90,7 @@ namespace ElGamalExt
             }
         }
 
-        public override void ImportParameters(ElGamalParameters p_parameters)
+        public override void ImportParameters(ElGamalModifiedParameters p_parameters)
         {
             // obtain the  big integer values from the byte parameter values
             o_key_struct.P = new BigInteger(p_parameters.P);
@@ -108,7 +108,7 @@ namespace ElGamalExt
             //Padding = o_key_struct.Padding;
         }
 
-        public override ElGamalParameters ExportParameters(bool p_include_private_params)
+        public override ElGamalModifiedParameters ExportParameters(bool p_include_private_params)
         {
             if (NeedToGenerateKey())
             {
@@ -116,7 +116,7 @@ namespace ElGamalExt
             }
 
             // create the parameter set and set the public values of the parameters
-            var x_params = new ElGamalParameters
+            var x_params = new ElGamalModifiedParameters
             {
                 P = o_key_struct.P.ToByteArray(),
                 G = o_key_struct.G.ToByteArray(),
@@ -138,27 +138,27 @@ namespace ElGamalExt
             return x_params;
         }
 
-        public override byte[] EncryptBigInteger(BigInteger p_data)
+        public override byte[] EncryptData(BigInteger p_data)
         {
             if (NeedToGenerateKey())
             {
                 CreateKeyPair(KeySizeValue);
             }
 
-            using (var x_enc = new ElGamalEncryptor(o_key_struct))
+            using (var x_enc = new ElGamalModifiedEncryptor(o_key_struct))
             {
                 return x_enc.ProcessFinalBigInteger(p_data);
             }
         }
 
-        public override BigInteger DecryptBigInteger(byte[] p_data)
+        public override BigInteger DecryptData(byte[] p_data)
         {
             if (NeedToGenerateKey())
             {
                 CreateKeyPair(KeySizeValue);
             }
 
-            var x_enc = new ElGamalDecryptor(o_key_struct);
+            var x_enc = new ElGamalModifiedDecryptor(o_key_struct);
 
             return x_enc.ProcessFinalByte(p_data);
         }
@@ -180,7 +180,7 @@ namespace ElGamalExt
 
         public override byte[] Multiply(byte[] p_first, byte[] p_second)
         {
-            return Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.ToByteArray());
+            return ElGamalExt.Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.ToByteArray());
         }
     }
 }

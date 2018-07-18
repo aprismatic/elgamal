@@ -16,9 +16,9 @@
 using System.Numerics;
 using BigIntegerExt;
 
-namespace ElGamalExt
+namespace ElGamalExtModified
 {
-    public struct ElGamalKeyStruct
+    public struct ElGamalModifiedKeyStruct
     {
         public BigInteger P;
         public BigInteger G;

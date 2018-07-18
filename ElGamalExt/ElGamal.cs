@@ -19,7 +19,7 @@ using System.Text;
 using System.Xml.Linq;
 using System.Numerics;
 
-namespace ElGamalExt
+namespace ElGamalExtModified
 {
     /*public enum ElGamalPaddingMode : byte
     {
@@ -29,14 +29,14 @@ namespace ElGamalExt
         BigIntegerPadding
     }*/
 
-    public abstract class ElGamal : AsymmetricAlgorithm
+    public abstract class ElGamalModified : AsymmetricAlgorithm
     {
         //public ElGamalPaddingMode Padding;
 
-        public abstract void ImportParameters(ElGamalParameters p_parameters);
-        public abstract ElGamalParameters ExportParameters(bool p_include_private_params);
-        public abstract byte[] EncryptBigInteger(BigInteger p_data);
-        public abstract BigInteger DecryptBigInteger(byte[] p_data);
+        public abstract void ImportParameters(ElGamalModifiedParameters p_parameters);
+        public abstract ElGamalModifiedParameters ExportParameters(bool p_include_private_params);
+        public abstract byte[] EncryptData(BigInteger p_data);
+        public abstract BigInteger DecryptData(byte[] p_data);
         public abstract byte[] Sign(byte[] p_hashcode);
         public abstract bool VerifySignature(byte[] p_hashcode, byte[] p_signature);
 
@@ -68,7 +68,7 @@ namespace ElGamalExt
 
         public override void FromXmlString(string p_string)
         {
-            var x_params = new ElGamalParameters();
+            var x_params = new ElGamalModifiedParameters();
 
             var keyValues = XDocument.Parse(p_string).Element("ElGamalKeyValue");
 

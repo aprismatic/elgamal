@@ -18,11 +18,11 @@ using System.Linq;
 using System.Numerics;
 using BigIntegerExt;
 
-namespace ElGamalExt
+namespace ElGamalExtModified
 {
-    public class ElGamalDecryptor : ElGamalAbstractCipher
+    public class ElGamalModifiedDecryptor : ElGamalModifiedAbstractCipher
     {
-        public ElGamalDecryptor(ElGamalKeyStruct p_struct)
+        public ElGamalModifiedDecryptor(ElGamalModifiedKeyStruct p_struct)
             : base(p_struct)
         {
             o_block_size = o_ciphertext_blocksize;

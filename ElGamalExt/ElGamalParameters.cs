@@ -15,10 +15,10 @@
 
 using System;
 
-namespace ElGamalExt
+namespace ElGamalExtModified
 {
     [Serializable]
-    public struct ElGamalParameters
+    public struct ElGamalModifiedParameters
     {
         public byte[] P;
         public byte[] G;

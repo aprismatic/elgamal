@@ -17,16 +17,16 @@ using System;
 using System.IO;
 using System.Numerics;
 
-namespace ElGamalExt
+namespace ElGamalExtModified
 {
-    public abstract class ElGamalAbstractCipher
+    public abstract class ElGamalModifiedAbstractCipher
     {
         protected int o_block_size;
         protected int o_plaintext_blocksize;
         protected int o_ciphertext_blocksize;
-        protected ElGamalKeyStruct o_key_struct;
+        protected ElGamalModifiedKeyStruct o_key_struct;
 
-        public ElGamalAbstractCipher(ElGamalKeyStruct p_key_struct)
+        public ElGamalModifiedAbstractCipher(ElGamalModifiedKeyStruct p_key_struct)
         {
             o_key_struct = p_key_struct;
 
