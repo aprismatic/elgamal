@@ -18,13 +18,13 @@ using System.Numerics;
 using System.Security.Cryptography;
 using BigIntegerExt;
 
-namespace ElGamalExtModified
+namespace ElGamalExt
 {
-    public class ElGamalModifiedEncryptor : ElGamalModifiedAbstractCipher, IDisposable
+    public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
         private RandomNumberGenerator o_random;
 
-        public ElGamalModifiedEncryptor(ElGamalModifiedKeyStruct p_struct)
+        public ElGamalEncryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
             o_random = RandomNumberGenerator.Create();

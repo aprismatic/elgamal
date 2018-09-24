@@ -1,5 +1,5 @@
 ﻿using BigIntegerExt;
-using ElGamalExtModified;
+using ElGamalExt;
 using System;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -19,24 +19,24 @@ namespace ElGamalTests
 
             for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
-                ElGamalModified algorithm = new ElGamalModifiedManaged
+                ElGamal algorithm = new ElGamalManaged
                 {
                     //Padding = ElGamalPaddingMode.BigIntegerPadding,
                     KeySize = keySize
                 };
 
-                ElGamalModified encryptAlgorithm = new ElGamalModifiedManaged();
+                ElGamal encryptAlgorithm = new ElGamalManaged();
                 encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
 
-                ElGamalModified decryptAlgorithm = new ElGamalModifiedManaged();
+                ElGamal decryptAlgorithm = new ElGamalManaged();
                 decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
 
                 var z = new BigInteger(); // Plaintext that is bigger than one block needs different padding,
                                           // and the encryption loses homomorphic properties
-                z = z.GenRandomBits(rnd.Next(1, ((ElGamalModifiedManaged) algorithm).KeyStruct.getPlaintextBlocksize()), rng);
+                z = z.GenRandomBits(rnd.Next(1, ((ElGamalManaged) algorithm).KeyStruct.getPlaintextBlocksize()), rng);
 
-                var z_enc_bytes = encryptAlgorithm.EncryptData(z);
-                var z_dec_bytes = decryptAlgorithm.DecryptData(z_enc_bytes);
+                var z_enc_bytes = encryptAlgorithm.EncryptBigInteger(z);
+                var z_dec_bytes = decryptAlgorithm.DecryptBigInteger(z_enc_bytes);
 
                 Assert.True(z == z_dec_bytes, $"{Environment.NewLine}{Environment.NewLine}" +
                                         $"Algorithm parameters (TRUE):{Environment.NewLine}" +
@@ -52,29 +52,29 @@ namespace ElGamalTests
         public void TestSpecificCases()
         {
             {
-                ElGamalModified algorithm = new ElGamalModifiedManaged
+                ElGamal algorithm = new ElGamalManaged
                 {
                     KeySize = 384,
                     //Padding = ElGamalPaddingMode.BigIntegerPadding
                 };
 
                 var a = new BigInteger(2048);
-                var a_bytes = algorithm.EncryptData(a);
-                var dec_a = algorithm.DecryptData(a_bytes);
+                var a_bytes = algorithm.EncryptBigInteger(a);
+                var dec_a = algorithm.DecryptBigInteger(a_bytes);
 
                 Assert.Equal(a, dec_a);
             }
 
             {
-                ElGamalModified algorithm = new ElGamalModifiedManaged
+                ElGamal algorithm = new ElGamalManaged
                 {
                     KeySize = 384,
                     //Padding = ElGamalPaddingMode.BigIntegerPadding
                 };
 
                 var a = new BigInteger(138);
-                var a_bytes = algorithm.EncryptData(a);
-                var dec_a = algorithm.DecryptData(a_bytes);
+                var a_bytes = algorithm.EncryptBigInteger(a);
+                var dec_a = algorithm.DecryptBigInteger(a_bytes);
 
                 Assert.Equal(a, dec_a);
             }
@@ -91,27 +91,27 @@ namespace ElGamalTests
             {
                 for (var i = 0; i < iterations; i++)
                 {
-                    ElGamalModified algorithm = new ElGamalModifiedManaged
+                    ElGamal algorithm = new ElGamalManaged
                     {
                         KeySize = keySize,
                         //Padding = ElGamalPaddingMode.BigIntegerPadding
                     };
 
-                    ElGamalModified encryptAlgorithm = new ElGamalModifiedManaged();
+                    ElGamal encryptAlgorithm = new ElGamalManaged();
                     encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
 
-                    ElGamalModified decryptAlgorithm = new ElGamalModifiedManaged();
+                    ElGamal decryptAlgorithm = new ElGamalManaged();
                     decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
 
                     var a = new BigInteger(rnd.Next());
                     var b = new BigInteger(rnd.Next());
 
-                    var a_bytes = encryptAlgorithm.EncryptData(a);
-                    var b_bytes = encryptAlgorithm.EncryptData(b);
+                    var a_bytes = encryptAlgorithm.EncryptBigInteger(a);
+                    var b_bytes = encryptAlgorithm.EncryptBigInteger(b);
 
                     var c_bytes = encryptAlgorithm.Multiply(a_bytes, b_bytes);
 
-                    var dec_c = decryptAlgorithm.DecryptData(c_bytes);
+                    var dec_c = decryptAlgorithm.DecryptBigInteger(c_bytes);
 
                     var ab_result = a * b;
 
@@ -133,21 +133,21 @@ namespace ElGamalTests
         {
             for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
-                ElGamalModified algorithm = new ElGamalModifiedManaged
+                ElGamal algorithm = new ElGamalManaged
                 {
                     KeySize = keySize,
                     //Padding = ElGamalPaddingMode.BigIntegerPadding
                 };
 
-                var prod = algorithm.EncryptData(new BigInteger(1));
-                var three = algorithm.EncryptData(new BigInteger(3));
+                var prod = algorithm.EncryptBigInteger(new BigInteger(1));
+                var three = algorithm.EncryptBigInteger(new BigInteger(3));
 
                 for (var i = 0; i < 30; i++)
                 {
                     prod = algorithm.Multiply(prod, three);
                 }
 
-                var sum_dec = algorithm.DecryptData(prod);
+                var sum_dec = algorithm.DecryptBigInteger(prod);
 
                 Assert.Equal(new BigInteger(205891132094649), sum_dec);
             }

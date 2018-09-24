@@ -8,6 +8,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ElGamalExt\ElGamalExtModified.csproj" />
+    <ProjectReference Include="..\ElGamalExt\ElGamalExt.csproj" />
   </ItemGroup>
 </Project>
