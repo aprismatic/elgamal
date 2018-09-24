@@ -28,15 +28,15 @@ namespace ElGamalExt
             o_block_size = o_ciphertext_blocksize;
         }
 
-        public override BigInteger ProcessFinalByte(byte[] p_final_block)
+        public BigInteger ProcessByteBlock(byte[] p__block)
         {
 
             // extract the byte arrays that represent A and B
             var byteLength = o_ciphertext_blocksize / 2;
             var x_a_bytes = new byte[byteLength];
-            Array.Copy(p_final_block, 0, x_a_bytes, 0, x_a_bytes.Length);
+            Array.Copy(p__block, 0, x_a_bytes, 0, x_a_bytes.Length);
             var x_b_bytes = new byte[byteLength];
-            Array.Copy(p_final_block, p_final_block.Length - x_b_bytes.Length, x_b_bytes, 0, x_b_bytes.Length);
+            Array.Copy(p__block, p__block.Length - x_b_bytes.Length, x_b_bytes, 0, x_b_bytes.Length);
 
             var A = new BigInteger(x_a_bytes);
             var B = new BigInteger(x_b_bytes);
@@ -47,11 +47,6 @@ namespace ElGamalExt
 
             // we may end up with results which are short some trailing zeros
             return M;
-        }
-
-        public override byte[] ProcessFinalBigInteger(BigInteger p_final_block)
-        {
-            throw new NotImplementedException();
         }
     }
 }

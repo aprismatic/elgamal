@@ -35,8 +35,5 @@ namespace ElGamalExt
 
             o_block_size = o_plaintext_blocksize;
         }
-
-        public abstract byte[] ProcessFinalBigInteger(BigInteger p_final_block);
-        public abstract BigInteger ProcessFinalByte(byte[] p_final_block);
     }
 }
