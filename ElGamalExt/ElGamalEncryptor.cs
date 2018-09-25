@@ -23,7 +23,8 @@ namespace ElGamalExt
     public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
         private RandomNumberGenerator o_random;
-
+		private static readonly BigInteger max = new BigInteger(UInt64.MaxValue);
+		
         public ElGamalEncryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
@@ -41,7 +42,7 @@ namespace ElGamalExt
             } while (BigInteger.GreatestCommonDivisor(K, o_key_struct.P - 1) != 1);
 
             var A = BigInteger.ModPow(o_key_struct.G, K, o_key_struct.P);
-            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * message % o_key_struct.P;
+            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * Encode(message) % o_key_struct.P;
 
             var x_a_bytes = A.ToByteArray();
             var x_b_bytes = B.ToByteArray();
@@ -54,6 +55,13 @@ namespace ElGamalExt
 
             return x_result;
         }
+
+		private BigInteger Encode(BigInteger origin)
+		{
+			if (origin < 0)
+				return max + origin + 1;
+			return origin;
+		}
 
         public void Dispose()
         {

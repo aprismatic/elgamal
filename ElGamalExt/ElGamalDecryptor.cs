@@ -21,8 +21,10 @@ using BigIntegerExt;
 namespace ElGamalExt
 {
     public class ElGamalDecryptor : ElGamalAbstractCipher
-    {
-        public ElGamalDecryptor(ElGamalKeyStruct p_struct)
+	{
+		private static readonly BigInteger max = new BigInteger(UInt64.MaxValue);
+
+		public ElGamalDecryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
             o_block_size = o_ciphertext_blocksize;
@@ -46,7 +48,15 @@ namespace ElGamalExt
             var M = B * A % o_key_struct.P;
 
             // we may end up with results which are short some trailing zeros
-            return M;
+            return Decode(M);
         }
+
+		private BigInteger Decode(BigInteger origin)
+		{
+			origin = origin % (max + 1);
+			if (origin > max / 2)
+				return origin - max - 1;
+			return origin;
+		}
     }
 }

@@ -56,10 +56,9 @@ namespace ElGamalTests
                     KeySize = 384
                 };
 
-                var a = new BigInteger(2048);
+                var a = new BigInteger(-325451);
                 var a_bytes = algorithm.EncryptData(a);
                 var dec_a = algorithm.DecryptData(a_bytes);
-
                 Assert.Equal(a, dec_a);
             }
 
