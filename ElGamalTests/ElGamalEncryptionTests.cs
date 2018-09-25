@@ -56,7 +56,7 @@ namespace ElGamalTests
                     KeySize = 384
                 };
 
-                var a = new BigInteger(-1);
+                var a = new BigInteger(2048);
                 var a_bytes = algorithm.EncryptData(a);
                 var dec_a = algorithm.DecryptData(a_bytes);
                 Assert.Equal(a, dec_a);
@@ -75,7 +75,6 @@ namespace ElGamalTests
                 Assert.Equal(a, dec_a);
             }
         }
-
 
         [Fact(DisplayName = "Multiplication batch")]
         public void TestMultiplication_Batch()
@@ -144,6 +143,35 @@ namespace ElGamalTests
                 var sum_dec = algorithm.DecryptData(prod);
 
                 Assert.Equal(new BigInteger(205891132094649), sum_dec);
+            }
+        }
+
+        [Fact(DisplayName = "Negative cases")]
+        public void TestNegativeCases()
+        {
+            {
+                ElGamal algorithm = new ElGamal
+				{
+                    KeySize = 384
+                };
+
+                var a = new BigInteger(-2048);
+                var a_bytes = algorithm.EncryptData(a);
+                var dec_a = algorithm.DecryptData(a_bytes);
+                Assert.Equal(a, dec_a);
+            }
+
+            {
+                ElGamal algorithm = new ElGamal
+				{
+                    KeySize = 384
+                };
+
+                var a = new BigInteger(-138);
+                var a_bytes = algorithm.EncryptData(a);
+                var dec_a = algorithm.DecryptData(a_bytes);
+
+                Assert.Equal(a, dec_a);
             }
         }
     }
