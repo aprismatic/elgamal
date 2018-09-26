@@ -159,20 +159,18 @@ namespace ElGamalTests
                 var a_bytes = algorithm.EncryptData(a);
                 var dec_a = algorithm.DecryptData(a_bytes);
                 Assert.Equal(a, dec_a);
-            }
 
-            {
-                ElGamal algorithm = new ElGamal
-				{
-                    KeySize = 384
-                };
+				var a_2 = new BigInteger(138);
+				var a_bytes_2 = algorithm.EncryptData(a_2);
+				var dec_a_2 = algorithm.DecryptData(a_bytes_2);
 
-                var a = new BigInteger(-138);
-                var a_bytes = algorithm.EncryptData(a);
-                var dec_a = algorithm.DecryptData(a_bytes);
+				Assert.Equal(a_2, dec_a_2);
 
-                Assert.Equal(a, dec_a);
-            }
+				var bytes_mul = algorithm.Multiply(a_bytes, a_bytes_2);
+				var dec_mul = algorithm.DecryptData(bytes_mul);
+
+				Assert.Equal(a * a_2, dec_mul);
+			}
         }
     }
 }

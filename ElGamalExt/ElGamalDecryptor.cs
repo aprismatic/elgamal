@@ -53,8 +53,6 @@ namespace ElGamalExt
 
 		private BigInteger Decode(BigInteger origin)
 		{
-			if (origin / 2 - 2 > max)
-				return origin;
 			origin = origin % (max + 1);
 			if (origin > max / 2)
 				return origin - max - 1;
