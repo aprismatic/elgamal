@@ -19,6 +19,7 @@ using System.Text;
 using System.Xml.Linq;
 using System.Numerics;
 using BigIntegerExt;
+using Numerics;
 
 namespace ElGamalExt
 {

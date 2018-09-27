@@ -2,16 +2,26 @@
 using ElGamalExt;
 using System;
 using System.Numerics;
+using Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace ElGamalTests
 {
     public class ElGamalEncryptionTests
     {
-       
-        [Fact(DisplayName = "Random BigIntegers")]
+		private static readonly double exp = 1e8;
+
+		private readonly ITestOutputHelper output;
+
+		public ElGamalEncryptionTests(ITestOutputHelper output)
+		{
+			this.output = output;
+		}
+
+		[Fact(DisplayName = "Random BigIntegers")]
         public void TestRandomBigInteger()
         {
             var rnd = new Random();
@@ -51,10 +61,10 @@ namespace ElGamalTests
         public void TestSpecificCases()
         {
             {
-                ElGamal algorithm = new ElGamal
+				ElGamal algorithm = new ElGamal
 				{
-                    KeySize = 384
-                };
+					KeySize = 384
+				};
 
                 var a = new BigInteger(2048);
                 var a_bytes = algorithm.EncryptData(a);
@@ -172,5 +182,44 @@ namespace ElGamalTests
 				Assert.Equal(a * a_2, dec_mul);
 			}
         }
-    }
+
+		[Fact(DisplayName = "Floating cases")]
+		public void TestFloatingCases()
+		{
+			{
+				ElGamal algorithm = new ElGamal
+				{
+					KeySize = 384
+				};
+
+				double a_row = 2.5;
+				double a_encode = a_row * exp;
+				var a = new BigInteger(a_encode);
+				var a_byte = algorithm.EncryptData(a);
+				var a_dec = algorithm.DecryptData(a_byte);
+				object a_obj = a_dec;
+				BigInteger a_unbox = (BigInteger)a_obj;
+				double a_decode = (double)a_unbox / exp;
+				Assert.Equal(a_row, a_decode);
+
+				double b_row = -20;
+				double b_encode = b_row * exp;
+				var b = new BigInteger(b_encode);
+				var b_byte = algorithm.EncryptData(b);
+				var b_dec = algorithm.DecryptData(b_byte);
+				object b_obj = b_dec;
+				BigInteger b_unbox = (BigInteger)b_obj;
+				double b_decode = (double)b_unbox / exp;
+				Assert.Equal(b_row, b_decode);
+
+				double mul_row = a_row * b_row;
+				var mul_byte = algorithm.Multiply(a_byte, b_byte);
+				var mul_dec = algorithm.DecryptData(mul_byte);
+				object mul_obj = mul_dec;
+				BigInteger mul_unbox = (BigInteger)mul_obj;
+				double mul_decode = (double)mul_unbox / (exp * exp);
+				Assert.Equal(mul_row, mul_decode);
+			}
+		}
+	}
 }
