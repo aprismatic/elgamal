@@ -23,9 +23,9 @@ namespace ElGamalExt
     public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
         private RandomNumberGenerator o_random;
-		private static readonly BigInteger max = new BigInteger(UInt64.MaxValue);
-		
-        public ElGamalEncryptor(ElGamalKeyStruct p_struct)
+		private static readonly BigInteger max = BigInteger.Pow(2, 256) - BigInteger.One;
+
+		public ElGamalEncryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
             o_random = RandomNumberGenerator.Create();

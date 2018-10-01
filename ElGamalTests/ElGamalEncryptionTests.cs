@@ -12,7 +12,7 @@ namespace ElGamalTests
 {
     public class ElGamalEncryptionTests
     {
-		private static readonly double exp = 1e8;
+		private static readonly BigInteger exp = new BigInteger(1e8);
 
 		private readonly ITestOutputHelper output;
 
@@ -192,33 +192,26 @@ namespace ElGamalTests
 					KeySize = 384
 				};
 
-				double a_row = 2.5;
-				double a_encode = a_row * exp;
-				var a = new BigInteger(a_encode);
-				var a_byte = algorithm.EncryptData(a);
-				var a_dec = algorithm.DecryptData(a_byte);
-				object a_obj = a_dec;
-				BigInteger a_unbox = (BigInteger)a_obj;
-				double a_decode = (double)a_unbox / exp;
-				Assert.Equal(a_row, a_decode);
+				//Positive Floating Point Number
+				var a = new BigRational(new Decimal(5457758.5));
+				var a_encode = a.Numerator;
+				var a_bytes = algorithm.EncryptData(a_encode);
+				var a_dec = new BigRational(algorithm.DecryptData(a_bytes), a.Denominator);
+				Assert.Equal(a, a_dec);
 
-				double b_row = -20;
-				double b_encode = b_row * exp;
-				var b = new BigInteger(b_encode);
-				var b_byte = algorithm.EncryptData(b);
-				var b_dec = algorithm.DecryptData(b_byte);
-				object b_obj = b_dec;
-				BigInteger b_unbox = (BigInteger)b_obj;
-				double b_decode = (double)b_unbox / exp;
-				Assert.Equal(b_row, b_decode);
+				//Negative Floating Point Number
+				var b = new BigRational(new Decimal(-1.568432156841));
+				var b_encode = b.Numerator;
+				var b_bytes = algorithm.EncryptData(b_encode);
+				var b_dec = new BigRational(algorithm.DecryptData(b_bytes), b.Denominator);
+				Assert.Equal(b, b_dec);
 
-				double mul_row = a_row * b_row;
-				var mul_byte = algorithm.Multiply(a_byte, b_byte);
-				var mul_dec = algorithm.DecryptData(mul_byte);
-				object mul_obj = mul_dec;
-				BigInteger mul_unbox = (BigInteger)mul_obj;
-				double mul_decode = (double)mul_unbox / (exp * exp);
-				Assert.Equal(mul_row, mul_decode);
+
+				//Floating Point Numbers Multiplication
+				var mul_bytes = algorithm.Multiply(a_bytes, b_bytes);
+				var mul_dec = new BigRational(algorithm.DecryptData(mul_bytes), a.Denominator * b.Denominator);
+				Assert.Equal(a * b, mul_dec);
+
 			}
 		}
 	}

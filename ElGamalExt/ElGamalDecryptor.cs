@@ -22,7 +22,7 @@ namespace ElGamalExt
 {
     public class ElGamalDecryptor : ElGamalAbstractCipher
 	{
-		private static readonly BigInteger max = new BigInteger(UInt64.MaxValue);
+		private static readonly BigInteger max = BigInteger.Pow(2, 256) - BigInteger.One;
 
 		public ElGamalDecryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
