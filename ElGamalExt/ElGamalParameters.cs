@@ -23,7 +23,7 @@ namespace ElGamalExt
         public byte[] P;
         public byte[] G;
         public byte[] Y;
-        public ElGamalPaddingMode Padding;
+        //public ElGamalPaddingMode Padding;
 
         public byte[] X;
     }

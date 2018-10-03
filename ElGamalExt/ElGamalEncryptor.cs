@@ -23,14 +23,15 @@ namespace ElGamalExt
     public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
         private RandomNumberGenerator o_random;
+		private static readonly BigInteger max = BigInteger.Pow(2, 128) - BigInteger.One;
 
-        public ElGamalEncryptor(ElGamalKeyStruct p_struct)
+		public ElGamalEncryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
             o_random = RandomNumberGenerator.Create();
         }
 
-        protected override byte[] ProcessDataBlock(byte[] p_block)
+        public byte[] ProcessBigInteger(BigInteger message)
         {
             // set random K
             BigInteger K;
@@ -41,7 +42,7 @@ namespace ElGamalExt
             } while (BigInteger.GreatestCommonDivisor(K, o_key_struct.P - 1) != 1);
 
             var A = BigInteger.ModPow(o_key_struct.G, K, o_key_struct.P);
-            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * new BigInteger(p_block) % o_key_struct.P;
+            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * Encode(message) % o_key_struct.P;
 
             var x_a_bytes = A.ToByteArray();
             var x_b_bytes = B.ToByteArray();
@@ -55,53 +56,12 @@ namespace ElGamalExt
             return x_result;
         }
 
-        protected override byte[] ProcessFinalDataBlock(byte[] p_final_block)
-        {
-            return p_final_block.Length > 0 ? ProcessDataBlock(PadPlaintextBlock(p_final_block)) : new byte[0];
-        }
-
-        protected byte[] PadPlaintextBlock(byte[] p_block)
-        {
-            if (p_block.Length < o_block_size)
-            {
-                var x_padded = new byte[o_block_size];
-
-                switch (o_key_struct.Padding)
-                {
-                    // trailing zeros
-                    case ElGamalPaddingMode.TrailingZeros:
-                        Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
-                        break;
-
-                    case ElGamalPaddingMode.LeadingZeros:
-                        Array.Copy(p_block, 0, x_padded, o_block_size - p_block.Length, p_block.Length);
-                        break;
-
-                    case ElGamalPaddingMode.ANSIX923:
-                        throw new NotImplementedException();
-                        break;
-
-                    case ElGamalPaddingMode.BigIntegerPadding:
-                        Array.Copy(p_block, 0, x_padded, 0, p_block.Length);
-                        if ((p_block[p_block.Length - 1] & 0b1000_0000) != 0)
-                        {
-                            for (var i = p_block.Length; i < x_padded.Length; i++)
-                            {
-                                x_padded[i] = 0xFF;
-                            }
-                        }
-                        break;
-
-                    // unlikely to happen
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                return x_padded;
-            }
-
-            return p_block;
-        }
+		private BigInteger Encode(BigInteger origin)
+		{
+			if (origin < 0)
+				return max + origin + 1;
+			return origin;
+		}
 
         public void Dispose()
         {

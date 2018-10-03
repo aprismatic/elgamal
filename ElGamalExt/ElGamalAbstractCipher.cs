@@ -15,6 +15,7 @@
 
 using System;
 using System.IO;
+using System.Numerics;
 
 namespace ElGamalExt
 {
@@ -34,43 +35,5 @@ namespace ElGamalExt
 
             o_block_size = o_plaintext_blocksize;
         }
-
-        public byte[] ProcessData(byte[] p_data)
-        {
-            var x_complete_blocks = p_data.Length / o_block_size + (p_data.Length % o_block_size > 0 ? 1 : 0);
-            x_complete_blocks = Math.Max(x_complete_blocks - 1, 0);
-
-            if (x_complete_blocks == 0)
-                return ProcessFinalDataBlock(p_data);
-
-            using (var x_stream = new MemoryStream())
-            {
-                var x_block = new byte[o_block_size];
-
-                // run through and process the complete blocks
-                var i = 0;
-                for (; i < x_complete_blocks; i++)
-                {
-                    Array.Copy(p_data, i * o_block_size, x_block, 0, o_block_size);
-
-                    var x_result = ProcessDataBlock(x_block);
-
-                    x_stream.Write(x_result, 0, x_result.Length);
-                }
-
-                var x_final_block = new byte[p_data.Length - (x_complete_blocks * o_block_size)];
-                Array.Copy(p_data, i * o_block_size, x_final_block, 0, x_final_block.Length);
-
-                var x_final_result = ProcessFinalDataBlock(x_final_block);
-
-                x_stream.Write(x_final_result, 0, x_final_result.Length);
-
-                return x_stream.ToArray();
-            }
-        }
-
-        protected abstract byte[] ProcessDataBlock(byte[] p_block);
-
-        protected abstract byte[] ProcessFinalDataBlock(byte[] p_final_block);
     }
 }
