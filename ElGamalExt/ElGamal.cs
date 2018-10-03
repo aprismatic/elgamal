@@ -26,6 +26,8 @@ namespace ElGamalExt
     public class ElGamal : AsymmetricAlgorithm
     {
 		private ElGamalKeyStruct o_key_struct;
+		private static readonly BigInteger max = BigInteger.Pow(2, 256) - BigInteger.One;
+
 		public ElGamalKeyStruct KeyStruct
 		{
 			get
@@ -88,7 +90,7 @@ namespace ElGamalExt
 			}
 		}
 
-		public byte[] EncryptData(BigInteger p_data)
+		public byte[][] EncryptData(BigRational p_data)
 		{
 			if (NeedToGenerateKey())
 			{
@@ -97,11 +99,14 @@ namespace ElGamalExt
 
 			using (var x_enc = new ElGamalEncryptor(o_key_struct))
 			{
-				return x_enc.ProcessBigInteger(p_data);
+				var numerator = x_enc.ProcessBigInteger(p_data.Numerator);
+				var denominator = x_enc.ProcessBigInteger(p_data.Denominator);
+				var array = new byte[][] { numerator, denominator };
+				return array;
 			}
 		}
 
-		public BigInteger DecryptData(byte[] p_data)
+		public BigRational DecryptData(byte[][] p_data)
 		{
 			if (NeedToGenerateKey())
 			{
@@ -110,12 +115,27 @@ namespace ElGamalExt
 
 			var x_enc = new ElGamalDecryptor(o_key_struct);
 
-			return x_enc.ProcessByteBlock(p_data);
+			var numerator = x_enc.ProcessByteBlock(p_data[0]);
+			var denominator = x_enc.ProcessByteBlock(p_data[1]);
+			var floating = new BigRational(numerator, denominator);
+
+			return floating;
 		}
 
-		public byte[] Multiply(byte[] p_first, byte[] p_second)
+		public byte[][] Multiply(byte[][] p_first, byte[][] p_second)
 		{
-			return Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.ToByteArray());
+			var mul_numerator =  Homomorphism.ElGamalHomomorphism.Multiply(p_first[0], p_second[0], o_key_struct.P.ToByteArray());
+			var mul_denominator = Homomorphism.ElGamalHomomorphism.Multiply(p_first[1], p_second[1], o_key_struct.P.ToByteArray());
+			var mul = new byte[][] { mul_numerator, mul_denominator };
+			return mul;
+		}
+
+		public byte[][] Divide(byte[][] p_first, byte[][] p_second)
+		{
+			var mul_numerator = Homomorphism.ElGamalHomomorphism.Multiply(p_first[0], p_second[1], o_key_struct.P.ToByteArray());
+			var mul_denominator = Homomorphism.ElGamalHomomorphism.Multiply(p_first[1], p_second[0], o_key_struct.P.ToByteArray());
+			var mul = new byte[][] { mul_numerator, mul_denominator };
+			return mul;
 		}
 
 		public void ImportParameters(ElGamalParameters p_parameters)

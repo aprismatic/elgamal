@@ -21,7 +21,7 @@ namespace ElGamalTests
 			this.output = output;
 		}
 
-		[Fact(DisplayName = "Random BigIntegers")]
+		/*[Fact(DisplayName = "Random BigIntegers")]
         public void TestRandomBigInteger()
         {
             var rnd = new Random();
@@ -154,7 +154,7 @@ namespace ElGamalTests
 
                 Assert.Equal(new BigInteger(205891132094649), sum_dec);
             }
-        }
+        }*/
 
         [Fact(DisplayName = "Negative cases")]
         public void TestNegativeCases()
@@ -165,21 +165,29 @@ namespace ElGamalTests
                     KeySize = 384
                 };
 
-                var a = new BigInteger(-2048);
-                var a_bytes = algorithm.EncryptData(a);
-                var dec_a = algorithm.DecryptData(a_bytes);
-                Assert.Equal(a, dec_a);
 
-				var a_2 = new BigInteger(138);
-				var a_bytes_2 = algorithm.EncryptData(a_2);
-				var dec_a_2 = algorithm.DecryptData(a_bytes_2);
+				//Negative Number En/Decryption
+				var a = new BigRational(new Decimal(-94660895));
+				var a_enc = algorithm.EncryptData(a);
+				var a_dec = algorithm.DecryptData(a_enc);
+				Assert.Equal(a, a_dec);
 
-				Assert.Equal(a_2, dec_a_2);
+				var b = new BigRational(new Decimal(45651255));
+				var b_enc = algorithm.EncryptData(b);
+				var b_dec = algorithm.DecryptData(b_enc);
+				Assert.Equal(b, b_dec);
 
-				var bytes_mul = algorithm.Multiply(a_bytes, a_bytes_2);
-				var dec_mul = algorithm.DecryptData(bytes_mul);
 
-				Assert.Equal(a * a_2, dec_mul);
+				//Negative Numbers Multiplication
+				var mul_bytes = algorithm.Multiply(a_enc, b_enc);
+				var mul_dec = algorithm.DecryptData(mul_bytes);
+				Assert.Equal(a * b, mul_dec);
+
+
+				//Negative Numbers Division
+				var div_bytes = algorithm.Divide(a_enc, b_enc);
+				var div_dec = algorithm.DecryptData(div_bytes);
+				Assert.Equal(a / b, div_dec);
 			}
         }
 
@@ -192,26 +200,30 @@ namespace ElGamalTests
 					KeySize = 384
 				};
 
-				//Positive Floating Point Number
-				var a = new BigRational(new Decimal(5457758.5));
-				var a_encode = a.Numerator;
-				var a_bytes = algorithm.EncryptData(a_encode);
-				var a_dec = new BigRational(algorithm.DecryptData(a_bytes), a.Denominator);
+
+				//Positive Floating Point Number En/Decryption
+				var a = new BigRational(new Decimal(12.5467));
+				var a_enc = algorithm.EncryptData(a);
+				var a_dec = algorithm.DecryptData(a_enc);
 				Assert.Equal(a, a_dec);
 
-				//Negative Floating Point Number
-				var b = new BigRational(new Decimal(-1.568432156841));
-				var b_encode = b.Numerator;
-				var b_bytes = algorithm.EncryptData(b_encode);
-				var b_dec = new BigRational(algorithm.DecryptData(b_bytes), b.Denominator);
+
+				//Negative Floating Point Number En/Decryption
+				var b = new BigRational(new Decimal(-4554545.1231));
+				var b_enc = algorithm.EncryptData(b);
+				var b_dec = algorithm.DecryptData(b_enc);
 				Assert.Equal(b, b_dec);
 
 
 				//Floating Point Numbers Multiplication
-				var mul_bytes = algorithm.Multiply(a_bytes, b_bytes);
-				var mul_dec = new BigRational(algorithm.DecryptData(mul_bytes), a.Denominator * b.Denominator);
+				var mul_bytes = algorithm.Multiply(a_enc, b_enc);
+				var mul_dec = algorithm.DecryptData(mul_bytes);
 				Assert.Equal(a * b, mul_dec);
 
+				//Floating Point Numbers Division
+				var div_bytes = algorithm.Divide(a_enc, b_enc);
+				var div_dec = algorithm.DecryptData(div_bytes);
+				Assert.Equal(a / b, div_dec);
 			}
 		}
 	}
