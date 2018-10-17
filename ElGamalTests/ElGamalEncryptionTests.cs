@@ -2,7 +2,6 @@
 using ElGamalExt;
 using System;
 using System.Numerics;
-using Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using Xunit;
@@ -12,16 +11,14 @@ namespace ElGamalTests
 {
     public class ElGamalEncryptionTests
     {
-		private static readonly BigInteger exp = new BigInteger(1e8);
+        private readonly ITestOutputHelper output;
 
-		private readonly ITestOutputHelper output;
+        public ElGamalEncryptionTests(ITestOutputHelper output)
+        {
+            this.output = output;
+        }
 
-		public ElGamalEncryptionTests(ITestOutputHelper output)
-		{
-			this.output = output;
-		}
-
-		/*[Fact(DisplayName = "Random BigIntegers")]
+        [Fact(DisplayName = "Random BigIntegers")]
         public void TestRandomBigInteger()
         {
             var rnd = new Random();
@@ -61,10 +58,10 @@ namespace ElGamalTests
         public void TestSpecificCases()
         {
             {
-				ElGamal algorithm = new ElGamal
-				{
-					KeySize = 384
-				};
+                ElGamal algorithm = new ElGamal
+                {
+                    KeySize = 384
+                };
 
                 var a = new BigInteger(2048);
                 var a_bytes = algorithm.EncryptData(a);
@@ -74,7 +71,7 @@ namespace ElGamalTests
 
             {
                 ElGamal algorithm = new ElGamal
-				{
+                {
                     KeySize = 384
                 };
 
@@ -97,7 +94,7 @@ namespace ElGamalTests
                 for (var i = 0; i < iterations; i++)
                 {
                     ElGamal algorithm = new ElGamal
-					{
+                    {
                         KeySize = keySize
                     };
 
@@ -138,7 +135,7 @@ namespace ElGamalTests
             for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
                 ElGamal algorithm = new ElGamal
-				{
+                {
                     KeySize = keySize
                 };
 
@@ -154,77 +151,99 @@ namespace ElGamalTests
 
                 Assert.Equal(new BigInteger(205891132094649), sum_dec);
             }
-        }*/
+        }
 
         [Fact(DisplayName = "Negative cases")]
         public void TestNegativeCases()
         {
             {
                 ElGamal algorithm = new ElGamal
-				{
+                {
                     KeySize = 384
                 };
 
 
-				//Negative Number En/Decryption
-				var a = new BigRational(new Decimal(-94660895));
-				var a_enc = algorithm.EncryptData(a);
-				var a_dec = algorithm.DecryptData(a_enc);
-				Assert.Equal(a, a_dec);
+                //Negative Number En/Decryption
+                var a = new BigFraction(new Decimal(-94660895));
+                var a_enc = algorithm.EncryptData(a);
+                var a_dec = algorithm.DecryptData(a_enc);
+                Assert.Equal(a, a_dec);
 
-				var b = new BigRational(new Decimal(45651255));
-				var b_enc = algorithm.EncryptData(b);
-				var b_dec = algorithm.DecryptData(b_enc);
-				Assert.Equal(b, b_dec);
-
-
-				//Negative Numbers Multiplication
-				var mul_bytes = algorithm.Multiply(a_enc, b_enc);
-				var mul_dec = algorithm.DecryptData(mul_bytes);
-				Assert.Equal(a * b, mul_dec);
+                var b = new BigFraction(new Decimal(45651255));
+                var b_enc = algorithm.EncryptData(b);
+                var b_dec = algorithm.DecryptData(b_enc);
+                Assert.Equal(b, b_dec);
 
 
-				//Negative Numbers Division
-				var div_bytes = algorithm.Divide(a_enc, b_enc);
-				var div_dec = algorithm.DecryptData(div_bytes);
-				Assert.Equal(a / b, div_dec);
-			}
+                //Negative Numbers Multiplication
+                var mul_bytes = algorithm.Multiply(a_enc, b_enc);
+                var mul_dec = algorithm.DecryptData(mul_bytes);
+                Assert.Equal(a * b, mul_dec);
+
+
+                //Negative Numbers Division
+                var div_bytes = algorithm.Divide(a_enc, b_enc);
+                var div_dec = algorithm.DecryptData(div_bytes);
+                Assert.Equal(a / b, div_dec);
+            }
         }
 
-		[Fact(DisplayName = "Floating cases")]
-		public void TestFloatingCases()
-		{
-			{
-				ElGamal algorithm = new ElGamal
-				{
-					KeySize = 384
-				};
+        [Fact(DisplayName = "Floating cases")]
+        public void TestFloatingCases()
+        {
+            {
+                ElGamal algorithm = new ElGamal
+                {
+                    KeySize = 384
+                };
 
 
-				//Positive Floating Point Number En/Decryption
-				var a = new BigRational(new Decimal(12.5467));
-				var a_enc = algorithm.EncryptData(a);
-				var a_dec = algorithm.DecryptData(a_enc);
-				Assert.Equal(a, a_dec);
+                //Positive Floating Point Number En/Decryption
+                var a = new BigFraction(new Decimal(12.5467));
+                var a_enc = algorithm.EncryptData(a);
+                var a_dec = algorithm.DecryptData(a_enc);
+                Assert.Equal(a, a_dec);
 
 
-				//Negative Floating Point Number En/Decryption
-				var b = new BigRational(new Decimal(-4554545.1231));
-				var b_enc = algorithm.EncryptData(b);
-				var b_dec = algorithm.DecryptData(b_enc);
-				Assert.Equal(b, b_dec);
+                //Negative Floating Point Number En/Decryption
+                var b = new BigFraction(new Decimal(-4554545.1231));
+                var b_enc = algorithm.EncryptData(b);
+                var b_dec = algorithm.DecryptData(b_enc);
+                Assert.Equal(b, b_dec);
 
 
-				//Floating Point Numbers Multiplication
-				var mul_bytes = algorithm.Multiply(a_enc, b_enc);
-				var mul_dec = algorithm.DecryptData(mul_bytes);
-				Assert.Equal(a * b, mul_dec);
+                //Floating Point Numbers Multiplication
+                var mul_bytes = algorithm.Multiply(a_enc, b_enc);
+                var mul_dec = algorithm.DecryptData(mul_bytes);
+                Assert.Equal(a * b, mul_dec);
 
-				//Floating Point Numbers Division
-				var div_bytes = algorithm.Divide(a_enc, b_enc);
-				var div_dec = algorithm.DecryptData(div_bytes);
-				Assert.Equal(a / b, div_dec);
-			}
-		}
-	}
+                //Floating Point Numbers Division
+                var div_bytes = algorithm.Divide(a_enc, b_enc);
+                var div_dec = algorithm.DecryptData(div_bytes);
+                Assert.Equal(a / b, div_dec);
+            }
+        }
+
+        [Fact(DisplayName = "Test Fraction")]
+        public void TestFraction()
+        {
+            BigFraction a = new BigFraction(1);
+            output.WriteLine(a.ToString());
+
+
+            BigFraction b = new BigFraction(1.26);
+            output.WriteLine(b.ToString());
+
+
+            BigFraction c = new BigFraction(new Decimal(20.25));
+            output.WriteLine(c.ToString());
+
+
+            BigFraction d = new BigFraction(new BigInteger(5), new BigInteger(10));
+            output.WriteLine(d.ToString());
+
+            BigFraction e = new BigFraction(new BigInteger(5));
+            output.WriteLine(e.ToString());
+        }
+    }
 }

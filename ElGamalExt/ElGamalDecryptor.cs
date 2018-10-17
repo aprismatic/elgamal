@@ -21,10 +21,10 @@ using BigIntegerExt;
 namespace ElGamalExt
 {
     public class ElGamalDecryptor : ElGamalAbstractCipher
-	{
-		private static readonly BigInteger max = BigInteger.Pow(2, 128) - BigInteger.One;
+    {
+        private static readonly BigInteger max = BigInteger.Pow(2, 128) - BigInteger.One;
 
-		public ElGamalDecryptor(ElGamalKeyStruct p_struct)
+        public ElGamalDecryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
             o_block_size = o_ciphertext_blocksize;
@@ -51,12 +51,12 @@ namespace ElGamalExt
             return Decode(M);
         }
 
-		private BigInteger Decode(BigInteger origin)
-		{
-			origin = origin % (max + 1);
-			if (origin > max / 2)
-				return origin - max - 1;
-			return origin;
-		}
+        private BigInteger Decode(BigInteger origin)
+        {
+            origin = origin % (max + 1);
+            if (origin > max / 2)
+                return origin - max - 1;
+            return origin;
+        }
     }
 }

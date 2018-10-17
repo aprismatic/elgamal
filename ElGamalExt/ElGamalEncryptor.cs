@@ -23,9 +23,9 @@ namespace ElGamalExt
     public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
         private RandomNumberGenerator o_random;
-		private static readonly BigInteger max = BigInteger.Pow(2, 128) - BigInteger.One;
+        private static readonly BigInteger max = BigInteger.Pow(2, 128) - BigInteger.One;
 
-		public ElGamalEncryptor(ElGamalKeyStruct p_struct)
+        public ElGamalEncryptor(ElGamalKeyStruct p_struct)
             : base(p_struct)
         {
             o_random = RandomNumberGenerator.Create();
@@ -56,12 +56,12 @@ namespace ElGamalExt
             return x_result;
         }
 
-		private BigInteger Encode(BigInteger origin)
-		{
-			if (origin < 0)
-				return max + origin + 1;
-			return origin;
-		}
+        private BigInteger Encode(BigInteger origin)
+        {
+            if (origin < 0)
+                return max + origin + 1;
+            return origin;
+        }
 
         public void Dispose()
         {
