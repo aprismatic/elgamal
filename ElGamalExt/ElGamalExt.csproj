@@ -8,6 +8,7 @@
     <Authors>Vasily Sidorov (bazzilic)</Authors>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="BigFraction" Version="0.1.0.5" />
     <PackageReference Include="BigIntegerExt" Version="0.1.3.6" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>

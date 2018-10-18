@@ -2,6 +2,7 @@
 using ElGamalExt;
 using System;
 using System.Numerics;
+using Aprismatic.BigFraction;
 using System.Security.Cryptography;
 using System.Text;
 using Xunit;
@@ -16,6 +17,31 @@ namespace ElGamalTests
         public ElGamalEncryptionTests(ITestOutputHelper output)
         {
             this.output = output;
+        }
+
+        [Fact(DisplayName = "Zero")]
+        public void TestZero()
+        {
+            for (var keySize = 384; keySize <= 1088; keySize += 8)
+            {
+                ElGamal algorithm = new ElGamal
+                {
+                    KeySize = keySize
+                };
+
+                ElGamal encryptAlgorithm = new ElGamal();
+                encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+
+                ElGamal decryptAlgorithm = new ElGamal();
+                decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+
+                var z = new BigInteger(0);
+
+                var z_enc = encryptAlgorithm.EncryptData(z);
+                var z_dec = decryptAlgorithm.DecryptData(z_enc);
+
+                Assert.Equal(z, z_dec);
+            }
         }
 
         [Fact(DisplayName = "Random BigIntegers")]
@@ -222,28 +248,6 @@ namespace ElGamalTests
                 var div_dec = algorithm.DecryptData(div_bytes);
                 Assert.Equal(a / b, div_dec);
             }
-        }
-
-        [Fact(DisplayName = "Test Fraction")]
-        public void TestFraction()
-        {
-            BigFraction a = new BigFraction(1);
-            output.WriteLine(a.ToString());
-
-
-            BigFraction b = new BigFraction(1.26);
-            output.WriteLine(b.ToString());
-
-
-            BigFraction c = new BigFraction(new Decimal(20.25));
-            output.WriteLine(c.ToString());
-
-
-            BigFraction d = new BigFraction(new BigInteger(5), new BigInteger(10));
-            output.WriteLine(d.ToString());
-
-            BigFraction e = new BigFraction(new BigInteger(5));
-            output.WriteLine(e.ToString());
         }
     }
 }
