@@ -10,11 +10,7 @@
   <ItemGroup>
     <PackageReference Include="BigFraction" Version="0.1.0.5" />
     <PackageReference Include="BigIntegerExt" Version="0.1.3.6" />
+    <PackageReference Include="ElGamalExt-Homomorphism" Version="0.10.0.16" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="ElGamalExt-Homomorphism">
-      <HintPath>..\..\ElGamalExt-Homomorphism\ElGamalExt-Homomorphism\bin\Release\net45\ElGamalExt-Homomorphism.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>
