@@ -1,32 +1,16 @@
-﻿/************************************************************************************
- This implementation of the ElGamal encryption scheme is based on the code from [1].
-
- This library is provided as-is and is covered by the MIT License [2] (except for the
- parts that belong to O'Reilly - they are covered by [3]).
-
- [1] Adam Freeman & Allen Jones, Programming .NET Security: O'Reilly Media, 2003,
-     ISBN 9780596552275 (http://books.google.com.sg/books?id=ykXCNVOIEuQC)
-
- [2] The MIT License (MIT), website, (http://opensource.org/licenses/MIT)
-
- [3] Tim O'Reilly, O'Reilly Policy on Re-Use of Code Examples from Books: website,
-     2001, (http://www.oreillynet.com/pub/a/oreilly/ask_tim/2001/codepolicy.html)
- ************************************************************************************/
-
+﻿using Aprismatic.BigFraction;
+using BigIntegerExt;
 using System;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
-using System.Numerics;
-using BigIntegerExt;
-using Aprismatic.BigFraction;
 
 namespace ElGamalExt
 {
     public class ElGamal : AsymmetricAlgorithm
     {
-        private ElGamalKeyStruct o_key_struct;
-        private static readonly BigInteger max = BigInteger.Pow(2, 256) - BigInteger.One;
+        private ElGamalKeyStruct keyStruct;
 
         public ElGamalKeyStruct KeyStruct
         {
@@ -36,18 +20,15 @@ namespace ElGamalExt
                 {
                     CreateKeyPair(KeySizeValue);
                 }
-                return o_key_struct;
+                return keyStruct;
             }
-            set
-            {
-                o_key_struct = value;
-            }
+            set => keyStruct = value;
         }
 
         public ElGamal()
         {
             // create the key struct and set all of the big integers to zero
-            o_key_struct = new ElGamalKeyStruct
+            keyStruct = new ElGamalKeyStruct
             {
                 P = BigInteger.Zero,
                 G = BigInteger.Zero,
@@ -58,49 +39,44 @@ namespace ElGamalExt
             // set the default key size value
             KeySizeValue = 384;
 
-            // set the default padding mode
-            //Padding = ElGamalPaddingMode.BigIntegerPadding;
-
             // set the range of legal keys
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
         }
 
         private bool NeedToGenerateKey()
         {
-            return (o_key_struct.P == 0) && (o_key_struct.G == 0) && (o_key_struct.Y == 0);
+            return (keyStruct.P == 0) && (keyStruct.G == 0) && (keyStruct.Y == 0);
         }
 
-        private void CreateKeyPair(int p_key_strength)
+        private void CreateKeyPair(int keyStrength)
         {
-            using (var x_random_generator = RandomNumberGenerator.Create())
+            using (var rng = RandomNumberGenerator.Create())
             {
                 // create the large prime number, P
-                o_key_struct.P = o_key_struct.P.GenPseudoPrime(p_key_strength, 16, x_random_generator);
+                keyStruct.P = keyStruct.P.GenPseudoPrime(keyStrength, 16, rng);
 
                 // create the two random numbers, which are smaller than P
-                o_key_struct.X = new BigInteger();
-                o_key_struct.X = o_key_struct.X.GenRandomBits(p_key_strength - 1, x_random_generator);
-                o_key_struct.G = new BigInteger();
-                o_key_struct.G = o_key_struct.G.GenRandomBits(p_key_strength - 1, x_random_generator);
+                keyStruct.X = new BigInteger();
+                keyStruct.X = keyStruct.X.GenRandomBits(keyStrength - 1, rng);
+                keyStruct.G = new BigInteger();
+                keyStruct.G = keyStruct.G.GenRandomBits(keyStrength - 1, rng);
 
                 // compute Y
-                o_key_struct.Y = BigInteger.ModPow(o_key_struct.G, o_key_struct.X, o_key_struct.P);
-
-                //o_key_struct.Padding = Padding;
+                keyStruct.Y = BigInteger.ModPow(keyStruct.G, keyStruct.X, keyStruct.P);
             }
         }
 
-        public byte[] EncryptData(BigFraction p_data)
+        public byte[] EncryptData(BigFraction message)
         {
             if (NeedToGenerateKey())
             {
                 CreateKeyPair(KeySizeValue);
             }
 
-            using (var x_enc = new ElGamalEncryptor(o_key_struct))
+            using (var encryptor = new ElGamalEncryptor(keyStruct))
             {
-                var numerator = x_enc.ProcessBigInteger(p_data.Numerator);
-                var denominator = x_enc.ProcessBigInteger(p_data.Denominator);
+                var numerator = encryptor.ProcessBigInteger(message.Numerator);
+                var denominator = encryptor.ProcessBigInteger(message.Denominator);
                 var array = new byte[numerator.Length * 2];
                 Array.Copy(numerator, 0, array, 0, numerator.Length);
                 Array.Copy(denominator, 0, array, array.Length / 2, denominator.Length);
@@ -108,54 +84,53 @@ namespace ElGamalExt
             }
         }
 
-        public BigFraction DecryptData(byte[] p_data)
+        public BigFraction DecryptData(byte[] data)
         {
             if (NeedToGenerateKey())
             {
                 CreateKeyPair(KeySizeValue);
             }
 
-            var x_enc = new ElGamalDecryptor(o_key_struct);
+            var decryptor = new ElGamalDecryptor(keyStruct);
 
-            var temp = new byte[p_data.Length / 2];
-            Array.Copy(p_data, temp, p_data.Length / 2);
-            var numerator = x_enc.ProcessByteBlock(temp);
-            Array.Copy(p_data, p_data.Length / 2, temp, 0, p_data.Length / 2);
-            var denominator = x_enc.ProcessByteBlock(temp);
-            var floating = new BigFraction(numerator, denominator);
+            var temp = new byte[data.Length / 2];
+            Array.Copy(data, temp, data.Length / 2);
+            var numerator = decryptor.ProcessByteBlock(temp);
+            Array.Copy(data, data.Length / 2, temp, 0, data.Length / 2);
+            var denominator = decryptor.ProcessByteBlock(temp);
 
-            return floating;
+            var res = new BigFraction(numerator, denominator);
+
+            return res;
         }
 
-        public byte[] Multiply(byte[] p_first, byte[] p_second)
+        public byte[] Multiply(byte[] first, byte[] second)
         {
-            return Homomorphism.ElGamalHomomorphism.Multiply(p_first, p_second, o_key_struct.P.ToByteArray());
+            return Homomorphism.ElGamalHomomorphism.Multiply(first, second, keyStruct.P.ToByteArray());
         }
 
-        public byte[] Divide(byte[] p_first, byte[] p_second)
+        public byte[] Divide(byte[] first, byte[] second)
         {
-            return Homomorphism.ElGamalHomomorphism.Divide(p_first, p_second, o_key_struct.P.ToByteArray());
+            return Homomorphism.ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
         }
 
-        public void ImportParameters(ElGamalParameters p_parameters)
+        public void ImportParameters(ElGamalParameters parameters)
         {
             // obtain the  big integer values from the byte parameter values
-            o_key_struct.P = new BigInteger(p_parameters.P);
-            o_key_struct.G = new BigInteger(p_parameters.G);
-            o_key_struct.Y = new BigInteger(p_parameters.Y);
-            //o_key_struct.Padding = p_parameters.Padding;
+            keyStruct.P = new BigInteger(parameters.P);
+            keyStruct.G = new BigInteger(parameters.G);
+            keyStruct.Y = new BigInteger(parameters.Y);
 
-            if (p_parameters.X != null && p_parameters.X.Length > 0)
+            if (parameters.X != null && parameters.X.Length > 0)
             {
-                o_key_struct.X = new BigInteger(p_parameters.X);
+                keyStruct.X = new BigInteger(parameters.X);
             }
 
             // set the length of the key based on the import
-            KeySizeValue = o_key_struct.P.BitCount();
-            //Padding = o_key_struct.Padding;
+            KeySizeValue = keyStruct.P.BitCount();
         }
 
-        public ElGamalParameters ExportParameters(bool p_include_private_params)
+        public ElGamalParameters ExportParameters(bool includePrivateParams)
         {
             if (NeedToGenerateKey())
             {
@@ -163,65 +138,62 @@ namespace ElGamalExt
             }
 
             // create the parameter set and set the public values of the parameters
-            var x_params = new ElGamalParameters
+            var prms = new ElGamalParameters
             {
-                P = o_key_struct.P.ToByteArray(),
-                G = o_key_struct.G.ToByteArray(),
-                Y = o_key_struct.Y.ToByteArray(),
-                //Padding = o_key_struct.Padding
+                P = keyStruct.P.ToByteArray(),
+                G = keyStruct.G.ToByteArray(),
+                Y = keyStruct.Y.ToByteArray()
             };
 
             // if required, include the private value, X
-            if (p_include_private_params)
+            if (includePrivateParams)
             {
-                x_params.X = o_key_struct.X.ToByteArray();
+                prms.X = keyStruct.X.ToByteArray();
             }
             else
             {
                 // ensure that we zero the value
-                x_params.X = new byte[1];
+                prms.X = new byte[1];
             }
 
-            return x_params;
+            return prms;
         }
 
-        public override string ToXmlString(bool p_include_private)
+        public override string ToXmlString(bool includePrivateParameters)
         {
-            var x_params = ExportParameters(p_include_private);
+            var prms = ExportParameters(includePrivateParameters);
 
-            var x_sb = new StringBuilder();
+            var sb = new StringBuilder();
 
-            x_sb.Append("<ElGamalKeyValue>");
+            sb.Append("<ElGamalKeyValue>");
 
-            x_sb.Append("<P>" + Convert.ToBase64String(x_params.P) + "</P>");
-            x_sb.Append("<G>" + Convert.ToBase64String(x_params.G) + "</G>");
-            x_sb.Append("<Y>" + Convert.ToBase64String(x_params.Y) + "</Y>");
-            //x_sb.Append("<Padding>" + x_params.Padding.ToString() + "</Padding>");
+            sb.Append("<P>" + Convert.ToBase64String(prms.P) + "</P>");
+            sb.Append("<G>" + Convert.ToBase64String(prms.G) + "</G>");
+            sb.Append("<Y>" + Convert.ToBase64String(prms.Y) + "</Y>");
 
-            if (p_include_private)
+            if (includePrivateParameters)
             {
                 // we need to include X, which is the part of private key
-                x_sb.Append("<X>" + Convert.ToBase64String(x_params.X) + "</X>");
+                sb.Append("<X>" + Convert.ToBase64String(prms.X) + "</X>");
             }
 
-            x_sb.Append("</ElGamalKeyValue>");
+            sb.Append("</ElGamalKeyValue>");
 
-            return x_sb.ToString();
+            return sb.ToString();
         }
 
-        public override void FromXmlString(string p_string)
+        public override void FromXmlString(string str)
         {
-            var x_params = new ElGamalParameters();
+            var prms = new ElGamalParameters();
 
-            var keyValues = XDocument.Parse(p_string).Element("ElGamalKeyValue");
+            var keyValues = XDocument.Parse(str).Element("ElGamalKeyValue");
 
-            x_params.P = Convert.FromBase64String((String)keyValues.Element("P") ?? "");
-            x_params.G = Convert.FromBase64String((String)keyValues.Element("G") ?? "");
-            x_params.Y = Convert.FromBase64String((String)keyValues.Element("Y") ?? "");
-            //x_params.Padding = (ElGamalPaddingMode)Enum.Parse(typeof(ElGamalPaddingMode), (String)keyValues.Element("Padding") ?? "");
-            x_params.X = Convert.FromBase64String((String)keyValues.Element("X") ?? "");
+            prms.P = Convert.FromBase64String((String)keyValues.Element("P") ?? "");
+            prms.G = Convert.FromBase64String((String)keyValues.Element("G") ?? "");
+            prms.Y = Convert.FromBase64String((String)keyValues.Element("Y") ?? "");
+            prms.X = Convert.FromBase64String((String)keyValues.Element("X") ?? "");
 
-            ImportParameters(x_params);
+            ImportParameters(prms);
         }
     }
 }

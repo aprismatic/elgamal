@@ -1,71 +1,58 @@
-﻿/************************************************************************************
- This implementation of the ElGamal encryption scheme is based on the code from [1].
-
- This library is provided as-is and is covered by the MIT License [2] (except for the
- parts that belong to O'Reilly - they are covered by [3]).
-
- [1] Adam Freeman & Allen Jones, Programming .NET Security: O'Reilly Media, 2003,
-     ISBN 9780596552275 (http://books.google.com.sg/books?id=ykXCNVOIEuQC)
-
- [2] The MIT License (MIT), website, (http://opensource.org/licenses/MIT)
-
- [3] Tim O'Reilly, O'Reilly Policy on Re-Use of Code Examples from Books: website,
-     2001, (http://www.oreillynet.com/pub/a/oreilly/ask_tim/2001/codepolicy.html)
- ************************************************************************************/
-
+﻿using BigIntegerExt;
 using System;
 using System.Numerics;
 using System.Security.Cryptography;
-using BigIntegerExt;
 
 namespace ElGamalExt
 {
     public class ElGamalEncryptor : ElGamalAbstractCipher, IDisposable
     {
-        private RandomNumberGenerator o_random;
-        private static readonly BigInteger max = BigInteger.Pow(2, 128) - BigInteger.One;
+        private RandomNumberGenerator rng;
 
-        public ElGamalEncryptor(ElGamalKeyStruct p_struct)
-            : base(p_struct)
+        public ElGamalEncryptor(ElGamalKeyStruct keyStruct)
+            : base(keyStruct)
         {
-            o_random = RandomNumberGenerator.Create();
+            rng = RandomNumberGenerator.Create();
         }
 
         public byte[] ProcessBigInteger(BigInteger message)
         {
+            if(BigInteger.Abs(message) > KeyStruct.MaxEncryptableValue)
+                throw new ArgumentException($"Message to encrypt is too large. Message should be |m| < 2^{KeyStruct.getMaxPlaintextBits()-1}");
+
             // set random K
             BigInteger K;
             do
             {
                 K = new BigInteger();
-                K = K.GenRandomBits(o_key_struct.P.BitCount() - 1, o_random);
-            } while (BigInteger.GreatestCommonDivisor(K, o_key_struct.P - 1) != 1);
+                K = K.GenRandomBits(KeyStruct.P.BitCount() - 1, rng);
+            } while (BigInteger.GreatestCommonDivisor(K, KeyStruct.P - 1) != 1);
 
-            var A = BigInteger.ModPow(o_key_struct.G, K, o_key_struct.P);
-            var B = BigInteger.ModPow(o_key_struct.Y, K, o_key_struct.P) * Encode(message) % o_key_struct.P;
+            var A = BigInteger.ModPow(KeyStruct.G, K, KeyStruct.P);
+            var B = BigInteger.ModPow(KeyStruct.Y, K, KeyStruct.P) * Encode(message) % KeyStruct.P;
 
-            var x_a_bytes = A.ToByteArray();
-            var x_b_bytes = B.ToByteArray();
+            var a_bytes = A.ToByteArray();
+            var b_bytes = B.ToByteArray();
 
             // create an array to contain the ciphertext
-            var x_result = new byte[o_ciphertext_blocksize];
+            var res = new byte[CiphertextBlocksize];
 
-            Array.Copy(x_a_bytes, 0, x_result, 0, x_a_bytes.Length);
-            Array.Copy(x_b_bytes, 0, x_result, x_result.Length / 2, x_b_bytes.Length);
+            Array.Copy(a_bytes, 0, res, 0, a_bytes.Length);
+            Array.Copy(b_bytes, 0, res, res.Length / 2, b_bytes.Length);
 
-            return x_result;
+            return res;
         }
 
         private BigInteger Encode(BigInteger origin)
         {
             if (origin < 0)
-                return max + origin + 1;
+                return KeyStruct.MaxRawPlaintext + origin + 1;
             return origin;
         }
 
         public void Dispose()
         {
-            o_random.Dispose();
+            rng.Dispose();
         }
     }
 }
