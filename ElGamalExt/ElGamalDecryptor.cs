@@ -1,4 +1,4 @@
-﻿using BigIntegerExt;
+﻿using Aprismatic.BigIntegerExt;
 using System;
 using System.Numerics;
 

@@ -1,5 +1,4 @@
-﻿using BigIntegerExt;
-using System;
+﻿using Aprismatic.BigIntegerExt;
 using System.Numerics;
 
 namespace ElGamalExt

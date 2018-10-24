@@ -1,5 +1,4 @@
 ﻿using Aprismatic.BigFraction;
-using BigIntegerExt;
 using ElGamalExt;
 using System;
 using System.Numerics;
