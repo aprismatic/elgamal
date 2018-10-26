@@ -78,7 +78,7 @@ namespace ElGamalTests
 
                     var bxa_enc = decryptAlgorithm.Multiply(b_enc, a_enc); // verify transitivity
                     var bxa_dec = decryptAlgorithm.DecryptData(bxa_enc);
-                    Assert.True(bxa_dec == a * b, $"{Environment.NewLine}{Environment.NewLine}" +
+                    Assert.True(bxa_dec == b * a, $"{Environment.NewLine}{Environment.NewLine}" +
                                                   $"Algorithm parameters (TRUE):{Environment.NewLine}" +
                                                   $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
                                                   $"a       : {a}{Environment.NewLine}{Environment.NewLine}" +
