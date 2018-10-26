@@ -1,7 +1,6 @@
-﻿using Aprismatic.BigIntegerExt;
-using System.Numerics;
+﻿using System.Numerics;
 
-namespace ElGamalExt
+namespace Aprismatic.ElGamalExt
 {
     public struct ElGamalKeyStruct
     {

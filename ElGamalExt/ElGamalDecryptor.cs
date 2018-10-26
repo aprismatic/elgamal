@@ -1,8 +1,7 @@
-﻿using Aprismatic.BigIntegerExt;
-using System;
+﻿using System;
 using System.Numerics;
 
-namespace ElGamalExt
+namespace Aprismatic.ElGamalExt
 {
     public class ElGamalDecryptor : ElGamalAbstractCipher
     {
