@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ElGamalExt
+namespace Aprismatic.ElGamalExt
 {
     [Serializable]
     public struct ElGamalParameters

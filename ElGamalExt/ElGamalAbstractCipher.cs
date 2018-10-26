@@ -1,4 +1,4 @@
-﻿namespace ElGamalExt
+﻿namespace Aprismatic.ElGamalExt
 {
     public abstract class ElGamalAbstractCipher
     {

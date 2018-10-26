@@ -1,12 +1,11 @@
-﻿using Aprismatic.BigFraction;
-using Aprismatic.BigIntegerExt;
-using System;
+﻿using System;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
+using Aprismatic.ElGamalExt.Homomorphism;
 
-namespace ElGamalExt
+namespace Aprismatic.ElGamalExt
 {
     public class ElGamal : AsymmetricAlgorithm
     {
@@ -106,12 +105,12 @@ namespace ElGamalExt
 
         public byte[] Multiply(byte[] first, byte[] second)
         {
-            return Homomorphism.ElGamalHomomorphism.Multiply(first, second, keyStruct.P.ToByteArray());
+            return ElGamalHomomorphism.Multiply(first, second, keyStruct.P.ToByteArray());
         }
 
         public byte[] Divide(byte[] first, byte[] second)
         {
-            return Homomorphism.ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
+            return ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
         }
 
         public void ImportParameters(ElGamalParameters parameters)
