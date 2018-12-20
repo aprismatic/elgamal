@@ -40,7 +40,7 @@ namespace Aprismatic.ElGamalExt
         {
             // We add 2 because last bit of a BigInteger is reserved to store its sign.
             // Therefore, theoretically, each part of ciphertext might need an extra byte to hold that one bit            
-            return getMaxPLength() * 2 + 2;
+            return getPLength() * 2 + 2;
         }
 
         public int getCiphertextLength()
@@ -48,7 +48,7 @@ namespace Aprismatic.ElGamalExt
             return getCiphertextBlocksize() * 2;
         }
 
-        public int getMaxPLength()
+        public int getPLength()
         {
             return (P.BitCount() + 7) / 8;
         }
