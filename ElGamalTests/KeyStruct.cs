@@ -24,7 +24,7 @@ namespace ElGamalTests
         }
 
         // TODO: Fix P length with respect to key size
-        // [Fact(DisplayName = "Lengths")]
+        [Fact(DisplayName = "Lengths")]
         public void TestLengths()
         {
             var rnd = new Random();
@@ -39,6 +39,7 @@ namespace ElGamalTests
                         KeySize = keySize
                     };
 
+                    //output.WriteLine(algorithm.KeyStruct.getPLength().ToString());
                     Assert.Equal(algorithm.KeySize / 8, algorithm.KeyStruct.getPLength());
 
                     algorithm.Dispose();

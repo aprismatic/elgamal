@@ -51,8 +51,11 @@ namespace Aprismatic.ElGamalExt
         {
             using (var rng = RandomNumberGenerator.Create())
             {
-                // create the large prime number, P
-                keyStruct.P = keyStruct.P.GenPseudoPrime(keyStrength, 16, rng);
+                // create the large prime number P, and regenerate P when P length is not same as KeySize
+                do
+                {
+                    keyStruct.P = keyStruct.P.GenPseudoPrime(keyStrength, 16, rng);
+                } while (keyStruct.getPLength() != keyStrength / 8);
 
                 // create the two random numbers, which are smaller than P
                 keyStruct.X = new BigInteger();
