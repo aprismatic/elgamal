@@ -23,7 +23,6 @@ namespace ElGamalTests
             rng.Dispose();
         }
 
-        // TODO: Fix P length with respect to key size
         [Fact(DisplayName = "Lengths")]
         public void TestLengths()
         {
