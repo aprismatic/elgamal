@@ -39,7 +39,6 @@ namespace ElGamalTests
                         KeySize = keySize
                     };
 
-                    //output.WriteLine(algorithm.KeyStruct.getPLength().ToString());
                     Assert.Equal(algorithm.KeySize / 8, algorithm.KeyStruct.getPLength());
 
                     algorithm.Dispose();
