@@ -9,7 +9,7 @@
     <RootNamespace>Aprismatic.ElGamalExt</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BigFraction" Version="0.1.0.9" />
+    <PackageReference Include="BigFraction" Version="0.1.0.12" />
     <PackageReference Include="BigIntegerExt" Version="0.1.3.10" />
     <PackageReference Include="ElGamalExt-Homomorphism" Version="0.10.0.23" />
   </ItemGroup>
