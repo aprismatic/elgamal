@@ -1,5 +1,6 @@
 # ElGamalExt
-[![Build status](https://ci.appveyor.com/api/projects/status/hkhymk05b1k0m217/branch/master?svg=true)](https://ci.appveyor.com/project/bazzilic/elgamalext/branch/master)
+
+![Test .NET (Windows)](https://github.com/aprismatic/elgamalext/workflows/Test%20.NET%20(Windows)/badge.svg)
 
 This project extends the .NET Framework cryptography subsystem with the [ElGamal public key cryptosystem](https://en.wikipedia.org/wiki/ElGamal_encryption) with support for homomorphic multiplication and division of integers and fractional numbers in the range ( −2<sup>127</sup>, 2<sup>127</sup> ).
 
