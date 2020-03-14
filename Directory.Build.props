@@ -1,0 +1,16 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>Aprismatic</Authors>
+    <Company>Aprismatic</Company>
+    <Copyright>(c) Aprismatic Pte. Ltd. All rights reserved.</Copyright>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageIconUrl>https://i.ibb.co/SmV2V0m/aprismatic.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/aprismatic/elgamalext</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\images\icon.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
+</Project>

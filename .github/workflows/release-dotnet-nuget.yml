@@ -1,0 +1,57 @@
+name: Release .NET NuGet
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup nuget
+      uses: nuget/setup-nuget@v1
+    - name: Update nuget source
+      run: |
+        nuget sources update -Name 'github' `
+                             -Source https://nuget.pkg.github.com/aprismatic/index.json `
+                             -UserName ${{ secrets.GithubUsername }} `
+                             -Password ${{ secrets.GithubToken }} `
+                             -ConfigFile ./nuget.config
+    - name: Restore packages
+      run: nuget restore
+    - name: Build with dotnet
+      run: dotnet build --configuration Release --no-restore
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build
+
+  publish:
+    needs: test
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Get version
+      id: get_version
+      run: |
+        tag_name=${{ github.event.release.tag_name }}
+        echo ::set-output name=VERSION::${tag_name:1}
+      shell: bash
+    - name: Setup nuget
+      uses: nuget/setup-nuget@v1
+    - name: Update nuget source
+      run: |
+        nuget sources update -Name 'github' `
+                             -Source https://nuget.pkg.github.com/aprismatic/index.json `
+                             -UserName ${{ secrets.GithubUsername }} `
+                             -Password ${{ secrets.GithubToken }} `
+                             -ConfigFile ./nuget.config
+    - name: Restore packages
+      run: nuget restore
+    - name: Build with dotnet
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.get_version.outputs.VERSION }}
+    - name: Pack nuget packages
+      run: dotnet pack --configuration Release --no-build -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+    - name: Publish nuget packages
+      run: dotnet nuget push **/*.nupkg --source "github"
