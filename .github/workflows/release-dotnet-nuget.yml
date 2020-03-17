@@ -32,12 +32,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Get version
-      id: get_version
-      run: |
-        tag_name=${{ github.event.release.tag_name }}
-        echo ::set-output name=VERSION::${tag_name:1}
-      shell: bash
     - name: Setup nuget
       uses: nuget/setup-nuget@v1
     - name: Update nuget source
@@ -50,8 +44,29 @@ jobs:
     - name: Restore packages
       run: nuget restore
     - name: Build with dotnet
-      run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.get_version.outputs.VERSION }}
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ github.event.release.tag_name }}
     - name: Pack nuget packages
-      run: dotnet pack --configuration Release --no-build -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+      run: dotnet pack --configuration Release --no-build --output nupkgs -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -p:PackageVersion=${{ github.event.release.tag_name }}
     - name: Publish nuget packages
       run: dotnet nuget push **/*.nupkg --source "github"
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: nupkgs
+        path: nupkgs
+
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: nupkgs
+        path: nupkgs
+    - name: Release artifacts
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'nupkgs/*'
