@@ -3,36 +3,32 @@ using System.Numerics;
 
 namespace Aprismatic.ElGamalExt
 {
-    public class ElGamalDecryptor : ElGamalAbstractCipher
+    public class ElGamalDecryptor
     {
+        private readonly ElGamalKeyStruct _keyStruct;
+
         public ElGamalDecryptor(ElGamalKeyStruct keyStruct)
-            : base(keyStruct)
-        { }
-
-        public BigInteger ProcessByteBlock(byte[] block)
         {
-            // extract the byte arrays that represent A and B
-            var byteLength = CiphertextBlocksize / 2;
-            var a_bytes = new byte[byteLength];
-            Array.Copy(block, 0, a_bytes, 0, a_bytes.Length);
-            var b_bytes = new byte[byteLength];
-            Array.Copy(block, block.Length - b_bytes.Length, b_bytes, 0, b_bytes.Length);
+            _keyStruct = keyStruct;
+        }
 
-            var A = new BigInteger(a_bytes);
-            var B = new BigInteger(b_bytes);
+        public BigInteger ProcessByteBlock(Span<byte> block_A, Span<byte> block_B)
+        {
+            var A = new BigInteger(block_A);
+            var B = new BigInteger(block_B);
 
-            A = BigInteger.ModPow(A, KeyStruct.X, KeyStruct.P);
-            A = A.ModInverse(KeyStruct.P);
-            var M = B * A % KeyStruct.P;
+            A = BigInteger.ModPow(A, _keyStruct.X, _keyStruct.P);
+            A = A.ModInverse(_keyStruct.P);
+            var M = B * A % _keyStruct.P;
 
             return Decode(M);
         }
 
         private BigInteger Decode(BigInteger origin)
         {
-            origin = origin % (KeyStruct.MaxRawPlaintext + 1);
-            if (origin > KeyStruct.MaxRawPlaintext / 2)
-                return origin - KeyStruct.MaxRawPlaintext - 1;
+            origin %= ElGamalKeyStruct.MaxRawPlaintext + BigInteger.One;
+            if (origin > ElGamalKeyStruct.MaxEncryptableValue)
+                return origin - ElGamalKeyStruct.MaxRawPlaintext - BigInteger.One;
             return origin;
         }
     }

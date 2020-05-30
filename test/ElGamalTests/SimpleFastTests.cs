@@ -29,10 +29,7 @@ namespace ElGamalTests
         public void TestSpecificCases()
         {
             {
-                var algorithm = new ElGamal
-                {
-                    KeySize = 384
-                };
+                var algorithm = new ElGamal(384);
 
                 var a = new BigInteger(2048);
                 var a_bytes = algorithm.EncryptData(a);
@@ -43,10 +40,7 @@ namespace ElGamalTests
             }
 
             {
-                var algorithm = new ElGamal
-                {
-                    KeySize = 384
-                };
+                var algorithm = new ElGamal(384);
 
                 var a = new BigInteger(138);
                 var a_bytes = algorithm.EncryptData(a);
@@ -60,10 +54,7 @@ namespace ElGamalTests
             { // based on https://github.com/bazzilic/PaillierExt/issues/15
                 for (var keySize = 384; keySize <= 1088; keySize += 8)
                 {
-                    var algorithm = new ElGamal
-                    {
-                        KeySize = keySize
-                    };
+                    var algorithm = new ElGamal(keySize);
 
                     var prod = algorithm.EncryptData(new BigInteger(1));
                     var three = algorithm.EncryptData(new BigInteger(3));
@@ -86,10 +77,7 @@ namespace ElGamalTests
         public void TestNegativeCases()
         {
             { // Simple negative cases
-                var algorithm = new ElGamal
-                {
-                    KeySize = 384
-                };
+                var algorithm = new ElGamal(384);
 
                 //Negative Number En/Decryption
                 var a = new BigFraction(new Decimal(-94660895));
@@ -121,10 +109,7 @@ namespace ElGamalTests
         public void TestFloatingCases()
         {
             {
-                var algorithm = new ElGamal
-                {
-                    KeySize = 384
-                };
+                var algorithm = new ElGamal(384);
 
                 //Positive Floating Point Number En/Decryption
                 var a = new BigFraction(new Decimal(12.5467));

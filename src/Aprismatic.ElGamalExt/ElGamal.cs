@@ -9,97 +9,103 @@ namespace Aprismatic.ElGamalExt
 {
     public class ElGamal : AsymmetricAlgorithm
     {
-        private ElGamalKeyStruct keyStruct;
+        private readonly ElGamalKeyStruct keyStruct;
+        private readonly ElGamalEncryptor encryptor;
+        private readonly ElGamalDecryptor decryptor;
 
-        public ElGamalKeyStruct KeyStruct
+        public ElGamal(int keySize, int precomputedQueueSize = 10)
         {
-            get
-            {
-                if (NeedToGenerateKey())
-                {
-                    CreateKeyPair(KeySizeValue);
-                }
-                return keyStruct;
-            }
-            set => keyStruct = value;
-        }
-
-        public ElGamal()
-        {
-            // create the key struct and set all of the big integers to zero
-            keyStruct = new ElGamalKeyStruct
-            {
-                P = BigInteger.Zero,
-                G = BigInteger.Zero,
-                Y = BigInteger.Zero,
-                X = BigInteger.Zero
-            };
-
-            // set the default key size value
-            KeySizeValue = 384;
-
-            // set the range of legal keys
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
+            KeySizeValue = keySize;
+            keyStruct = CreateKeyPair();
+            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(keyStruct);
         }
 
-        private bool NeedToGenerateKey()
+        public ElGamal(ElGamalParameters parameters, int precomputedQueueSize = 10)
         {
-            return (keyStruct.P == 0) && (keyStruct.G == 0) && (keyStruct.Y == 0);
+            LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
+
+            keyStruct = new ElGamalKeyStruct(
+                new BigInteger(parameters.P),
+                new BigInteger(parameters.G),
+                new BigInteger(parameters.Y),
+                (parameters.X?.Length ?? 0) > 0 ? new BigInteger(parameters.X) : BigInteger.Zero
+            );
+
+            KeySizeValue = keyStruct.PLength * 8;
+
+            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(keyStruct);
         }
 
-        private void CreateKeyPair(int keyStrength)
+        public ElGamal(string Xml, int precomputedQueueSize = 10)
         {
+            LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
+
+            var prms = new ElGamalParameters();
+            var keyValues = XDocument.Parse(Xml).Element("ElGamalKeyValue");
+            prms.P = Convert.FromBase64String((String)keyValues.Element("P") ?? "");
+            prms.G = Convert.FromBase64String((String)keyValues.Element("G") ?? "");
+            prms.Y = Convert.FromBase64String((String)keyValues.Element("Y") ?? "");
+            prms.X = Convert.FromBase64String((String)keyValues.Element("X") ?? "");
+
+            keyStruct = new ElGamalKeyStruct(
+                new BigInteger(prms.P),
+                new BigInteger(prms.G),
+                new BigInteger(prms.Y),
+                new BigInteger(prms.X)
+            );
+
+            KeySizeValue = keyStruct.PLength * 8;
+
+            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(keyStruct);
+        }
+
+        public int MaxPlaintextBits => ElGamalKeyStruct.MaxPlaintextBits;
+
+        private ElGamalKeyStruct CreateKeyPair()
+        {
+            BigInteger P, G, Y, X;
+
             using (var rng = RandomNumberGenerator.Create())
             {
-                // create the large prime number P, and regenerate P when P length is not same as KeySize
+                // create the large prime number P, and regenerate P when P length is not same as KeySize in bytes
                 do
                 {
-                    keyStruct.P = keyStruct.P.GenPseudoPrime(keyStrength, 16, rng);
-                } while (keyStruct.getPLength() != keyStrength / 8);
+                    P = BigInteger.Zero.GenPseudoPrime(KeySizeValue, 16, rng);
+                } while (P.BitCount() < KeySizeValue - 7);
 
                 // create the two random numbers, which are smaller than P
-                keyStruct.X = new BigInteger();
-                keyStruct.X = keyStruct.X.GenRandomBits(keyStrength - 1, rng);
-                keyStruct.G = new BigInteger();
-                keyStruct.G = keyStruct.G.GenRandomBits(keyStrength - 1, rng);
+                X = BigInteger.Zero.GenRandomBits(KeySizeValue - 1, rng);
+                G = BigInteger.Zero.GenRandomBits(KeySizeValue - 1, rng);
 
-                // compute Y
-                keyStruct.Y = BigInteger.ModPow(keyStruct.G, keyStruct.X, keyStruct.P);
+                Y = BigInteger.ModPow(G, X, P);
             }
+
+            return new ElGamalKeyStruct(P, G, Y, X);
         }
 
         public byte[] EncryptData(BigFraction message)
         {
-            if (NeedToGenerateKey())
-            {
-                CreateKeyPair(KeySizeValue);
-            }
+            var ctbs = keyStruct.CiphertextBlocksize;
+            var array = new byte[ctbs * 2];
 
-            using (var encryptor = new ElGamalEncryptor(keyStruct))
-            {
-                var numerator = encryptor.ProcessBigInteger(message.Numerator);
-                var denominator = encryptor.ProcessBigInteger(message.Denominator);
-                var array = new byte[numerator.Length * 2];
-                Array.Copy(numerator, 0, array, 0, numerator.Length);
-                Array.Copy(denominator, 0, array, array.Length / 2, denominator.Length);
-                return array;
-            }
+            encryptor.ProcessBigInteger(message.Numerator, array.AsSpan(0, ctbs));
+            encryptor.ProcessBigInteger(message.Denominator, array.AsSpan(ctbs, ctbs));
+
+            return array;
         }
 
         public BigFraction DecryptData(byte[] data)
         {
-            if (NeedToGenerateKey())
-            {
-                CreateKeyPair(KeySizeValue);
-            }
+            var halfblock = data.Length >> 1;
+            var quarterblock = halfblock >> 1;
+            var dsp = data.AsSpan();
 
-            var decryptor = new ElGamalDecryptor(keyStruct);
-
-            var temp = new byte[data.Length / 2];
-            Array.Copy(data, temp, data.Length / 2);
-            var numerator = decryptor.ProcessByteBlock(temp);
-            Array.Copy(data, data.Length / 2, temp, 0, data.Length / 2);
-            var denominator = decryptor.ProcessByteBlock(temp);
+            var numerator = decryptor.ProcessByteBlock(dsp.Slice(0, quarterblock), dsp.Slice(quarterblock, quarterblock));
+            var denominator = decryptor.ProcessByteBlock(dsp.Slice(halfblock, quarterblock), dsp.Slice(halfblock + quarterblock, quarterblock));
 
             var res = new BigFraction(numerator, denominator);
 
@@ -116,47 +122,18 @@ namespace Aprismatic.ElGamalExt
             return ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
         }
 
-        public void ImportParameters(ElGamalParameters parameters)
-        {
-            // obtain the  big integer values from the byte parameter values
-            keyStruct.P = new BigInteger(parameters.P);
-            keyStruct.G = new BigInteger(parameters.G);
-            keyStruct.Y = new BigInteger(parameters.Y);
-
-            if (parameters.X != null && parameters.X.Length > 0)
-            {
-                keyStruct.X = new BigInteger(parameters.X);
-            }
-
-            // set the length of the key based on the import
-            KeySizeValue = keyStruct.P.BitCount();
-        }
-
         public ElGamalParameters ExportParameters(bool includePrivateParams)
         {
-            if (NeedToGenerateKey())
-            {
-                CreateKeyPair(KeySizeValue);
-            }
-
-            // create the parameter set and set the public values of the parameters
+            // set the public values of the parameters
             var prms = new ElGamalParameters
             {
                 P = keyStruct.P.ToByteArray(),
                 G = keyStruct.G.ToByteArray(),
-                Y = keyStruct.Y.ToByteArray()
+                Y = keyStruct.Y.ToByteArray(),
+                X = includePrivateParams           // if required, include the private value, X
+                    ? keyStruct.X.ToByteArray()
+                    : new byte[1]
             };
-
-            // if required, include the private value, X
-            if (includePrivateParams)
-            {
-                prms.X = keyStruct.X.ToByteArray();
-            }
-            else
-            {
-                // ensure that we zero the value
-                prms.X = new byte[1];
-            }
 
             return prms;
         }
@@ -184,18 +161,9 @@ namespace Aprismatic.ElGamalExt
             return sb.ToString();
         }
 
-        public override void FromXmlString(string str)
+        public new void Dispose()
         {
-            var prms = new ElGamalParameters();
-
-            var keyValues = XDocument.Parse(str).Element("ElGamalKeyValue");
-
-            prms.P = Convert.FromBase64String((String)keyValues.Element("P") ?? "");
-            prms.G = Convert.FromBase64String((String)keyValues.Element("G") ?? "");
-            prms.Y = Convert.FromBase64String((String)keyValues.Element("Y") ?? "");
-            prms.X = Convert.FromBase64String((String)keyValues.Element("X") ?? "");
-
-            ImportParameters(prms);
+            encryptor.Dispose();
         }
     }
 }

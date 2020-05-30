@@ -32,19 +32,14 @@ namespace ElGamalTests
             {
                 for (var keySize = 384; keySize <= 1088; keySize += 8)
                 {
-                    var algorithm = new ElGamal
-                    {
-                        KeySize = keySize
-                    };
+                    var algorithm = new ElGamal(keySize);
 
-                    var encryptAlgorithm = new ElGamal();
-                    encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+                    var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
 
-                    var decryptAlgorithm = new ElGamal();
-                    decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+                    var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
-                    var n = new BigInteger().GenRandomBits(rnd.Next(1, algorithm.KeyStruct.getMaxPlaintextBits() - 1), rng);
-                    var d = new BigInteger().GenRandomBits(rnd.Next(1, algorithm.KeyStruct.getMaxPlaintextBits() - 1), rng);
+                    var n = new BigInteger().GenRandomBits(rnd.Next(1, algorithm.MaxPlaintextBits - 1), rng);
+                    var d = new BigInteger().GenRandomBits(rnd.Next(1, algorithm.MaxPlaintextBits - 1), rng);
                     var f = new BigFraction(n, d);
                     if (rnd.Next() % 2 == 0) // random sign
                         f *= -1;
