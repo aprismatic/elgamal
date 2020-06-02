@@ -6,39 +6,26 @@ using Xunit.Abstractions;
 
 namespace ElGamalTests
 {
-    public class KeyStruct : IDisposable
+    public class KeyStruct
     {
         private readonly ITestOutputHelper output;
-
-        private readonly Random rnd = new Random();
-        private readonly RandomNumberGenerator rng = new RNGCryptoServiceProvider();
 
         public KeyStruct(ITestOutputHelper output)
         {
             this.output = output;
         }
 
-        public void Dispose()
-        {
-            rng.Dispose();
-        }
-
         [Fact(DisplayName = "Lengths")]
         public void TestLengths()
         {
-            var rnd = new Random();
-            var rng = new RNGCryptoServiceProvider();
-
             for (var i = 0; i < Globals.iterations; i++)
             {
                 for (var keySize = 384; keySize <= 1088; keySize += 8)
                 {
-                    var algorithm = new ElGamal
-                    {
-                        KeySize = keySize
-                    };
+                    var algorithm = new ElGamal(keySize);
+                    var prms = algorithm.ExportParameters(false);
 
-                    Assert.Equal(algorithm.KeySize / 8, algorithm.KeyStruct.getPLength());
+                    Assert.Equal(algorithm.KeySize / 8, prms.P.Length);
 
                     algorithm.Dispose();
                 }

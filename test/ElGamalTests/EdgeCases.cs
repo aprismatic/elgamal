@@ -30,16 +30,11 @@ namespace ElGamalTests
         {
             for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
-                var algorithm = new ElGamal
-                {
-                    KeySize = keySize
-                };
+                var algorithm = new ElGamal(keySize);
 
-                var encryptAlgorithm = new ElGamal();
-                encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+                var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
 
-                var decryptAlgorithm = new ElGamal();
-                decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+                var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
                 var z = new BigInteger(0);
                 var r = new BigInteger(rnd.Next(1, 65536));
@@ -72,16 +67,11 @@ namespace ElGamalTests
         {
             for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
-                var algorithm = new ElGamal
-                {
-                    KeySize = keySize
-                };
+                var algorithm = new ElGamal(keySize);
 
-                var encryptAlgorithm = new ElGamal();
-                encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+                var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
 
-                var decryptAlgorithm = new ElGamal();
-                decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+                var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
                 var o = new BigInteger(1);
                 var r = new BigInteger(rnd.Next(2, 65536));
@@ -122,16 +112,11 @@ namespace ElGamalTests
 
             for (var keySize = 384; keySize <= 1088; keySize += 8)
             {
-                var algorithm = new ElGamal
-                {
-                    KeySize = keySize
-                };
+                var algorithm = new ElGamal(keySize);
 
-                var encryptAlgorithm = new ElGamal();
-                encryptAlgorithm.FromXmlString(algorithm.ToXmlString(false));
+                var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
 
-                var decryptAlgorithm = new ElGamal();
-                decryptAlgorithm.FromXmlString(algorithm.ToXmlString(true));
+                var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
 
                 // MAX
