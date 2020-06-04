@@ -13,6 +13,11 @@ namespace Aprismatic.ElGamalExt
         private readonly ElGamalEncryptor encryptor;
         private readonly ElGamalDecryptor decryptor;
 
+        public int MaxPlaintextBits => ElGamalKeyStruct.MaxPlaintextBits;
+        public BigInteger P => keyStruct.P;
+        public int PLength => keyStruct.PLength;
+        public int CiphertextLength => keyStruct.CiphertextLength;
+
         public ElGamal(int keySize, int precomputedQueueSize = 10)
         {
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
@@ -62,8 +67,6 @@ namespace Aprismatic.ElGamalExt
             encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
             decryptor = new ElGamalDecryptor(keyStruct);
         }
-
-        public int MaxPlaintextBits => ElGamalKeyStruct.MaxPlaintextBits;
 
         private ElGamalKeyStruct CreateKeyPair()
         {
