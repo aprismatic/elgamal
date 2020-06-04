@@ -1,6 +1,4 @@
-﻿using System;
-using System.Security.Cryptography;
-using Aprismatic.ElGamalExt;
+﻿using Aprismatic.ElGamalExt;
 using Xunit;
 using Xunit.Abstractions;
 

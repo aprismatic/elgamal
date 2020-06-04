@@ -9,34 +9,38 @@ namespace Aprismatic.ElGamalExt
 {
     public class ElGamal : AsymmetricAlgorithm
     {
-        public ElGamalKeyStruct KeyStruct { get; }
+        private readonly ElGamalKeyStruct keyStruct;
         private readonly ElGamalEncryptor encryptor;
         private readonly ElGamalDecryptor decryptor;
+
+        public BigInteger P => keyStruct.P;
+        public int PLength => keyStruct.PLength;
+        public int CiphertextLength => keyStruct.CiphertextLength;
 
         public ElGamal(int keySize, int precomputedQueueSize = 10)
         {
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
             KeySizeValue = keySize;
-            KeyStruct = CreateKeyPair();
-            encryptor = new ElGamalEncryptor(KeyStruct, precomputedQueueSize);
-            decryptor = new ElGamalDecryptor(KeyStruct);
+            keyStruct = CreateKeyPair();
+            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(keyStruct);
         }
 
         public ElGamal(ElGamalParameters parameters, int precomputedQueueSize = 10)
         {
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
 
-            KeyStruct = new ElGamalKeyStruct(
+            keyStruct = new ElGamalKeyStruct(
                 new BigInteger(parameters.P),
                 new BigInteger(parameters.G),
                 new BigInteger(parameters.Y),
                 (parameters.X?.Length ?? 0) > 0 ? new BigInteger(parameters.X) : BigInteger.Zero
             );
 
-            KeySizeValue = KeyStruct.PLength * 8;
+            KeySizeValue = keyStruct.PLength * 8;
 
-            encryptor = new ElGamalEncryptor(KeyStruct, precomputedQueueSize);
-            decryptor = new ElGamalDecryptor(KeyStruct);
+            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(keyStruct);
         }
 
         public ElGamal(string Xml, int precomputedQueueSize = 10)
@@ -50,17 +54,17 @@ namespace Aprismatic.ElGamalExt
             prms.Y = Convert.FromBase64String((String)keyValues.Element("Y") ?? "");
             prms.X = Convert.FromBase64String((String)keyValues.Element("X") ?? "");
 
-            KeyStruct = new ElGamalKeyStruct(
+            keyStruct = new ElGamalKeyStruct(
                 new BigInteger(prms.P),
                 new BigInteger(prms.G),
                 new BigInteger(prms.Y),
                 new BigInteger(prms.X)
             );
 
-            KeySizeValue = KeyStruct.PLength * 8;
+            KeySizeValue = keyStruct.PLength * 8;
 
-            encryptor = new ElGamalEncryptor(KeyStruct, precomputedQueueSize);
-            decryptor = new ElGamalDecryptor(KeyStruct);
+            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(keyStruct);
         }
 
         public int MaxPlaintextBits => ElGamalKeyStruct.MaxPlaintextBits;
@@ -89,7 +93,7 @@ namespace Aprismatic.ElGamalExt
 
         public byte[] EncryptData(BigFraction message)
         {
-            var ctbs = KeyStruct.CiphertextBlocksize;
+            var ctbs = keyStruct.CiphertextBlocksize;
             var array = new byte[ctbs * 2];
 
             encryptor.ProcessBigInteger(message.Numerator, array.AsSpan(0, ctbs));
@@ -114,12 +118,12 @@ namespace Aprismatic.ElGamalExt
 
         public byte[] Multiply(byte[] first, byte[] second)
         {
-            return ElGamalHomomorphism.Multiply(first, second, KeyStruct.P.ToByteArray());
+            return ElGamalHomomorphism.Multiply(first, second, keyStruct.P.ToByteArray());
         }
 
         public byte[] Divide(byte[] first, byte[] second)
         {
-            return ElGamalHomomorphism.Divide(first, second, KeyStruct.P.ToByteArray());
+            return ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
         }
 
         public ElGamalParameters ExportParameters(bool includePrivateParams)
@@ -127,11 +131,11 @@ namespace Aprismatic.ElGamalExt
             // set the public values of the parameters
             var prms = new ElGamalParameters
             {
-                P = KeyStruct.P.ToByteArray(),
-                G = KeyStruct.G.ToByteArray(),
-                Y = KeyStruct.Y.ToByteArray(),
+                P = keyStruct.P.ToByteArray(),
+                G = keyStruct.G.ToByteArray(),
+                Y = keyStruct.Y.ToByteArray(),
                 X = includePrivateParams           // if required, include the private value, X
-                    ? KeyStruct.X.ToByteArray()
+                    ? keyStruct.X.ToByteArray()
                     : new byte[1]
             };
 
