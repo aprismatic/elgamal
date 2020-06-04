@@ -9,7 +9,7 @@ namespace Aprismatic.ElGamalExt
 {
     public class ElGamal : AsymmetricAlgorithm
     {
-        private readonly ElGamalKeyStruct keyStruct;
+        public ElGamalKeyStruct KeyStruct { get; }
         private readonly ElGamalEncryptor encryptor;
         private readonly ElGamalDecryptor decryptor;
 
@@ -17,26 +17,26 @@ namespace Aprismatic.ElGamalExt
         {
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
             KeySizeValue = keySize;
-            keyStruct = CreateKeyPair();
-            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
-            decryptor = new ElGamalDecryptor(keyStruct);
+            KeyStruct = CreateKeyPair();
+            encryptor = new ElGamalEncryptor(KeyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(KeyStruct);
         }
 
         public ElGamal(ElGamalParameters parameters, int precomputedQueueSize = 10)
         {
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
 
-            keyStruct = new ElGamalKeyStruct(
+            KeyStruct = new ElGamalKeyStruct(
                 new BigInteger(parameters.P),
                 new BigInteger(parameters.G),
                 new BigInteger(parameters.Y),
                 (parameters.X?.Length ?? 0) > 0 ? new BigInteger(parameters.X) : BigInteger.Zero
             );
 
-            KeySizeValue = keyStruct.PLength * 8;
+            KeySizeValue = KeyStruct.PLength * 8;
 
-            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
-            decryptor = new ElGamalDecryptor(keyStruct);
+            encryptor = new ElGamalEncryptor(KeyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(KeyStruct);
         }
 
         public ElGamal(string Xml, int precomputedQueueSize = 10)
@@ -50,17 +50,17 @@ namespace Aprismatic.ElGamalExt
             prms.Y = Convert.FromBase64String((String)keyValues.Element("Y") ?? "");
             prms.X = Convert.FromBase64String((String)keyValues.Element("X") ?? "");
 
-            keyStruct = new ElGamalKeyStruct(
+            KeyStruct = new ElGamalKeyStruct(
                 new BigInteger(prms.P),
                 new BigInteger(prms.G),
                 new BigInteger(prms.Y),
                 new BigInteger(prms.X)
             );
 
-            KeySizeValue = keyStruct.PLength * 8;
+            KeySizeValue = KeyStruct.PLength * 8;
 
-            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
-            decryptor = new ElGamalDecryptor(keyStruct);
+            encryptor = new ElGamalEncryptor(KeyStruct, precomputedQueueSize);
+            decryptor = new ElGamalDecryptor(KeyStruct);
         }
 
         public int MaxPlaintextBits => ElGamalKeyStruct.MaxPlaintextBits;
@@ -89,7 +89,7 @@ namespace Aprismatic.ElGamalExt
 
         public byte[] EncryptData(BigFraction message)
         {
-            var ctbs = keyStruct.CiphertextBlocksize;
+            var ctbs = KeyStruct.CiphertextBlocksize;
             var array = new byte[ctbs * 2];
 
             encryptor.ProcessBigInteger(message.Numerator, array.AsSpan(0, ctbs));
@@ -114,12 +114,12 @@ namespace Aprismatic.ElGamalExt
 
         public byte[] Multiply(byte[] first, byte[] second)
         {
-            return ElGamalHomomorphism.Multiply(first, second, keyStruct.P.ToByteArray());
+            return ElGamalHomomorphism.Multiply(first, second, KeyStruct.P.ToByteArray());
         }
 
         public byte[] Divide(byte[] first, byte[] second)
         {
-            return ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
+            return ElGamalHomomorphism.Divide(first, second, KeyStruct.P.ToByteArray());
         }
 
         public ElGamalParameters ExportParameters(bool includePrivateParams)
@@ -127,11 +127,11 @@ namespace Aprismatic.ElGamalExt
             // set the public values of the parameters
             var prms = new ElGamalParameters
             {
-                P = keyStruct.P.ToByteArray(),
-                G = keyStruct.G.ToByteArray(),
-                Y = keyStruct.Y.ToByteArray(),
+                P = KeyStruct.P.ToByteArray(),
+                G = KeyStruct.G.ToByteArray(),
+                Y = KeyStruct.Y.ToByteArray(),
                 X = includePrivateParams           // if required, include the private value, X
-                    ? keyStruct.X.ToByteArray()
+                    ? KeyStruct.X.ToByteArray()
                     : new byte[1]
             };
 
