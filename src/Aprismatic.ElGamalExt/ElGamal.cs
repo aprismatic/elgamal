@@ -18,6 +18,7 @@ namespace Aprismatic.ElGamalExt
         public int PLength => keyStruct.PLength;
         public int CiphertextLength => keyStruct.CiphertextLength;
 
+
         // TODO: Constructors should allow to specify MaxPlaintextBits
         public ElGamal(int keySize, int precomputedQueueSize = 10) // TODO: Constructor should probably optionally accept an RNG
         {
