@@ -82,10 +82,10 @@ namespace Aprismatic.ElGamalExt
             return (gkp, ykp);
         }
 
-        public void ProcessBigInteger(BigInteger message, Span<byte> WriteTo)
+        public void ProcessBigInteger(BigInteger message, Span<byte> writeTo)
         {
-            if (BigInteger.Abs(message) > ElGamalKeyStruct.MaxEncryptableValue)
-                throw new ArgumentException($"Message to encrypt is too large. Message should be |m| < 2^{ElGamalKeyStruct.MaxPlaintextBits - 1}");
+            if (BigInteger.Abs(message) > _keyStruct.MaxEncryptableValue)
+                throw new ArgumentException($"Message to encrypt is too large. Message should be |m| < 2^{_keyStruct.MaxPlaintextBits - 1}");
 
             if (!_isPrecomputed || !_encPrecomputedChannel.Reader.TryRead(out var vp))
                 vp = ComputeValuePair();
@@ -95,14 +95,14 @@ namespace Aprismatic.ElGamalExt
             var B = ykp * Encode(message) % _keyStruct.P;
 
             var halfblock = _keyStruct.CiphertextBlocksize >> 1;
-            A.TryWriteBytes(WriteTo.Slice(0, halfblock), out _);
-            B.TryWriteBytes(WriteTo.Slice(halfblock, halfblock), out _);
+            A.TryWriteBytes(writeTo.Slice(0, halfblock), out _);
+            B.TryWriteBytes(writeTo.Slice(halfblock, halfblock), out _);
         }
 
-        private BigInteger Encode(BigInteger origin)
+        public BigInteger Encode(BigInteger origin) // TODO: Add tests now that this method is public
         {
             if (origin.Sign < 0)
-                return ElGamalKeyStruct.MaxRawPlaintext + origin + BigInteger.One;
+                return _keyStruct.MaxRawPlaintext + origin + BigInteger.One;
             return origin;
         }
 
