@@ -24,11 +24,11 @@ namespace Aprismatic.ElGamalExt
             return Decode(M);
         }
 
-        private BigInteger Decode(BigInteger origin)
+        public BigInteger Decode(BigInteger origin) // TODO: Add tests now that this method is public
         {
-            origin %= ElGamalKeyStruct.MaxRawPlaintext + BigInteger.One;
-            if (origin > ElGamalKeyStruct.MaxEncryptableValue)
-                return origin - ElGamalKeyStruct.MaxRawPlaintext - BigInteger.One;
+            origin %= _keyStruct.MaxRawPlaintext + BigInteger.One;
+            if (origin > _keyStruct.MaxEncryptableValue)
+                return origin - _keyStruct.MaxRawPlaintext - BigInteger.One;
             return origin;
         }
     }
