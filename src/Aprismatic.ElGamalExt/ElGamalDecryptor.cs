@@ -21,15 +21,7 @@ namespace Aprismatic.ElGamalExt
             A = A.ModInverse(_keyStruct.P);
             var M = B * A % _keyStruct.P;
 
-            return Decode(M);
-        }
-
-        public BigInteger Decode(BigInteger origin) // TODO: Add tests now that this method is public
-        {
-            origin %= _keyStruct.MaxRawPlaintext + BigInteger.One;
-            if (origin > _keyStruct.MaxEncryptableValue)
-                return origin - _keyStruct.MaxRawPlaintext - BigInteger.One;
-            return origin;
+            return M;
         }
     }
 }
