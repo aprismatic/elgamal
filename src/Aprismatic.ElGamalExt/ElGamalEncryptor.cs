@@ -67,14 +67,12 @@ namespace Aprismatic.ElGamalExt
         {
             BigInteger K;
 
+            // Generate the private key: a random number > 1 and < P-1
+            var PminusOne = _keyStruct.P - BigInteger.One;
+            do
             {
-                var KSize = _keyStruct.PBitCount - 1;
-                var PMinusOne = _keyStruct.P - BigInteger.One;
-                do
-                {
-                    K = BigInteger.Zero.GenRandomBits(KSize, _rng);
-                } while (!BigInteger.GreatestCommonDivisor(K, PMinusOne).IsOne);
-            }
+                K = BigInteger.Zero.GenRandomBits(_keyStruct.PBitCount, _rng);
+            } while (K <= BigInteger.One || K >= PminusOne);
 
             var gkp = BigInteger.ModPow(_keyStruct.G, K, _keyStruct.P);
             var ykp = BigInteger.ModPow(_keyStruct.Y, K, _keyStruct.P);
@@ -82,28 +80,18 @@ namespace Aprismatic.ElGamalExt
             return (gkp, ykp);
         }
 
-        public void ProcessBigInteger(BigInteger message, Span<byte> writeTo)
+        public void ProcessBigInteger(BigInteger encodedMessage, Span<byte> writeTo)
         {
-            if (BigInteger.Abs(message) > _keyStruct.MaxEncryptableValue)
-                throw new ArgumentException($"Message to encrypt is too large. Message should be |m| < 2^{_keyStruct.MaxPlaintextBits - 1}");
-
             if (!_isPrecomputed || !_encPrecomputedChannel.Reader.TryRead(out var vp))
                 vp = ComputeValuePair();
             var (gkp, ykp) = vp;
 
             var A = gkp;
-            var B = ykp * Encode(message) % _keyStruct.P;
+            var B = (ykp * encodedMessage) % _keyStruct.P;
 
             var halfblock = _keyStruct.CiphertextBlocksize >> 1;
-            A.TryWriteBytes(writeTo.Slice(0, halfblock), out _);
-            B.TryWriteBytes(writeTo.Slice(halfblock, halfblock), out _);
-        }
-
-        public BigInteger Encode(BigInteger origin) // TODO: Add tests now that this method is public
-        {
-            if (origin.Sign < 0)
-                return _keyStruct.MaxRawPlaintext + origin + BigInteger.One;
-            return origin;
+            A.TryWriteBytes(writeTo[..halfblock], out _);
+            B.TryWriteBytes(writeTo[halfblock..], out _);
         }
 
         public void Dispose()

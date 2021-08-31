@@ -10,8 +10,8 @@ namespace Aprismatic.ElGamalExt
     public struct ElGamalKeyStruct
     {
         // PUBLIC KEY
-        public readonly BigInteger P;
-        public readonly BigInteger G;
+        public readonly BigInteger P; // Moduluus of the cyclic group
+        public readonly BigInteger G; // Generator of the group
         public readonly BigInteger Y;
         public readonly int MaxPlaintextBits;
 
