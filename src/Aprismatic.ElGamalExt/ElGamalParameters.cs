@@ -26,17 +26,17 @@ namespace Aprismatic.ElGamalExt
             // PARSE THE PUBLIC KEY PORTION
             var kvelP = kv.Element("P");
             if(kvelP == null)
-                throw new ArgumentException("Provided XML does not have a public key value P");
+                throw new ArgumentException("Provided XML does not have a public key value `P`");
             res.P = Convert.FromBase64String(kvelP.Value);
 
             var kvelG = kv.Element("G");
             if (kvelG == null)
-                throw new ArgumentException("Provided XML does not have a public key value G");
+                throw new ArgumentException("Provided XML does not have a public key value `G`");
             res.G = Convert.FromBase64String(kvelG.Value);
 
             var kvelY = kv.Element("Y");
             if (kvelY == null)
-                throw new ArgumentException("Provided XML does not have a public key value Y");
+                throw new ArgumentException("Provided XML does not have a public key value `Y`");
             res.Y = Convert.FromBase64String(kvelY.Value);
 
             var kvelMPB = kv.Element("MaxPlaintextBits");

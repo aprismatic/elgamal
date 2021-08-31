@@ -13,6 +13,7 @@ namespace Aprismatic.ElGamalExt
         private readonly ElGamalDecryptor decryptor;
 
         public int MaxPlaintextBits => keyStruct.MaxPlaintextBits;
+        public BigInteger MaxEncryptableValue => keyStruct.MaxEncryptableValue;
         public BigInteger P => keyStruct.P;
         public int PLength => keyStruct.PLength;
         public int CiphertextLength => keyStruct.CiphertextLength;
@@ -51,30 +52,51 @@ namespace Aprismatic.ElGamalExt
 
         private ElGamalKeyStruct CreateKeyPair(int maxptbits) // TODO: This method should probably move to KeyStruct
         {
+            // Good reading on the topic: https://ibm.github.io/system-security-research-updates/2021/07/20/insecurity-elgamal-pt1
+
             BigInteger P, G, Y, X;
+            var bitwo = new BigInteger(2);
+            BigInteger Q, PminusOne;
 
             using var rng = RandomNumberGenerator.Create();
 
-            // create the large prime number P, and regenerate P when P length is not same as KeySize in bytes
+            // Generate a large safe prime number P, and regenerate P when it is not same as KeySize in bytes
             do
             {
-                P = BigInteger.Zero.GenPseudoPrime(KeySizeValue, 16, rng);
-            } while (P.BitCount() < KeySizeValue - 7);
+                do
+                {
+                    Q = BigInteger.Zero.GenPseudoPrime(KeySizeValue - 1, 16, rng);
+                } while (Q.BitCount() != KeySizeValue - 1);
+                PminusOne = bitwo * Q;
+                P = PminusOne + BigInteger.One;
+            } while (P.BitCount() != KeySizeValue && !P.IsProbablePrime(16));
 
-            // create the two random numbers, which are smaller than P
-            X = BigInteger.Zero.GenRandomBits(KeySizeValue - 1, rng);
-            G = BigInteger.Zero.GenRandomBits(KeySizeValue - 1, rng);
+            // Find a generator (= a primitive root of group mod P)
+            // G is a primitive root if for all prime factors of P-1, P[i], G^((P-1)/P[i]) (mod P) is not congruent to 1
+            // Prime factors of (P-1) are 2 and (P-1)/2 because P = 2Q + 1, and Q is prime
+            for (G = bitwo; G < PminusOne; G++)
+            {
+                if (!BigInteger.ModPow(G, 2, P).IsOne && !BigInteger.ModPow(G, Q, P).IsOne)
+                    break;
+            }
 
+            // Generate the private key: a random number > 1 and < P-1
+            do
+            {
+                X = BigInteger.Zero.GenRandomBits(KeySizeValue, rng);
+            } while (X <= BigInteger.One || X >= PminusOne);
+
+            // Generate the public key G^X mod P
             Y = BigInteger.ModPow(G, X, P);
 
             return new ElGamalKeyStruct(P, G, Y, X, maxptbits);
         }
 
-        // TODO: Consider moving Encode and Decode to a separate class library. This way, MultiplyBy and DivideBy can be moved down to Homomorphism library
+        // TODO: Consider moving Encode and Decode to a separate class library or to Homomorphism. This way, plaintext operations can be moved down to Homomorphism library
         public BigInteger Encode(BigInteger message) // TODO: Add tests now that this method is public
         {
             if (BigInteger.Abs(message) > keyStruct.MaxEncryptableValue)
-                throw new ArgumentException($"Message to encrypt is too large. Message should be |m| < 2^{keyStruct.MaxPlaintextBits - 1}");
+                throw new ArgumentException($"Numerator or denominator of the fraction to encrypt are too large; should be |m| < 2^{keyStruct.MaxPlaintextBits - 1}");
 
             if (message.Sign < 0)
                 return keyStruct.MaxRawPlaintext + message + BigInteger.One;
@@ -115,18 +137,12 @@ namespace Aprismatic.ElGamalExt
             return res;
         }
 
-        public byte[] Multiply(byte[] first, byte[] second)
-        {
-            return ElGamalHomomorphism.Multiply(first, second, keyStruct.P.ToByteArray());
-        }
+        public byte[] Multiply(byte[] first, byte[] second) => ElGamalHomomorphism.Multiply(first, second, keyStruct.P.ToByteArray());
 
-        public byte[] Divide(byte[] first, byte[] second)
-        {
-            return ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
-        }
+        public byte[] Divide(byte[] first, byte[] second) => ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
 
-        // TODO: Examine ways of moving this to the Homomorphism class library
-        public byte[] MultiplyByPlaintext(byte[] first, BigFraction second) // TODO: Add overloads for BigInteger, Int32, Int64; same for DivideByPlaintext
+        // TODO: Examine ways of moving plaintext ops implementations to the Homomorphism class library
+        public byte[] PlaintextMultiply(byte[] first, BigFraction second) // TODO: Add overloads for BigInteger, Int32, Int64; same for PlaintextDivide
         {
             var res = new byte[first.Length];
             var ressp = res.AsSpan();
@@ -150,9 +166,37 @@ namespace Aprismatic.ElGamalExt
             return res;
         }
 
-        public byte[] DivideByPlaintext(byte[] first, BigFraction second)
+        public byte[] PlaintextDivide(byte[] first, BigFraction second) => PlaintextMultiply(first, new BigFraction(second.Denominator, second.Numerator));
+
+        public byte[] PlaintextPow(byte[] first, int exp)
         {
-            return MultiplyByPlaintext(first, new BigFraction(second.Denominator, second.Numerator));
+            if (exp < 0) throw new ArgumentOutOfRangeException(nameof(exp), "Exponent should be >= 0");
+
+            var halfblock = first.Length >> 1;
+            var quarterblock = halfblock >> 1;
+
+            var fsp = first.AsSpan();
+
+            var nba_bi = new BigInteger(fsp[..quarterblock]);
+            var nbb_bi = new BigInteger(fsp[quarterblock..halfblock]);
+            var dba_bi = new BigInteger(fsp[halfblock..(halfblock + quarterblock)]);
+            var dbb_bi = new BigInteger(fsp[(halfblock + quarterblock)..]);
+
+            var exp_bi = new BigInteger(exp);
+            nba_bi = BigInteger.ModPow(nba_bi, exp_bi, keyStruct.P);
+            nbb_bi = BigInteger.ModPow(nbb_bi, exp_bi, keyStruct.P);
+            dba_bi = BigInteger.ModPow(dba_bi, exp_bi, keyStruct.P);
+            dbb_bi = BigInteger.ModPow(dbb_bi, exp_bi, keyStruct.P);
+
+            var res = new byte[first.Length];
+            var ressp = res.AsSpan();
+
+            nba_bi.TryWriteBytes(ressp[..quarterblock], out _);
+            nbb_bi.TryWriteBytes(ressp[quarterblock..halfblock], out _);
+            dba_bi.TryWriteBytes(ressp[halfblock..(halfblock + quarterblock)], out _);
+            dbb_bi.TryWriteBytes(ressp[(halfblock + quarterblock)..], out _);
+
+            return res;
         }
 
         public ElGamalParameters ExportParameters(bool includePrivateParams) => keyStruct.ExportParameters(includePrivateParams);

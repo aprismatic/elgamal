@@ -15,9 +15,18 @@ namespace ElGamalTests
         private readonly Random rnd = new Random();
         private readonly RandomNumberGenerator rng = new RNGCryptoServiceProvider();
 
+        private readonly int minKeySize;
+        private readonly int maxKeySize;
+        private readonly int step;
+
         public SimpleFastTests(ITestOutputHelper output)
         {
             this.output = output;
+
+            using var tmpElG = new ElGamal(512, 0);
+            minKeySize = tmpElG.LegalKeySizes[0].MinSize;
+            maxKeySize = tmpElG.LegalKeySizes[0].MaxSize;
+            step = (maxKeySize - minKeySize) / tmpElG.LegalKeySizes[0].SkipSize;
         }
 
         public void Dispose()
@@ -29,7 +38,7 @@ namespace ElGamalTests
         public void TestSpecificCases()
         {
             {
-                var algorithm = new ElGamal(384);
+                var algorithm = new ElGamal(minKeySize);
 
                 var a = new BigInteger(2048);
                 var a_bytes = algorithm.EncryptData(a);
@@ -40,7 +49,7 @@ namespace ElGamalTests
             }
 
             {
-                var algorithm = new ElGamal(384);
+                var algorithm = new ElGamal(minKeySize);
 
                 var a = new BigInteger(138);
                 var a_bytes = algorithm.EncryptData(a);
@@ -52,9 +61,9 @@ namespace ElGamalTests
             }
 
             { // based on https://github.com/bazzilic/PaillierExt/issues/15
-                for (var keySize = 384; keySize <= 1088; keySize += 8)
+                for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
                 {
-                    var algorithm = new ElGamal(keySize);
+                    var algorithm = new ElGamal(keySize, 0);
 
                     var prod = algorithm.EncryptData(new BigInteger(1));
                     var three = algorithm.EncryptData(new BigInteger(3));
@@ -77,7 +86,7 @@ namespace ElGamalTests
         public void TestNegativeCases()
         {
             { // Simple negative cases
-                var algorithm = new ElGamal(384);
+                var algorithm = new ElGamal(minKeySize);
 
                 //Negative Number En/Decryption
                 var a = new BigFraction(new Decimal(-94660895));
@@ -109,7 +118,7 @@ namespace ElGamalTests
         public void TestFloatingCases()
         {
             {
-                var algorithm = new ElGamal(384);
+                var algorithm = new ElGamal(minKeySize);
 
                 //Positive Floating Point Number En/Decryption
                 var a = new BigFraction(new Decimal(12.5467));

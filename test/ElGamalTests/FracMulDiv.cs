@@ -15,9 +15,18 @@ namespace ElGamalTests
         private readonly Random rnd = new Random();
         private readonly RandomNumberGenerator rng = new RNGCryptoServiceProvider();
 
+        private readonly int minKeySize;
+        private readonly int maxKeySize;
+        private readonly int step;
+
         public FracMulDiv(ITestOutputHelper output)
         {
             this.output = output;
+
+            using var tmpElG = new ElGamal(512, 0);
+            minKeySize = tmpElG.LegalKeySizes[0].MinSize;
+            maxKeySize = tmpElG.LegalKeySizes[0].MaxSize;
+            step = (maxKeySize - minKeySize) / tmpElG.LegalKeySizes[0].SkipSize;
         }
 
         public void Dispose()
@@ -33,14 +42,11 @@ namespace ElGamalTests
 
             for (var i = 0; i < Globals.iterations; i++)
             {
-                for (var keySize = 384; keySize <= 1088; keySize += 8)
+                for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
                 {
-                    var algorithm = new ElGamal(keySize);
-
+                    var algorithm = new ElGamal(keySize, 0);
                     var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
-
                     var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
-
 
                     BigFraction a, b;
                     do

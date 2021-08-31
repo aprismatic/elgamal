@@ -1,4 +1,6 @@
-﻿using Aprismatic.ElGamalExt;
+﻿using System.Numerics;
+using Aprismatic;
+using Aprismatic.ElGamalExt;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -8,9 +10,18 @@ namespace ElGamalTests
     {
         private readonly ITestOutputHelper output;
 
+        private readonly int minKeySize;
+        private readonly int maxKeySize;
+        private readonly int step;
+
         public KeyStruct(ITestOutputHelper output)
         {
             this.output = output;
+
+            using var tmpElG = new ElGamal(512, 0);
+            minKeySize = tmpElG.LegalKeySizes[0].MinSize;
+            maxKeySize = tmpElG.LegalKeySizes[0].MaxSize;
+            step = (maxKeySize - minKeySize) / tmpElG.LegalKeySizes[0].SkipSize;
         }
 
         [Fact(DisplayName = "Lengths")]
@@ -18,12 +29,13 @@ namespace ElGamalTests
         {
             for (var i = 0; i < Globals.iterations; i++)
             {
-                for (var keySize = 384; keySize <= 1088; keySize += 8)
+                for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
                 {
-                    var algorithm = new ElGamal(keySize);
+                    using var algorithm = new ElGamal(keySize, 0);
                     var prms = algorithm.ExportParameters(false);
 
-                    Assert.Equal(algorithm.KeySize / 8, prms.P.Length);
+                    var P = new BigInteger(prms.P);
+                    Assert.Equal(algorithm.KeySize, P.BitCount());
 
                     algorithm.Dispose();
                 }
