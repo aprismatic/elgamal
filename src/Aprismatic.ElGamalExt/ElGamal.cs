@@ -63,10 +63,7 @@ namespace Aprismatic.ElGamalExt
             // Generate a large safe prime number P, and regenerate P when it is not same as KeySize in bytes
             do
             {
-                do
-                {
-                    Q = BigInteger.Zero.GenPseudoPrime(KeySizeValue - 1, 16, rng);
-                } while (Q.BitCount() != KeySizeValue - 1);
+                Q = BigInteger.Zero.GenPseudoPrime(KeySizeValue - 1, 16, rng);
                 PminusOne = bitwo * Q;
                 P = PminusOne + BigInteger.One;
             } while (P.BitCount() != KeySizeValue && !P.IsProbablePrime(16));

@@ -5,8 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Aprismatic.BigFraction" Version="0.1.5" />
-    <PackageReference Include="Aprismatic.BigIntegerExt" Version="0.1.6" />
+    <PackageReference Include="Aprismatic.BigIntegerExt" Version="0.1.7" />
     <PackageReference Include="Aprismatic.ElGamalExt.Homomorphism" Version="0.10.2" />
-    <PackageReference Include="System.Threading.Channels" Version="5.0.0" />
+    <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
   </ItemGroup>
 </Project>
