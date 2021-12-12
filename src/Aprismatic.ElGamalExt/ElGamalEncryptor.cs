@@ -96,8 +96,6 @@ namespace Aprismatic.ElGamalExt
 
         public void Dispose()
         {
-            _rng.Dispose();
-
             if (_isPrecomputed)
             {
                 _encPrecomputeCts.Cancel();
@@ -105,6 +103,8 @@ namespace Aprismatic.ElGamalExt
                 _encPrecomputeCts.Dispose();
                 _encPrecomputeTask.Dispose();
             }
+
+            _rng.Dispose();
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using Aprismatic.ElGamalExt.Homomorphism;
 
@@ -9,8 +8,9 @@ namespace Aprismatic.ElGamalExt
     public class ElGamal : AsymmetricAlgorithm
     {
         private readonly ElGamalKeyStruct keyStruct;
-        private readonly ElGamalEncryptor encryptor;
-        private readonly ElGamalDecryptor decryptor;
+
+        public readonly ElGamalEncryptor Encryptor;
+        public readonly ElGamalDecryptor Decryptor;
 
         public int MaxPlaintextBits => keyStruct.MaxPlaintextBits;
         public BigInteger MaxEncryptableValue => keyStruct.MaxEncryptableValue;
@@ -25,8 +25,8 @@ namespace Aprismatic.ElGamalExt
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
             KeySizeValue = keySize; // TODO: Validate that key is of legal size
             keyStruct = CreateKeyPair(ElGamalKeyDefaults.DefaultMaxPlaintextBits);
-            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
-            decryptor = new ElGamalDecryptor(keyStruct);
+            Encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            Decryptor = new ElGamalDecryptor(keyStruct);
         }
 
         public ElGamal(ElGamalParameters prms, int precomputedQueueSize = 10) // TODO: Consolidate constructors in one method
@@ -43,11 +43,11 @@ namespace Aprismatic.ElGamalExt
 
             KeySizeValue = keyStruct.PLength * 8; // TODO: Validate that key is of legal size
 
-            encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
-            decryptor = new ElGamalDecryptor(keyStruct);
+            Encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            Decryptor = new ElGamalDecryptor(keyStruct);
         }
 
-        public ElGamal(string Xml, int precomputedQueueSize = 10) : this(ElGamalParameters.FromXml(Xml), precomputedQueueSize)
+        public ElGamal(string xml, int precomputedQueueSize = 10) : this(ElGamalParameters.FromXml(xml), precomputedQueueSize)
         { }
 
         private ElGamalKeyStruct CreateKeyPair(int maxptbits) // TODO: This method should probably move to KeyStruct
@@ -114,8 +114,8 @@ namespace Aprismatic.ElGamalExt
             var array = new byte[ctbs * 2];
             var arsp = array.AsSpan();
 
-            encryptor.ProcessBigInteger(Encode(message.Numerator), arsp[..ctbs]);
-            encryptor.ProcessBigInteger(Encode(message.Denominator), arsp[ctbs..]);
+            Encryptor.ProcessBigInteger(Encode(message.Numerator), arsp[..ctbs]);
+            Encryptor.ProcessBigInteger(Encode(message.Denominator), arsp[ctbs..]);
 
             return array;
         }
@@ -126,17 +126,17 @@ namespace Aprismatic.ElGamalExt
             var quarterblock = halfblock >> 1;
             var dsp = data.AsSpan();
 
-            var numerator = decryptor.ProcessByteBlock(dsp[..quarterblock], dsp[quarterblock..halfblock]);
-            var denominator = decryptor.ProcessByteBlock(dsp[halfblock..(halfblock + quarterblock)], dsp[(halfblock + quarterblock)..]);
+            var numerator = Decryptor.ProcessByteBlock(dsp[..quarterblock], dsp[quarterblock..halfblock]);
+            var denominator = Decryptor.ProcessByteBlock(dsp[halfblock..(halfblock + quarterblock)], dsp[(halfblock + quarterblock)..]);
 
             var res = new BigFraction(Decode(numerator), Decode(denominator));
 
             return res;
         }
 
-        public byte[] Multiply(byte[] first, byte[] second) => ElGamalHomomorphism.Multiply(first, second, keyStruct.P.ToByteArray());
+        public byte[] Multiply(byte[] first, byte[] second) => ElGamalHomomorphism.MultiplyFractions(first, second, keyStruct.P.ToByteArray());
 
-        public byte[] Divide(byte[] first, byte[] second) => ElGamalHomomorphism.Divide(first, second, keyStruct.P.ToByteArray());
+        public byte[] Divide(byte[] first, byte[] second) => ElGamalHomomorphism.DivideFractions(first, second, keyStruct.P.ToByteArray());
 
         // TODO: Examine ways of moving plaintext ops implementations to the Homomorphism class library
         public byte[] PlaintextMultiply(byte[] first, BigFraction second) // TODO: Add overloads for BigInteger, Int32, Int64; same for PlaintextDivide
@@ -165,35 +165,41 @@ namespace Aprismatic.ElGamalExt
 
         public byte[] PlaintextDivide(byte[] first, BigFraction second) => PlaintextMultiply(first, new BigFraction(second.Denominator, second.Numerator));
 
-        public byte[] PlaintextPow(byte[] first, int exp)
+        public byte[] PlaintextPow(byte[] first, BigInteger exp_bi)
         {
-            if (exp < 0) throw new ArgumentOutOfRangeException(nameof(exp), "Exponent should be >= 0");
+            if (exp_bi.Sign < 0) throw new ArgumentOutOfRangeException(nameof(exp_bi), "Exponent should be >= 0");
 
             var halfblock = first.Length >> 1;
-            var quarterblock = halfblock >> 1;
 
             var fsp = first.AsSpan();
-
-            var nba_bi = new BigInteger(fsp[..quarterblock]);
-            var nbb_bi = new BigInteger(fsp[quarterblock..halfblock]);
-            var dba_bi = new BigInteger(fsp[halfblock..(halfblock + quarterblock)]);
-            var dbb_bi = new BigInteger(fsp[(halfblock + quarterblock)..]);
-
-            var exp_bi = new BigInteger(exp);
-            nba_bi = BigInteger.ModPow(nba_bi, exp_bi, keyStruct.P);
-            nbb_bi = BigInteger.ModPow(nbb_bi, exp_bi, keyStruct.P);
-            dba_bi = BigInteger.ModPow(dba_bi, exp_bi, keyStruct.P);
-            dbb_bi = BigInteger.ModPow(dbb_bi, exp_bi, keyStruct.P);
+            var numerator = fsp[..halfblock];
+            var denominator = fsp[halfblock..];
 
             var res = new byte[first.Length];
             var ressp = res.AsSpan();
+            var new_numerator = ressp[..halfblock];
+            var new_denominator = ressp[halfblock..];
 
-            nba_bi.TryWriteBytes(ressp[..quarterblock], out _);
-            nbb_bi.TryWriteBytes(ressp[quarterblock..halfblock], out _);
-            dba_bi.TryWriteBytes(ressp[halfblock..(halfblock + quarterblock)], out _);
-            dbb_bi.TryWriteBytes(ressp[(halfblock + quarterblock)..], out _);
+            PlaintextPowBigInteger(numerator, exp_bi, new_numerator);
+            PlaintextPowBigInteger(denominator, exp_bi, new_denominator);
 
             return res;
+        }
+
+        public void PlaintextPowBigInteger(ReadOnlySpan<byte> first, BigInteger exp_bi, Span<byte> writeTo)
+        {
+            if (exp_bi.Sign < 0) throw new ArgumentOutOfRangeException(nameof(exp_bi), "Exponent should be >= 0");
+
+            var halfblock = first.Length >> 1;
+
+            var a_bi = new BigInteger(first[..halfblock]);
+            var b_bi = new BigInteger(first[halfblock..]);
+
+            a_bi = BigInteger.ModPow(a_bi, exp_bi, keyStruct.P);
+            b_bi = BigInteger.ModPow(b_bi, exp_bi, keyStruct.P);
+
+            a_bi.TryWriteBytes(writeTo[..halfblock], out _);
+            b_bi.TryWriteBytes(writeTo[halfblock..], out _);
         }
 
         public ElGamalParameters ExportParameters(bool includePrivateParams) => keyStruct.ExportParameters(includePrivateParams);
@@ -204,6 +210,6 @@ namespace Aprismatic.ElGamalExt
             return prms.ToXml(includePrivateParameters);
         }
 
-        public new void Dispose() => encryptor.Dispose();
+        public new void Dispose() => Encryptor.Dispose();
     }
 }

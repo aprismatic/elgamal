@@ -14,7 +14,7 @@ namespace ElGamalTests
         private readonly ITestOutputHelper output;
 
         private readonly Random rnd = new Random();
-        private readonly RandomNumberGenerator rng = new RNGCryptoServiceProvider();
+        private readonly RandomNumberGenerator rng = RandomNumberGenerator.Create();
 
         private readonly int minKeySize;
         private readonly int maxKeySize;
@@ -39,7 +39,7 @@ namespace ElGamalTests
         public void TestPlaintextMulDiv()
         {
             var rnd = new Random();
-            var rng = new RNGCryptoServiceProvider();
+            var rng = RandomNumberGenerator.Create();
 
             for (var i = 0; i < Globals.iterations; i++)
             {
@@ -163,7 +163,7 @@ namespace ElGamalTests
         public void TestPlaintextPow()
         {
             var rnd = new Random();
-            var rng = new RNGCryptoServiceProvider();
+            var rng = RandomNumberGenerator.Create();
 
             for (var i = 0; i < Globals.iterations; i++)
             {
@@ -198,6 +198,45 @@ namespace ElGamalTests
                         $"a ^ b   : {res}{Environment.NewLine}{Environment.NewLine}" +
                         $"apb_dec : {apb_dec}");
                 }
+            }
+
+            // Test overflow
+            for (var i = 0; i < Globals.iterations; i++)
+            {
+                var algorithm = new ElGamal(512, 0);
+
+                BigInteger a;
+                do
+                {
+                    a = new BigInteger().GenRandomBits(rnd.Next(16, 24), rng);
+                } while (a <= 0);
+
+                var P = algorithm.P;
+                var big_exp = BigInteger.Pow(2, 128) + 5;
+
+                var bi_block_length = algorithm.CiphertextLength / 2;
+                var a_enc = new byte[bi_block_length];
+                algorithm.Encryptor.ProcessBigInteger(a, a_enc);
+
+                var a_enc_exp = new byte[bi_block_length];
+                var a_enc_exp_sp = a_enc_exp.AsSpan();
+                algorithm.PlaintextPowBigInteger(a_enc, big_exp, a_enc_exp_sp);
+
+                var bi_part_length = bi_block_length / 2;
+                var a_exp_dec =
+                    algorithm.Decryptor.ProcessByteBlock(a_enc_exp_sp[..bi_part_length],
+                        a_enc_exp_sp[bi_part_length..]);
+
+                var expect = BigInteger.ModPow(a, big_exp, P);
+
+                Assert.True(expect == a_exp_dec,
+                    $"{Environment.NewLine}{Environment.NewLine}" +
+                    $"Algorithm parameters (TRUE):{Environment.NewLine}" +
+                    $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
+                    $"a       : {a}{Environment.NewLine}" +
+                    $"big_exp : {big_exp}{Environment.NewLine}" +
+                    $"expect  : {expect}{Environment.NewLine}" +
+                    $"actual  : {a_exp_dec}");
             }
 
             // TODO: Add tests for 0^x, x^0, 1^x, x^1, 0^1, 1^0

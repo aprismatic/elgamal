@@ -13,7 +13,7 @@ namespace ElGamalTests
         private readonly ITestOutputHelper output;
 
         private readonly Random rnd = new Random();
-        private readonly RandomNumberGenerator rng = new RNGCryptoServiceProvider();
+        private readonly RandomNumberGenerator rng = RandomNumberGenerator.Create();
 
         private readonly int minKeySize;
         private readonly int maxKeySize;
