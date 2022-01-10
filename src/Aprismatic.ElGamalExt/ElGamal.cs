@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Security.Cryptography;
 using Aprismatic.ElGamalExt.Homomorphism;
@@ -56,32 +57,25 @@ namespace Aprismatic.ElGamalExt
 
             BigInteger P, G, Y, X;
             var bitwo = new BigInteger(2);
-            BigInteger Q, PminusOne;
 
             using var rng = RandomNumberGenerator.Create();
 
-            // Generate a large safe prime number P, and regenerate P when it is not same as KeySize in bytes
-            do
-            {
-                Q = BigInteger.Zero.GenPseudoPrime(KeySizeValue - 1, 16, rng);
-                PminusOne = bitwo * Q;
-                P = PminusOne + BigInteger.One;
-            } while (P.BitCount() != KeySizeValue && !P.IsProbablePrime(16));
+            // Generate a large safe prime number P of key length KeySizeValue
+            P = BigInteger.Zero.GenSafePseudoPrime(KeySizeValue, 16, rng);
+            var PminusOne = P - BigInteger.One;
+            var Q = PminusOne / bitwo;
 
             // Find a generator (= a primitive root of group mod P)
             // G is a primitive root if for all prime factors of P-1, P[i], G^((P-1)/P[i]) (mod P) is not congruent to 1
             // Prime factors of (P-1) are 2 and (P-1)/2 because P = 2Q + 1, and Q is prime
             for (G = bitwo; G < PminusOne; G++)
             {
-                if (!BigInteger.ModPow(G, 2, P).IsOne && !BigInteger.ModPow(G, Q, P).IsOne)
+                if (!BigInteger.ModPow(G, bitwo, P).IsOne && !BigInteger.ModPow(G, Q, P).IsOne)
                     break;
             }
 
             // Generate the private key: a random number > 1 and < P-1
-            do
-            {
-                X = BigInteger.Zero.GenRandomBits(KeySizeValue, rng);
-            } while (X <= BigInteger.One || X >= PminusOne);
+            X = BigInteger.Zero.GenRandomBits(bitwo, PminusOne, rng);
 
             // Generate the public key G^X mod P
             Y = BigInteger.ModPow(G, X, P);

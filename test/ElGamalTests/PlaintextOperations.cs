@@ -13,7 +13,7 @@ namespace ElGamalTests
     {
         private readonly ITestOutputHelper output;
 
-        private readonly Random rnd = new Random();
+        private readonly Random rnd = new();
         private readonly RandomNumberGenerator rng = RandomNumberGenerator.Create();
 
         private readonly int minKeySize;
@@ -27,28 +27,22 @@ namespace ElGamalTests
             using var tmpElG = new ElGamal(512, 0);
             minKeySize = tmpElG.LegalKeySizes[0].MinSize;
             maxKeySize = tmpElG.LegalKeySizes[0].MaxSize;
-            step = (maxKeySize - minKeySize) / tmpElG.LegalKeySizes[0].SkipSize;
+            step = (maxKeySize - minKeySize) / Globals.KeySteps;
         }
 
-        public void Dispose()
-        {
-            rng.Dispose();
-        }
+        public void Dispose() => rng.Dispose();
 
         [Fact(DisplayName = "PLAINTEXT (MUL/DIV, +-)")]
         public void TestPlaintextMulDiv()
         {
-            var rnd = new Random();
-            var rng = RandomNumberGenerator.Create();
-
-            for (var i = 0; i < Globals.iterations; i++)
+            for (var i = 0; i < Globals.Iterations; i++)
             {
                 for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
                 {
-                    var algorithm = new ElGamal(keySize, 0);
+                    using var algorithm = new ElGamal(keySize, 0);
 
-                    var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
-                    var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
+                    using var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
+                    using var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
                     BigFraction a, b;
                     do
@@ -151,10 +145,6 @@ namespace ElGamalTests
                         $"b       : {BigFraction.MinusOne}{Environment.NewLine}{Environment.NewLine}" +
                         $"a / b   : {-a}{Environment.NewLine}{Environment.NewLine}" +
                         $"axm1_dec : {adm1_dec}");
-
-                    algorithm.Dispose();
-                    encryptAlgorithm.Dispose();
-                    decryptAlgorithm.Dispose();
                 }
             }
         }
@@ -162,17 +152,14 @@ namespace ElGamalTests
         [Fact(DisplayName = "PLAINTEXT POW")]
         public void TestPlaintextPow()
         {
-            var rnd = new Random();
-            var rng = RandomNumberGenerator.Create();
-
-            for (var i = 0; i < Globals.iterations; i++)
+            for (var i = 0; i < Globals.Iterations; i++)
             {
                 for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
                 {
-                    var algorithm = new ElGamal(keySize, 0);
+                    using var algorithm = new ElGamal(keySize, 0);
 
-                    var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
-                    var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
+                    using var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
+                    using var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
                     BigFraction a;
                     do
@@ -201,9 +188,9 @@ namespace ElGamalTests
             }
 
             // Test overflow
-            for (var i = 0; i < Globals.iterations; i++)
+            for (var i = 0; i < Globals.Iterations; i++)
             {
-                var algorithm = new ElGamal(512, 0);
+                using var algorithm = new ElGamal(512, 0);
 
                 BigInteger a;
                 do

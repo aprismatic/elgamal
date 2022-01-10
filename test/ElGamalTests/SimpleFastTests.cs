@@ -26,7 +26,7 @@ namespace ElGamalTests
             using var tmpElG = new ElGamal(512, 0);
             minKeySize = tmpElG.LegalKeySizes[0].MinSize;
             maxKeySize = tmpElG.LegalKeySizes[0].MaxSize;
-            step = (maxKeySize - minKeySize) / tmpElG.LegalKeySizes[0].SkipSize;
+            step = (maxKeySize - minKeySize) / Globals.KeySteps;
         }
 
         public void Dispose()
@@ -38,46 +38,38 @@ namespace ElGamalTests
         public void TestSpecificCases()
         {
             {
-                var algorithm = new ElGamal(minKeySize);
+                using var algorithm = new ElGamal(minKeySize, 0);
 
                 var a = new BigInteger(2048);
                 var a_bytes = algorithm.EncryptData(a);
                 var dec_a = algorithm.DecryptData(a_bytes);
                 Assert.Equal(a, dec_a);
-
-                algorithm.Dispose();
             }
 
             {
-                var algorithm = new ElGamal(minKeySize);
+                using var algorithm = new ElGamal(minKeySize, 0);
 
                 var a = new BigInteger(138);
                 var a_bytes = algorithm.EncryptData(a);
                 var dec_a = algorithm.DecryptData(a_bytes);
 
                 Assert.Equal(a, dec_a);
-
-                algorithm.Dispose();
             }
 
             { // based on https://github.com/bazzilic/PaillierExt/issues/15
                 for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
                 {
-                    var algorithm = new ElGamal(keySize, 0);
+                    using var algorithm = new ElGamal(keySize, 0);
 
                     var prod = algorithm.EncryptData(new BigInteger(1));
                     var three = algorithm.EncryptData(new BigInteger(3));
 
                     for (var i = 0; i < 30; i++)
-                    {
                         prod = algorithm.Multiply(prod, three);
-                    }
 
                     var sum_dec = algorithm.DecryptData(prod);
 
                     Assert.Equal(new BigInteger(205891132094649), sum_dec);
-
-                    algorithm.Dispose();
                 }
             }
         }
@@ -86,7 +78,7 @@ namespace ElGamalTests
         public void TestNegativeCases()
         {
             { // Simple negative cases
-                var algorithm = new ElGamal(minKeySize);
+                using var algorithm = new ElGamal(minKeySize);
 
                 //Negative Number En/Decryption
                 var a = new BigFraction(new Decimal(-94660895));
@@ -104,13 +96,12 @@ namespace ElGamalTests
                 var mul_bytes = algorithm.Multiply(a_enc, b_enc);
                 var mul_dec = algorithm.DecryptData(mul_bytes);
                 Assert.Equal(a * b, mul_dec);
+                
 
                 //Negative Numbers Division
                 var div_bytes = algorithm.Divide(a_enc, b_enc);
                 var div_dec = algorithm.DecryptData(div_bytes);
                 Assert.Equal(a / b, div_dec);
-
-                algorithm.Dispose();
             }
         }
 
@@ -118,7 +109,7 @@ namespace ElGamalTests
         public void TestFloatingCases()
         {
             {
-                var algorithm = new ElGamal(minKeySize);
+                using var algorithm = new ElGamal(minKeySize);
 
                 //Positive Floating Point Number En/Decryption
                 var a = new BigFraction(new Decimal(12.5467));
@@ -139,12 +130,11 @@ namespace ElGamalTests
                 var mul_dec = algorithm.DecryptData(mul_bytes);
                 Assert.Equal(a * b, mul_dec);
 
+
                 //Floating Point Numbers Division
                 var div_bytes = algorithm.Divide(a_enc, b_enc);
                 var div_dec = algorithm.DecryptData(div_bytes);
                 Assert.Equal(a / b, div_dec);
-
-                algorithm.Dispose();
             }
         }
     }

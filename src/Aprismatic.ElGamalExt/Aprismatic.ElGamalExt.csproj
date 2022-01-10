@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Aprismatic.BigFraction" Version="0.1.5" />
-    <PackageReference Include="Aprismatic.BigIntegerExt" Version="0.1.7" />
+    <PackageReference Include="Aprismatic.BigIntegerExt" Version="0.1.9" />
     <PackageReference Include="Aprismatic.ElGamalExt.Homomorphism" Version="0.11.0" />
     <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
   </ItemGroup>
