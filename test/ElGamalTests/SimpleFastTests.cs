@@ -26,7 +26,7 @@ namespace ElGamalTests
             using var tmpElG = new ElGamal(512, 0);
             minKeySize = tmpElG.LegalKeySizes[0].MinSize;
             maxKeySize = tmpElG.LegalKeySizes[0].MaxSize;
-            step = (maxKeySize - minKeySize) / Globals.KeySteps;
+            step = (maxKeySize - minKeySize) / (Globals.KeySteps - 1);
         }
 
         public void Dispose()
