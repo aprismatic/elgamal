@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Channels;
 
-namespace Aprismatic.ElGamalExt
+namespace Aprismatic.ElGamal
 {
     public class ElGamalEncryptor : IDisposable
     {

@@ -6,7 +6,7 @@
     <Copyright>(c) Aprismatic Pte. Ltd. All rights reserved.</Copyright>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://i.ibb.co/SmV2V0m/aprismatic.png</PackageIconUrl>
-    <RepositoryUrl>https://github.com/aprismatic/elgamalext</RepositoryUrl>
+    <RepositoryUrl>https://github.com/aprismatic/elgamal</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

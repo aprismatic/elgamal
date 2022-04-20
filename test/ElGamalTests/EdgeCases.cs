@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Security.Cryptography;
 using Aprismatic;
-using Aprismatic.ElGamalExt;
+using Aprismatic.ElGamal;
 using Xunit;
 using Xunit.Abstractions;
 

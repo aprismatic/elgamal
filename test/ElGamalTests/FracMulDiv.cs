@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Security.Cryptography;
 using Aprismatic;
-using Aprismatic.ElGamalExt;
+using Aprismatic.ElGamal;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,7 +12,6 @@ namespace ElGamalTests
     {
         private readonly ITestOutputHelper output;
 
-        private readonly Random rnd = new();
         private readonly RandomNumberGenerator rng = RandomNumberGenerator.Create();
 
         private readonly int minKeySize;

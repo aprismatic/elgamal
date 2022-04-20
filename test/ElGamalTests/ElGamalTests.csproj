@@ -12,6 +12,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Aprismatic.ElGamalExt\Aprismatic.ElGamalExt.csproj" />
+    <ProjectReference Include="..\..\src\Aprismatic.ElGamal\Aprismatic.ElGamal.csproj" />
   </ItemGroup>
 </Project>

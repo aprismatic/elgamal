@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Security.Cryptography;
-using Aprismatic.ElGamalExt.Homomorphism;
+using Aprismatic.ElGamal.Homomorphism;
 
-namespace Aprismatic.ElGamalExt
+namespace Aprismatic.ElGamal
 {
     public class ElGamal : AsymmetricAlgorithm
     {
@@ -114,26 +113,25 @@ namespace Aprismatic.ElGamalExt
             return array;
         }
 
-        public BigFraction DecryptData(byte[] data)
+        public BigFraction DecryptData(ReadOnlySpan<byte> data)
         {
             var halfblock = data.Length >> 1;
             var quarterblock = halfblock >> 1;
-            var dsp = data.AsSpan();
 
-            var numerator = Decryptor.ProcessByteBlock(dsp[..quarterblock], dsp[quarterblock..halfblock]);
-            var denominator = Decryptor.ProcessByteBlock(dsp[halfblock..(halfblock + quarterblock)], dsp[(halfblock + quarterblock)..]);
+            var numerator = Decryptor.ProcessByteBlock(data[..quarterblock], data[quarterblock..halfblock]);
+            var denominator = Decryptor.ProcessByteBlock(data[halfblock..(halfblock + quarterblock)], data[(halfblock + quarterblock)..]);
 
             var res = new BigFraction(Decode(numerator), Decode(denominator));
 
             return res;
         }
 
-        public byte[] Multiply(byte[] first, byte[] second) => ElGamalHomomorphism.MultiplyFractions(first, second, keyStruct.P.ToByteArray());
+        public byte[] Multiply(ReadOnlySpan<byte> first, ReadOnlySpan<byte> second) => ElGamalHomomorphism.MultiplyFractions(first, second, keyStruct.P.ToByteArray());
 
-        public byte[] Divide(byte[] first, byte[] second) => ElGamalHomomorphism.DivideFractions(first, second, keyStruct.P.ToByteArray());
+        public byte[] Divide(ReadOnlySpan<byte> first, ReadOnlySpan<byte> second) => ElGamalHomomorphism.DivideFractions(first, second, keyStruct.P.ToByteArray());
 
         // TODO: Examine ways of moving plaintext ops implementations to the Homomorphism class library
-        public byte[] PlaintextMultiply(byte[] first, BigFraction second) // TODO: Add overloads for BigInteger, Int32, Int64; same for PlaintextDivide
+        public byte[] PlaintextMultiply(ReadOnlySpan<byte> first, BigFraction second) // TODO: Add overloads for BigInteger, Int32, Int64; same for PlaintextDivide
         {
             var res = new byte[first.Length];
             var ressp = res.AsSpan();
@@ -141,12 +139,11 @@ namespace Aprismatic.ElGamalExt
             var halfblock = first.Length >> 1;
             var quarterblock = halfblock >> 1;
 
-            var fsp = first.AsSpan();
-            fsp[..quarterblock].CopyTo(ressp[..quarterblock]);
-            fsp[halfblock..(halfblock + quarterblock)].CopyTo(ressp[halfblock..(halfblock + quarterblock)]);
+            first[..quarterblock].CopyTo(ressp[..quarterblock]);
+            first[halfblock..(halfblock + quarterblock)].CopyTo(ressp[halfblock..(halfblock + quarterblock)]);
 
-            var nbb_bi = new BigInteger(fsp[quarterblock..halfblock]);
-            var dbb_bi = new BigInteger(fsp[(halfblock + quarterblock)..]);
+            var nbb_bi = new BigInteger(first[quarterblock..halfblock]);
+            var dbb_bi = new BigInteger(first[(halfblock + quarterblock)..]);
 
             nbb_bi = (nbb_bi * Encode(second.Numerator)) % keyStruct.P;
             dbb_bi = (dbb_bi * Encode(second.Denominator)) % keyStruct.P;
@@ -157,17 +154,16 @@ namespace Aprismatic.ElGamalExt
             return res;
         }
 
-        public byte[] PlaintextDivide(byte[] first, BigFraction second) => PlaintextMultiply(first, new BigFraction(second.Denominator, second.Numerator));
+        public byte[] PlaintextDivide(ReadOnlySpan<byte> first, BigFraction second) => PlaintextMultiply(first, new BigFraction(second.Denominator, second.Numerator));
 
-        public byte[] PlaintextPow(byte[] first, BigInteger exp_bi)
+        public byte[] PlaintextPow(ReadOnlySpan<byte> first, BigInteger exp_bi)
         {
             if (exp_bi.Sign < 0) throw new ArgumentOutOfRangeException(nameof(exp_bi), "Exponent should be >= 0");
 
             var halfblock = first.Length >> 1;
 
-            var fsp = first.AsSpan();
-            var numerator = fsp[..halfblock];
-            var denominator = fsp[halfblock..];
+            var numerator = first[..halfblock];
+            var denominator = first[halfblock..];
 
             var res = new byte[first.Length];
             var ressp = res.AsSpan();

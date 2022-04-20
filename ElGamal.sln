@@ -15,14 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{9336DBF6-976F-
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2955983D-FEC3-4C34-8890-DD89658479E9}"
 	ProjectSection(SolutionItems) = preProject
-		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		nuget.config = nuget.config
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aprismatic.ElGamalExt", "src\Aprismatic.ElGamalExt\Aprismatic.ElGamalExt.csproj", "{21BF08AE-7DBC-4EE4-9315-4304129D3E11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aprismatic.ElGamal", "src\Aprismatic.ElGamal\Aprismatic.ElGamal.csproj", "{21BF08AE-7DBC-4EE4-9315-4304129D3E11}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElGamalTests", "test\ElGamalTests\ElGamalTests.csproj", "{45732104-089F-4843-B5BD-726ADC70FE45}"
 EndProject

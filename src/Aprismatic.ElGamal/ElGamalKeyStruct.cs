@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Aprismatic.ElGamalExt
+namespace Aprismatic.ElGamal
 {
     public struct ElGamalKeyDefaults
     {

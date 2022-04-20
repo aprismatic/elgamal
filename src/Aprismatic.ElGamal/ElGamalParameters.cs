@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Text;
 using System.Xml.Linq;
 
-namespace Aprismatic.ElGamalExt
+namespace Aprismatic.ElGamal
 {
     [Serializable]
     public struct ElGamalParameters

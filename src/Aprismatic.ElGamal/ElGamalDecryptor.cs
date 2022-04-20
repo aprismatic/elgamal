@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace Aprismatic.ElGamalExt
+namespace Aprismatic.ElGamal
 {
     public class ElGamalDecryptor
     {
@@ -12,7 +12,7 @@ namespace Aprismatic.ElGamalExt
             _keyStruct = keyStruct;
         }
 
-        public BigInteger ProcessByteBlock(Span<byte> block_A, Span<byte> block_B)
+        public BigInteger ProcessByteBlock(ReadOnlySpan<byte> block_A, ReadOnlySpan<byte> block_B)
         {
             var A = new BigInteger(block_A);
             var B = new BigInteger(block_B);

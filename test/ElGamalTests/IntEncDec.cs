@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Security.Cryptography;
 using Aprismatic;
-using Aprismatic.ElGamalExt;
+using Aprismatic.ElGamal;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -41,7 +41,6 @@ namespace ElGamalTests
                     var algorithm = new ElGamal(keySize, 0);
 
                     var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
-
                     var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
                     var z = new BigInteger();

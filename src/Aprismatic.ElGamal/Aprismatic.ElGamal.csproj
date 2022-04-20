@@ -2,11 +2,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Description>Extension for the .NET Framework cryptography subsystem, which introduces the ElGamal public key cryptosystem with support for homomorphic multiplication.</Description>
+    <RootNamespace>Aprismatic.ElGamalExt</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Aprismatic.BigFraction" Version="0.2.0" />
     <PackageReference Include="Aprismatic.BigIntegerExt" Version="0.2.0.2" />
-    <PackageReference Include="Aprismatic.ElGamalExt.Homomorphism" Version="0.11.0" />
+    <PackageReference Include="Aprismatic.ElGamal.Homomorphism" Version="0.12.0" />
     <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
   </ItemGroup>
 </Project>
