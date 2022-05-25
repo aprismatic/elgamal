@@ -51,6 +51,55 @@ namespace ElGamalTests
                 Assert.True(X > 1);
                 Assert.True(X < P - 1);
             }
+
+            // invalid key sizes
+            for (var i = 0; i < Globals.Iterations; i++)
+            {
+                var keySize = minKeySize - 1;
+                Assert.Throws<ArgumentException>(() => new ElGamal(keySize));
+                var p = BigInteger.One.GenRandomBits(keySize, rng);
+                Assert.Throws<ArgumentException>(() => new ElGamal(p));
+
+                keySize = maxKeySize + 1;
+                Assert.Throws<ArgumentException>(() => new ElGamal(keySize));
+                p = BigInteger.One.GenRandomBits(keySize, rng);
+                Assert.Throws<ArgumentException>(() => new ElGamal(p));
+
+                keySize = minKeySize + 1;
+                Assert.Throws<ArgumentException>(() => new ElGamal(keySize));
+                p = BigInteger.One.GenRandomBits(keySize, rng);
+                Assert.Throws<ArgumentException>(() => new ElGamal(p));
+
+                keySize = maxKeySize - 1;
+                Assert.Throws<ArgumentException>(() => new ElGamal(keySize));
+                p = BigInteger.One.GenRandomBits(keySize, rng);
+                Assert.Throws<ArgumentException>(() => new ElGamal(p));
+            }
+
+            // existing prime
+            for (var i = 0; i < Globals.Iterations; i++)
+            {
+                var p = BigInteger.One;
+                do
+                    p = BigInteger.One.GenPseudoPrime(minKeySize, 8, rng);
+                while (((p-1)/2).IsProbablePrime(8, rng)); // make p NOT a safe prime
+
+                Assert.Throws<ArgumentException>(() => new ElGamal(p));
+
+                p = p.GenSafePseudoPrime(minKeySize, 8, rng);
+                var eg = new ElGamal(p);
+
+                Assert.Equal(eg.P, p);
+                Assert.Equal(eg.KeySize, p.BitCount());
+                Assert.Equal(p.BitCount(), eg.PLength * 8);
+
+                var prms = eg.ExportParameters(true);
+                var X = new BigInteger(prms.X);
+                Assert.True(X > 1);
+                Assert.True(X < p - 1);
+
+                Assert.Throws<ArgumentException>(() => new ElGamal(p + 1)); // not a prime
+            }
         }
     }
 }

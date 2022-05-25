@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
 using Aprismatic.ElGamal.Homomorphism;
@@ -19,12 +20,40 @@ namespace Aprismatic.ElGamal
         public int CiphertextLength => keyStruct.CiphertextLength;
 
 
+        #region Constructors & Key Generaion
         // TODO: Constructors should allow to specify MaxPlaintextBits
         public ElGamal(int keySize, int precomputedQueueSize = 10) // TODO: Constructor should probably optionally accept an RNG
         {
             LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
-            KeySizeValue = keySize; // TODO: Validate that key is of legal size
-            keyStruct = CreateKeyPair(ElGamalKeyDefaults.DefaultMaxPlaintextBits);
+            KeySizeValue = keySize;
+
+            if (!LegalKeySizesValue.Any(x => x.MinSize <= KeySizeValue && KeySizeValue <= x.MaxSize && (KeySizeValue - x.MinSize) % x.SkipSize == 0))
+                throw new ArgumentException("Key size is not supported by this algorithm.");
+
+            using var rng = RandomNumberGenerator.Create();
+            var P = BigInteger.Zero.GenSafePseudoPrime(KeySizeValue, 16, rng); // Generate a large safe prime number P of key length KeySizeValue
+
+            keyStruct = CreateKeyPair(P, ElGamalKeyDefaults.DefaultMaxPlaintextBits, rng);
+
+            Encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
+            Decryptor = new ElGamalDecryptor(keyStruct);
+        }
+
+        public ElGamal(BigInteger safePrimeModulus, int precomputedQueueSize = 10)
+        {
+            LegalKeySizesValue = new[] { new KeySizes(384, 1088, 8) };
+            KeySizeValue = safePrimeModulus.BitCount();
+
+            if (!LegalKeySizesValue.Any(x => x.MinSize <= KeySizeValue && KeySizeValue <= x.MaxSize && (KeySizeValue - x.MinSize) % x.SkipSize == 0))
+                throw new ArgumentException("Key size is not supported by this algorithm.");
+
+            using var rng = RandomNumberGenerator.Create();
+
+            if (! (safePrimeModulus.IsProbablePrime(4, rng) && ((safePrimeModulus - BigInteger.One) >> 1).IsProbablePrime(4, rng)) )
+                throw new ArgumentException("Provided prime is not a safe prime.");
+
+            keyStruct = CreateKeyPair(safePrimeModulus, ElGamalKeyDefaults.DefaultMaxPlaintextBits, rng);
+
             Encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
             Decryptor = new ElGamalDecryptor(keyStruct);
         }
@@ -41,7 +70,10 @@ namespace Aprismatic.ElGamal
                 prms.MaxPlaintextBits
             );
 
-            KeySizeValue = keyStruct.PLength * 8; // TODO: Validate that key is of legal size
+            KeySizeValue = keyStruct.P.BitCount();
+
+            if (!LegalKeySizesValue.Any(x => x.MinSize <= KeySizeValue && KeySizeValue <= x.MaxSize && (KeySizeValue - x.MinSize) % x.SkipSize == 0))
+                throw new ArgumentException("Key size is not supported by this algorithm.");
 
             Encryptor = new ElGamalEncryptor(keyStruct, precomputedQueueSize);
             Decryptor = new ElGamalDecryptor(keyStruct);
@@ -50,17 +82,12 @@ namespace Aprismatic.ElGamal
         public ElGamal(string xml, int precomputedQueueSize = 10) : this(ElGamalParameters.FromXml(xml), precomputedQueueSize)
         { }
 
-        private ElGamalKeyStruct CreateKeyPair(int maxptbits) // TODO: This method should probably move to KeyStruct
+        private ElGamalKeyStruct CreateKeyPair(BigInteger P, int maxptbits, RandomNumberGenerator rng) // TODO: This method should probably move to KeyStruct
         {
             // Good reading on the topic: https://ibm.github.io/system-security-research-updates/2021/07/20/insecurity-elgamal-pt1
 
-            BigInteger P, G, Y, X;
+            BigInteger G, Y, X;
             var bitwo = new BigInteger(2);
-
-            using var rng = RandomNumberGenerator.Create();
-
-            // Generate a large safe prime number P of key length KeySizeValue
-            P = BigInteger.Zero.GenSafePseudoPrime(KeySizeValue, 16, rng);
             var PminusOne = P - BigInteger.One;
             var Q = PminusOne / bitwo;
 
@@ -81,26 +108,9 @@ namespace Aprismatic.ElGamal
 
             return new ElGamalKeyStruct(P, G, Y, X, maxptbits);
         }
+        #endregion
 
-        // TODO: Consider moving Encode and Decode to a separate class library or to Homomorphism. This way, plaintext operations can be moved down to Homomorphism library
-        public BigInteger Encode(BigInteger message) // TODO: Add tests now that this method is public
-        {
-            if (BigInteger.Abs(message) > keyStruct.MaxEncryptableValue)
-                throw new ArgumentException($"Numerator or denominator of the fraction to encrypt are too large; should be |m| < 2^{keyStruct.MaxPlaintextBits - 1}");
-
-            if (message.Sign < 0)
-                return keyStruct.MaxRawPlaintext + message + BigInteger.One;
-            return message;
-        }
-
-        public BigInteger Decode(BigInteger encodedMessage) // TODO: Add tests now that this method is public
-        {
-            encodedMessage %= keyStruct.MaxRawPlaintext + BigInteger.One;
-            if (encodedMessage > keyStruct.MaxEncryptableValue)
-                return encodedMessage - keyStruct.MaxRawPlaintext - BigInteger.One;
-            return encodedMessage;
-        }
-
+        #region Encryption & Decryprtion
         public byte[] EncryptData(BigFraction message)
         {
             var ctbs = keyStruct.CiphertextBlocksize;
@@ -124,6 +134,27 @@ namespace Aprismatic.ElGamal
             var res = new BigFraction(Decode(numerator), Decode(denominator));
 
             return res;
+        }
+        #endregion
+
+        #region Homomorphic Properties
+        // TODO: Consider moving Encode and Decode to a separate class library or to Homomorphism. This way, plaintext operations can be moved down to Homomorphism library
+        public BigInteger Encode(BigInteger message) // TODO: Add tests now that this method is public
+        {
+            if (BigInteger.Abs(message) > keyStruct.MaxEncryptableValue)
+                throw new ArgumentException($"Numerator or denominator of the fraction to encrypt are too large; should be |m| < 2^{keyStruct.MaxPlaintextBits - 1}");
+
+            if (message.Sign < 0)
+                return keyStruct.MaxRawPlaintext + message + BigInteger.One;
+            return message;
+        }
+
+        public BigInteger Decode(BigInteger encodedMessage) // TODO: Add tests now that this method is public
+        {
+            encodedMessage %= keyStruct.MaxRawPlaintext + BigInteger.One;
+            if (encodedMessage > keyStruct.MaxEncryptableValue)
+                return encodedMessage - keyStruct.MaxRawPlaintext - BigInteger.One;
+            return encodedMessage;
         }
 
         public byte[] Multiply(ReadOnlySpan<byte> first, ReadOnlySpan<byte> second) => ElGamalHomomorphism.MultiplyFractions(first, second, keyStruct.P.ToByteArray());
@@ -191,7 +222,9 @@ namespace Aprismatic.ElGamal
             a_bi.TryWriteBytes(writeTo[..halfblock], out _);
             b_bi.TryWriteBytes(writeTo[halfblock..], out _);
         }
+        #endregion
 
+        #region Serialization
         public ElGamalParameters ExportParameters(bool includePrivateParams) => keyStruct.ExportParameters(includePrivateParams);
 
         public override string ToXmlString(bool includePrivateParameters)
@@ -199,6 +232,7 @@ namespace Aprismatic.ElGamal
             var prms = ExportParameters(includePrivateParameters);
             return prms.ToXml(includePrivateParameters);
         }
+        #endregion
 
         public new void Dispose() => Encryptor.Dispose();
     }
