@@ -189,9 +189,22 @@ namespace Aprismatic.ElGamal
 
         public byte[] PlaintextPow(ReadOnlySpan<byte> first, BigInteger exp_bi)
         {
-            if (exp_bi.Sign < 0) throw new ArgumentOutOfRangeException(nameof(exp_bi), "Exponent should be >= 0");
+            if (exp_bi.Sign == 0)
+                return EncryptData(BigFraction.One);
 
             var halfblock = first.Length >> 1;
+
+            if (exp_bi.Sign < 0) { // TODO: avoid copying
+                // flip the encrypted fraction
+                var flipped = new byte[first.Length];
+                first[..halfblock].CopyTo(flipped[halfblock..]);
+                first[halfblock..].CopyTo(flipped[..halfblock]);
+
+                // power the flipped fraction
+                var flipped_powed = PlaintextPow(flipped, -exp_bi);
+
+                return Multiply(first, flipped_powed);
+            }
 
             var numerator = first[..halfblock];
             var denominator = first[halfblock..];

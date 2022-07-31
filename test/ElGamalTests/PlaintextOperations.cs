@@ -161,13 +161,9 @@ namespace ElGamalTests
                     using var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
                     using var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
-                    BigFraction a;
-                    do
-                    {
-                        var n = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
-                        var d = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
-                        a = new BigFraction(n, d);
-                    } while (a <= 0);
+                    var n = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    var d = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    var a = new BigFraction(n, d);
 
                     var b = rnd.Next(1, 10);
 
@@ -192,11 +188,7 @@ namespace ElGamalTests
             {
                 using var algorithm = new ElGamal(512, 0);
 
-                BigInteger a;
-                do
-                {
-                    a = new BigInteger().GenRandomBits(rnd.Next(16, 24), rng);
-                } while (a <= 0);
+                var a = new BigInteger().GenRandomBits(rnd.Next(16, 24), rng);
 
                 var P = algorithm.P;
                 var big_exp = BigInteger.Pow(2, 128) + 5;
@@ -228,6 +220,101 @@ namespace ElGamalTests
 
             // TODO: Add tests for 0^x, x^0, 1^x, x^1, 0^1, 1^0
             // TODO: Add tests for -2^2 (negative numbers < -2 will cause overflow on smaller key sizes with mxptbits = 128)
+        }
+
+        [Fact(DisplayName = "PLAINTEXT POW BY ZERO")]
+        public void TestPlaintextPowZero()
+        {
+            for (var i = 0; i < Globals.Iterations; i++)
+            {
+                for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
+                {
+                    using var algorithm = new ElGamal(keySize, 0);
+
+                    using var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
+                    using var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
+
+                    var n = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    var d = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    var a = new BigFraction(n, d);
+
+                    n = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    d = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    var b = new BigFraction(n, d);
+                    b = -b;
+
+                    var a_enc = encryptAlgorithm.EncryptData(a);
+                    var b_enc = encryptAlgorithm.EncryptData(b);
+
+                    var ap0_enc = decryptAlgorithm.PlaintextPow(a_enc, 0);
+                    var bp0_enc = decryptAlgorithm.PlaintextPow(b_enc, 0);
+                    var ap0_dec = decryptAlgorithm.DecryptData(ap0_enc);
+                    var bp0_dec = decryptAlgorithm.DecryptData(bp0_enc);
+
+                    Assert.True(ap0_dec == 1,
+                        $"{Environment.NewLine}{Environment.NewLine}" +
+                        $"Algorithm parameters (TRUE):{Environment.NewLine}" +
+                        $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
+                        $"a       : {a}{Environment.NewLine}" +
+                        $"ap0_dec : {ap0_dec}");
+
+                    Assert.True(bp0_dec == 1,
+                        $"{Environment.NewLine}{Environment.NewLine}" +
+                        $"Algorithm parameters (TRUE):{Environment.NewLine}" +
+                        $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
+                        $"a       : {b}{Environment.NewLine}" +
+                        $"ap0_dec : {bp0_dec}");
+                }
+            }
+        }
+
+        [Fact(DisplayName = "PLAINTEXT POW BY NEGATIVE")]
+        public void TestPlaintextPowNegative()
+        {
+            for (var i = 0; i < Globals.Iterations; i++)
+            {
+                for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
+                {
+                    using var algorithm = new ElGamal(keySize, 0);
+
+                    using var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
+                    using var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
+
+                    var n = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    var d = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    var a = new BigFraction(n, d);
+
+                    n = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    d = new BigInteger().GenRandomBits(rnd.Next(1, 12), rng);
+                    var b = new BigFraction(n, d);
+                    b = -b;
+
+                    var pow = new BigInteger().GenRandomBits(rnd.Next(2,3), rng);
+                    pow = -pow;
+
+                    var a_enc = encryptAlgorithm.EncryptData(a);
+                    var b_enc = encryptAlgorithm.EncryptData(b);
+
+                    var ap0_enc = decryptAlgorithm.PlaintextPow(a_enc, pow);
+                    var bp0_enc = decryptAlgorithm.PlaintextPow(b_enc, pow);
+                    var ap0_dec = decryptAlgorithm.DecryptData(ap0_enc);
+                    var bp0_dec = decryptAlgorithm.DecryptData(bp0_enc);
+
+                    Assert.True(ap0_dec == new BigFraction(BigInteger.Pow(a.Denominator, (int)(-pow)), BigInteger.Pow(a.Numerator, (int)(-pow))),
+                        $"{Environment.NewLine}{Environment.NewLine}" +
+                        $"Algorithm parameters (TRUE):{Environment.NewLine}" +
+                        $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
+                        $"a       : {a}{Environment.NewLine}" +
+                        $"ap0_dec : {ap0_dec}");
+
+                    Assert.True(ap0_dec == new BigFraction(BigInteger.Pow(b.Denominator, (int)(-pow)), BigInteger.Pow(b.Numerator, (int)(-pow))),
+                        $"{Environment.NewLine}{Environment.NewLine}" +
+                        $"Algorithm parameters (TRUE):{Environment.NewLine}" +
+                        $"{algorithm.ToXmlString(true)}{Environment.NewLine}{Environment.NewLine}" +
+                        $"a       : {b}{Environment.NewLine}" +
+                        $"ap0_dec : {bp0_dec}");
+                }
+            }
         }
     }
 }
