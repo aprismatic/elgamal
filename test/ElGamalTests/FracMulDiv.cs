@@ -40,9 +40,9 @@ namespace ElGamalTests
             {
                 for (var keySize = minKeySize; keySize <= maxKeySize; keySize += step)
                 {
-                    var algorithm = new ElGamal(keySize, 0);
-                    var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
-                    var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
+                    using var algorithm = new ElGamal(keySize, 0);
+                    using var encryptAlgorithm = new ElGamal(algorithm.ToXmlString(false));
+                    using var decryptAlgorithm = new ElGamal(algorithm.ToXmlString(true));
 
                     BigFraction a, b;
                     do
@@ -108,10 +108,6 @@ namespace ElGamalTests
                                                   $"b       : {b}{Environment.NewLine}{Environment.NewLine}" +
                                                   $"b / a   : {b / a}{Environment.NewLine}{Environment.NewLine}" +
                                                   $"bda_dec : {bda_dec}");
-
-                    algorithm.Dispose();
-                    encryptAlgorithm.Dispose();
-                    decryptAlgorithm.Dispose();
                 }
             }
         }
